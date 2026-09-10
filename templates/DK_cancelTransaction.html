@@ -1,0 +1,418 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Running Page{% endblock %}
+
+{% block content %}
+<link rel="stylesheet"href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='save.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='csstran.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='moneyTable.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Flatpickr Theme (เลือกได้) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<!-- Thai language -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<link rel="stylesheet"href="{{ url_for('static', filename='popup.css') }}">
+<link rel="stylesheet"href="{{ url_for('static', filename='popup1.css') }}">
+
+<h2>Welcome to  ยกเลิกรายการรายการตั้งสมาชิกเสียชีวิต</h2>
+<h3>
+    <a href="/DK_HOME">HOME</a>
+    ยกเลิกรายการ\ ยกเลิกรายการบันทึกรายการตั้งสมาชิกเสียชีวิต
+</h3>
+
+<div class="maint">
+
+    <form id="registerForm">
+
+        <!-- ปุ่ม -->
+        <div class="button-group">
+            <button type="button" class="sbtnCancel" id="btnCancel">
+                📄 ยกเลิก
+            </button>
+
+            
+        </div>
+        <hr class="my-box">
+        <!-- ===================== -->
+        <!-- HEADER -->
+        <!-- ===================== -->
+        <div class="form-group1">
+            <p>บันทึกรายการตั้งสมาชิกเสียชีวิต</p>
+            <div class="row-container1">
+                <div class="form-left">
+                    <label>เลขที่เอกสาร</label>
+                    <input type="text" id="docid" name="docid" disabled> 
+                      <label for="date">วันที่บันทึก :</label><br>
+                        <input type="date" id="thai-date" name="thai-date">
+                        <input type="hidden" id="ad-date" name="date"> <!-- ค่านี้จะถูกส่งไป FastAPI -->
+                        <br><br>
+                        <label>ยอดเงินที่ต้องเก็บ</label>
+                          <input
+                           type="number"
+                           id="collect_amount"
+                           name="collect_amount"
+                           placeholder="0.00" 
+                          >
+                </div>
+
+                <div class="form-right">
+                    <label for="Idcustomer"> รหัสสมาชิก:</label><br>
+                        <input type="text" id="Idcustomer" name="Idcustomer"disabled><br>
+                    <label for="prefix">คำนำหน้า :</label><br>
+                        <input type="text" id="prefix"name="prefix"disabled><br>    
+                    <label for="name">ชื่อ :</label><br>
+                        <input type="text" id="name"name="name"disabled><br>
+                    <label for="lastname">นามสกุล :</label><br>
+                        <input type="text" id="lastname"name="lastname"disabled><br>
+                    <label for="Idcard">เลขบัตรประชาชน :</label><br>
+                        <input type="text" id="Idcard"name="Idcard"disabled><br>
+                    <button type="button"class="popup"id="openPopup"> +ค้นหาสมาชิก  </button>
+                  
+            </div>
+
+            <div class="form-right">
+                    <!-- ค่านี้จะถูกส่งไป FastAPI -->
+
+                    <label for="dateend">วันที่เสียชีวิต :</label><br>
+                      <input type="dateend" id="thai-dateend" name="thai-dateend"disabled>
+                      <input type="hidden" id="ad-dateend" name="dateend">
+                    <label for="name">เลขที่มรณะ :</label><br>
+                        <input type="text" id="numberend"name="numberend"><br>
+                    <button type="button"class="" id="calculateTable"> คำนวณยอด</button>
+                 
+   
+            </div>     
+            <!-- POPUP -->
+                    <div id="popupForm" class="popup-bg">
+                        <div class="popup-box">
+                                    <span class="close-btn"
+                                        id="closePopup">
+                                        &times;
+                                    </span>
+                                    <h3>เลือกสมาชิก</h3>
+                                        <input type="text"
+                                            class="search-input"
+                                            placeholder="🔍 ค้นหาสมาชิก...">
+                                        <button type="button"
+                                                class="search-button">
+                                            ค้นหา
+                                        </button>
+
+                                    <table class="popup-table">
+                                        <thead>
+                                            <tr>
+                                                <th>รหัสสมาชิก</th>
+                                                <th>ชื่อ</th>
+                                                <th>สถานะ</th>
+                                                <th>เลขบัตรประชาชน</th>
+                                                <th>เลขที่มรณะ</th>
+                                                <th>เลือก</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="popupTableBody">
+                                        </tbody>
+                                    </table>
+                        </div>
+                    </div>
+          </div>
+    </div>
+
+        <!-- ===================== -->
+        <!-- TABLE เงินที่ต้องเก็บ -->
+        <!-- ===================== -->
+                <div class="form-group1">
+                <p3>ตารางเก็บเงิน</p3>
+                <div class="table-container">
+                    <table id="moneyTable">
+                        <thead>
+                            <tr>
+                                <th width="60">ลำดับ</th>
+                                <th width="120">รหัสสมาชิก</th>
+                                <th width="100">คำนำหน้า</th>
+                                <th>ชื่อ</th>
+                                <th>นามสกุล</th>
+                                <th width="120">เลขที่มรณะ</th>
+                                <th width="120">เงินที่ต้องเก็บ</th>
+                                <th width="120">เงินที่ชำระ</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+    </form>
+
+
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+
+import { API_BASE } from "/static/js/config.js";
+
+document.getElementById("calculateTable")
+.addEventListener("click", calculateTable);
+const thaiInput = document.getElementById("thai-date");
+const adInput = document.getElementById("ad-date");
+ 
+// =========================
+// DATE Open วันที่เสียชีวิต
+// =========================
+const thaiInputEnd =
+    document.getElementById("thai-dateend");
+const adInputEnd =
+    document.getElementById("ad-dateend");
+const fpEnd = flatpickr("#thai-dateend", {
+    locale: "th",
+    dateFormat: "Y-m-d",
+    allowInput: false,
+    defaultDate: "today",
+    onReady: function(
+        selectedDates,
+        dateStr,
+        instance
+    ){
+        changeToBuddhistYear(instance);
+        if (selectedDates.length > 0) {
+            const date = selectedDates[0];
+            thaiInputEnd.value =
+                formatThaiDate(date);
+            updateHiddenDateEnd(date);
+        }
+    },
+    onChange: function(
+        selectedDates,
+        dateStr,
+        instance
+    ){
+        if (!selectedDates.length) return;
+        const date = selectedDates[0];
+        thaiInputEnd.value =
+            formatThaiDate(date);
+        updateHiddenDateEnd(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(
+        selectedDates,
+        dateStr,
+        instance
+    ){
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(
+        selectedDates,
+        dateStr,
+        instance
+    ){
+        changeToBuddhistYear(instance);
+    }
+
+});
+
+// =========================
+// UPDATE DATE เริ่มวันที่จากฐานข้อมูล
+// =========================
+
+function updateHiddenDateEnd(date){
+    const yyyy =
+        date.getFullYear();
+    const mm =
+        String(date.getMonth() + 1)
+        .padStart(2, '0');
+    const dd =
+        String(date.getDate())
+        .padStart(2, '0');
+    adInputEnd.value =
+        `${yyyy}-${mm}-${dd}`;
+}
+
+// =========================
+// READONLY
+// =========================
+window.onload = function () {
+    document.getElementById("Idcustomer").readOnly = true;
+};
+
+// =========================
+// FLATPICKR
+// =========================
+const fp = flatpickr("#thai-date", {
+    locale: "th",
+    dateFormat: "Y-m-d",
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        if (selectedDates.length > 0) {
+            const date = selectedDates[0];
+            thaiInput.value = formatThaiDate(date);
+            updateHiddenDate(date);
+        }
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (!selectedDates.length) return;
+        const date = selectedDates[0];
+        thaiInput.value = formatThaiDate(date);
+        updateHiddenDate(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    }
+});
+
+// =========================
+// เปลี่ยน ค.ศ. → พ.ศ.
+// =========================
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+    }, 1);
+}
+
+// =========================
+// FORMAT THAI DATE
+// =========================
+function formatThaiDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+// =========================
+// UPDATE HIDDEN DATE
+// =========================
+function updateHiddenDate(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    adInput.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// =========================
+// GET ID
+// =========================
+const params = new URLSearchParams(window.location.search);
+const docid = params.get("docid");
+if (!docid) {
+alert("❌ ไม่พบรหัสเอกสาร");
+throw new Error("No docid");
+}
+console.log("DOCID =>", docid);
+
+// =========================
+// LOAD DATA
+// =========================
+fetch(`${API_BASE}/transaction1/${docid}`)
+.then(res => res.json())
+.then(data => {
+    if (data.error !== "0") {
+        alert("❌ ไม่พบข้อมูลสมาชิก");
+        return;
+    }
+    const emp = data.results;
+    // =====================
+    // HEADER
+    // =====================
+    document.getElementById("docid").value = emp.docid || "";
+    document.getElementById("collect_amount").value = emp.amount || 0;
+    document.getElementById("Idcustomer").value = emp.Idcustomer || "";
+    document.getElementById("prefix").value = emp.prefix || "";
+    document.getElementById("name").value = emp.name || "";
+    document.getElementById("lastname").value = emp.lastname || "";
+    document.getElementById("Idcard").value = emp.Idcard || "";
+    document.getElementById("numberend").value = emp.numberend || "";
+    // =====================
+    // DATE
+    // =====================
+    if (emp.date) {
+        const dbDate = new Date(emp.date);
+        fp.setDate(dbDate);
+        thaiInput.value = formatThaiDate(dbDate);
+        updateHiddenDate(dbDate);
+    }
+
+    if (emp.dateend) {
+        const deadDate = new Date(emp.dateend);
+        document.getElementById("thai-dateend").value =
+            formatThaiDate(deadDate);
+        document.getElementById("ad-dateend").value =
+            emp.dateend;
+    }
+    // =====================
+    // TABLE DETAIL
+    // =====================
+    let tbody = document.querySelector("#moneyTable tbody");
+    tbody.innerHTML = "";
+    if (Array.isArray(emp.details)) {
+    emp.details.forEach((row, index) => {
+        tbody.insertAdjacentHTML("beforeend", `
+            <tr>
+                <td class="text-center">${index + 1}</td>
+                <td>${row.Idcustomer || ""}</td>
+                <td>${row.prefix || ""}</td>
+                <td>${row.name || ""}</td>
+                <td>${row.lastname || ""}</td>
+                <td class="text-center">${row.numberend || ""}</td>
+                <td class="text-end">
+                    ${(row.amount || 0).toLocaleString()}
+                </td>
+                <td class="text-end">
+                    ${(row.payamount || 0).toLocaleString()}
+                </td>               
+            </tr>
+            `);
+        });
+    }
+})
+.catch(err => {
+    console.error(err);
+    alert("❌ โหลดข้อมูลไม่สำเร็จ");
+});
+
+
+ //
+ document.getElementById("btnCancel").addEventListener("click", async () => {
+    const docid = document.getElementById("docid").value;
+    if (!confirm("ยืนยันยกเลิกรายการนี้?")) return;
+    const formData = new FormData();
+    formData.append("docid", docid);
+    formData.append("status", "2");
+    try {
+        const res = await fetch(`${API_BASE}/canceltransaction/update`, {
+            method: "POST",
+            body: formData
+        });
+        const data = await res.json();
+        if (data.error === "0") {
+            alert("ยกเลิกสำเร็จ");
+            window.location.href = "/DK_HOME";
+        } else {
+            alert(data.message);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("เชื่อมต่อ API ไม่ได้");
+    }
+});
+
+</script>
+
+{% endblock %}

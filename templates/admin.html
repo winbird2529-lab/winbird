@@ -1,0 +1,19 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Home Page{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to DK_home</h2>
+<p>Hello Flaskform layout!</p>
+ <div class="content my-2">
+   <form method="post">
+           {{form.hidden_tag()}}
+           {{form.name.label}}
+           {{form.name}} 
+           {{form.submit()}}          
+   </form>
+ </div> 
+{% endblock %}
+
+

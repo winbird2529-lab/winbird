@@ -1,0 +1,82 @@
+.pagination{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:5px;
+    margin-top:20px;
+    flex-wrap: wrap;
+}
+
+.pagination button{
+    padding:8px 14px;
+    border:1px solid #ccc;
+    background:#fff;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+.pagination button.active{
+    background:#273B4A;
+    color:white;
+    border-color:#f4f5f7;
+}
+
+.pagination button:hover{
+    background:#f1f1f1;
+}
+
+/* ==========================================
+   Filter Tabs & Page Summary
+   ========================================== */
+.filter-tabs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.tab-filter-btn {
+    padding: 7px 16px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tab-filter-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.tab-filter-btn.active {
+    background: #273B4A;
+    color: #ffffff;
+    border-color: #273B4A;
+    box-shadow: 0 4px 10px rgba(39, 59, 74, 0.2);
+}
+
+.tab-filter-btn .count-badge {
+    background: rgba(0,0,0,0.08);
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.tab-filter-btn.active .count-badge {
+    background: rgba(255,255,255,0.25);
+    color: #ffffff;
+}
+
+.page-summary {
+    color: #64748b;
+    font-size: 14px;
+    margin: 10px 0;
+}

@@ -1,0 +1,94 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %} บันทึกทะเบียนพนักงาน {% endblock %}
+
+{% block content %}
+
+<h3><a href="/DK_Home">HOME</a> <a href="DK_Employee">\ ทะเบียนพนักงาน</a> \ บันทึกทะเบียนพนักงาน</h3>
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<div class="main">
+
+  
+
+     <p>บันทึกทะเบียนพนักงาน</p>
+       <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 15px;">
+        <div class="button-group">
+          <a href="/DK_fromemployee"><button type="submit" class="submit-btnsave">📄 บันทึก</button></a>
+          <a href="/DK_fromemployee"><button type="submit" class="btn-delete">🗑️ ยกเลิก</button></a>
+        </div>
+      </div>
+      <hr class="my-box">
+
+ <div class="row-container">
+    
+    <div class="form-left">
+      <div class="employee-card">
+  <div class="employee-header">
+    <img src="https://via.placeholder.com/120" alt="employee photo">
+    
+  </div>
+
+  <div class="employee-detail">
+    <h3>ข้อมูลส่วนตัว</h3>
+    <div class="detail-grid">
+      <div><strong>รหัสพนักงาน:</strong> </div>
+      <div><strong>ชื่อ:</strong> </div>
+      <div><strong>นามสกุล:</strong> </div>
+      <div><strong>เบอร์โทร:</strong> </div>
+      <div><strong>ตำแหน่ง:</strong> </div>
+      <div><strong>วันที่เริ่มงาน:</strong> 15/01/2022</div>
+    </div>
+  </div>
+</div>
+    </div>
+    
+    
+    <div class="form-left">                
+      <form class="">
+          <p>ข้อมูลทั่วไป</p>
+        
+   
+          <label for="Id">รหัสพนักงาน :</label><br>
+                <input type="text" id="Id" name="Id"><br>
+          <label for="prefix">คำนำหน้า :</label><br>
+                <select name="prefix" id="prefix" required>
+                  <option value="">-- กรุณาเลือก --</option>
+                  <option value="นาย">นาย</option>
+                  <option value="นาง">นาง</option>
+                  <option value="นางสาว">นางสาว</option>
+                </select><br>
+    
+          <label for="name">ชื่อ :</label><br>
+                
+                <input name="name" type="text" id="name" placeholder="กรอกชื่อ" required /><br>
+                
+          <label for="Lname">นามสกุล :</label><br>
+                <input name="Lname" type="text" id="Lname" placeholder="กรอกนามสกุล" required /><br>
+
+          <label for="idcard">เลขบัตรประชาชน :</label><br>
+                <input name="idcard" type="text" id="idcard" placeholder="กรอกเลขบัตร 13 หลัก" required /><br>
+
+          <label for="Tel">เบอร์โทรศัพย์ :</label><br>
+                <input name="Tel" type="text" id="Tel" placeholder="เบอร์โทรศัพย์" required /><br>
+          <label for="Position">ตำแหน่ง :</label><br>
+                <input name="Position" type="text" id="Position" placeholder="ตำแหน่ง" required /><br>
+             
+  
+       
+    </form>
+
+
+  </div>
+    <div class="form-left">
+          <p>ข้อมูลทั่วไป</p>
+          <label for="date">วันที่ :</label><br>
+                <input name="date" type="text" id="date" placeholder="วันที่" required /><br>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,271 @@
+     * {
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: sans-serif;
+      
+    }
+    /* เส้น */ 
+   .my-box {
+      margin-top: 20px; /* เว้นระยะห่างด้านบน 20 พิกเซล */
+      background-color: #f9f9f9;
+  
+    }
+   /* เส้น */ 
+
+    .layout {
+      display: grid;
+      grid-template-areas:
+        "header header"
+        "sidebar main";
+      grid-template-columns: 250px 1fr;
+      grid-template-rows: 60px 1fr;
+      height: 100vh;
+    }
+
+     .header {
+      grid-area: header;
+      background: linear-gradient(to right,#273B4A);
+      background-color: #79797c;
+      color: rgb(248, 252, 252);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2 30px;
+    }
+   /* ===== Layout หลักให้เต็มหน้าจอ ===== */
+
+
+/* ===== Sidebar ===== */
+/* Sidebar */
+.sidebar {
+  grid-area: sidebar;
+  background: linear-gradient(to bottom, #dde1e4);
+  border-right: 1px solid #eee;
+  padding: 15px; /* เดิม 25px → ลดให้ชิดลง */
+  color: rgb(71, 53, 53);
+  font-family: 'Sarabun', sans-serif;
+}
+
+/* เมนู */
+ul.navbar {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.navbar li {
+  margin-bottom: 4px;   /* เดิม 8px → ลดช่องไฟระหว่างเมนู */
+}
+
+ul.navbar li a {
+  display: block;
+  padding: 5px 8px;      /* เดิม 8px 12px → ลดช่องไฟในปุ่ม */
+  text-decoration: none;
+  text-align: left;
+  color: rgb(41, 36, 36);
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;       /* เดิม 15px → ให้ดูแน่นและชิด */
+  border-radius: 4px;    /* เดิม 6px → ลดความนูนให้ดูคอมแพค */
+  transition: 0.3s;
+}
+
+/* Hover */
+ul.navbar li a:hover {
+  background-color: #ee6f1a;
+  color: white;
+}
+
+/* Active */
+ul.navbar li a.active {
+  background-color: #333;
+  color: white;
+}
+  
+   /* ปิดเมนูรอง */
+
+
+.main {
+      grid-area: main;
+      background-color: #f5f7fa;
+      padding: 10px;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+   /* กรุปกรอปรองจาก Main */
+.form-group {
+      max-width: 800px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.form-group1 {
+      max-width: 1800px;
+      margin: 15px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}/* ปิดกรุปกรอปรองจาก Main */
+ .form-group2 {
+    max-width: 800px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+.form-group3 {
+      max-width: 1800px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}/* ปิดกรุปกรอปรองจาก Main สมัคสมาชิก*/
+
+
+
+/* ====== Layout หลัก: CSS GRID ====== */
+
+/* ====== เวอร์ชัน 3 ช่อง (สามคอลัมน์) – สวย เรียบ ใช้งานจริง ====== */
+.row-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);   /* ← ทำเป็น 3 ช่อง */
+  gap: 20px;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 10px;
+  justify-content: start; /* บังคับให้ item จัดฝั่งซ้าย */
+}
+/* ทำให้เป็น Grid แบบยืดหยุ่น รองรับ 3 ช่อง เมื่อจอเล็กลงจะกลายเป็น 2 ช่อง → 1 ช่องอัตโนมัติ */
+.row-containerxx {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 10px;
+}
+
+.row-container1 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin: 20px 0;     /* เปลี่ยนจาก auto → 0 เพื่อไม่จัดกลาง */
+  padding: 10px;
+  justify-content: start; /* บังคับให้ item จัดฝั่งซ้าย */
+}
+.row-container2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 10px;
+}
+
+/* ====== กล่องซ้าย-ขวา (Form Card) ====== */
+.form-left,
+.form-right {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+
+/* ====== หัวข้อใน Form ====== */
+.form-left p,
+.form-right p {
+  margin-top: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* ====== Label ====== */
+/*.form-left label,
+.form-right label {
+  display: block;
+  margin: 0px 0 1px;
+  font-weight: 250;
+}
+
+/* ====== Input ====== */
+.form-left input,
+.form-right input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* ====== เอฟเฟกต์เวลา focus ====== */
+.form-left input:focus,
+.form-right input:focus {
+  border-color: #4e9af1;
+  box-shadow: 0 0 0 3px rgba(78, 154, 241, 0.2);
+  outline: none;
+}
+
+/* ====== Responsive: ปรับบนหน้าจอเล็ก ====== */
+@media (max-width: 480px) {
+  .row-container {
+    padding: 5px;
+    gap: 15px;
+  }
+
+  .form-left,
+  .form-right {
+    font-size: 13px;
+    padding: 18px;
+  }
+
+  .form-left p,
+  .form-right p {
+    font-size: 13px;
+    font-size: 16px;
+  }
+
+  .form-left input,
+  .form-right input {
+    font-size: 13px;
+    padding: 8px;
+  }
+}
+
+    
+  . footer{
+      grid-area: header;
+      background: linear-gradient(to right,#273B4A);
+      background-color: #79797c;
+      color: rgb(248, 252, 252);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2 30px;
+    }
+
+/*นาย นาง นางสาว*/
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}

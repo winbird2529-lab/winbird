@@ -1,0 +1,35 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %} DK_Employee {% endblock %}
+
+{% block content %}
+
+<h2>Welcome to DK_vendor</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<p>Hello Flask layout!</p>
+<h3><a href="/DK_Home">HOME</a> \ ทะเบียน(ผู้ผลิต/ผู้จัดจำหน่าย)</h3>
+
+<div class="main">
+
+    <div class="form-group1">
+
+        <p>ข้อมูล(ผู้ผลิต/ผู้จัดจำหน่าย)</p>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 15px;">
+
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="ค้นหา...">
+                <button class="search-button">ค้นหา</button>
+            </div>
+
+            <a href="/DK_fromvender">
+                <button class="btn-primary">+ เพิ่มข้อมูล(ผู้ผลิต/ผู้จัดจำหน่าย)</button>
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

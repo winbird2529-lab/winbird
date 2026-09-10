@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css.css') }}">
+    <title>{% block title %}CM_Home{% endblock %}</title>
+    
+  </head>
+
+  <body>
+    <div class="layout">
+        
+      <div class="header">
+        
+        <h2>ระบบบันทึกรายการ</h2>
+          
+      </div>
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <nav>
+           <h2>ค่าคงที่</h2>
+           <ul class="navbar">
+            <li><a href="/CM_Home">HOME</a></li>
+            <li><a href="/CM_Running">เลขที่เอกสาร</a></li>
+            <li><a href="/CM_person">ทะเบียนสมาชิก</a></li>
+            <li><a href="/CM_Employee">ทะเบียนพนักงาน</a></li>
+           </ul>
+          
+          
+          <h2>เมนู</h2>
+          <ul class="navbar">
+            <li><a href="/CM_Senditem">บันทึกรายการ</a></li>
+            <li><a href="/CM_Transaction">บันทึกรายการเก็บเงิน</a></li>
+            <li><a href="/linecustomer">รอเพิ่ม</a></li>
+          </ul>
+
+         
+
+          <h2>รายงาน</h2>
+          <ul class="navbar">
+            <li><a href="">รายงานทะเบียนลูกค้า</a></li>
+            <li><a href="">รายงานทะเบียนพนักงาน</a></li>
+            <li><a href="/DK_Test">ทดสอบ form</a></li>
+            <li><a href="/fromdate">ทดสอบ บันทึกวันที</a></li>
+          </ul>
+
+          <h2>APPS</h2>
+          <ul class="navbar">
+            <li><a href="/login">login</a></li>
+            <li><a href="/">ออกจากระบบ</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main">
+        <h2>{% block page_title %}{% endblock %}</h2>
+        <p>{% block description %}{% endblock %}</p>
+        
+        {% block content %}
+        {% endblock %}
+      </div>
+
+    </div>
+
+
+  </body>
+</html>
+
+

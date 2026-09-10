@@ -1,0 +1,36 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Test Page{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<h2>Welcome to DK_home</h2>
+<p>Hello Flask layout!</p>
+
+
+
+<div class="employee-card">
+  <div class="employee-header">
+    <img src="https://via.placeholder.com/120" alt="employee photo">
+    <div class="employee-info">
+      <h2>นายสมชาย ใจดี</h2>
+      <p>ตำแหน่ง: เจ้าหน้าที่ฝ่ายบุคคล</p>
+      <p>รหัสพนักงาน: EMP-1023</p>
+    </div>
+  </div>
+
+  <div class="employee-detail">
+    <h3>ข้อมูลส่วนตัว</h3>
+    <div class="detail-grid">
+      <div><strong>อายุ:</strong> 32 ปี</div>
+      <div><strong>แผนก:</strong> ฝ่ายบุคคล (HR)</div>
+      <div><strong>เบอร์โทร:</strong> 081-234-5678</div>
+      <div><strong>อีเมล:</strong> somchai@company.com</div>
+      <div><strong>ที่อยู่:</strong> กรุงเทพฯ</div>
+      <div><strong>วันที่เริ่มงาน:</strong> 15/01/2022</div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

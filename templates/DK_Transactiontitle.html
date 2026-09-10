@@ -1,0 +1,57 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Running Page{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to เลขที่เอกสาร</h2>
+<p>Hello Flask layout!</p>
+<h3><a href="/DK_HOME">HOME</a> \ เลขที่เอกสาร</h3>
+<div class="main">
+ 
+    <form id="registerForm">
+             <div class="button-group">
+                <button type="submit" class="submit-btnsave">📄 บันทึก</button>
+                <button type="submit" class="btn-edit">✏️ แก้ไข</button>
+                
+              </div>
+            <hr class="my-box">
+  
+   <div class="form-group1">
+        <p>เลขที่ Running</p>
+
+            <div class="row-inline">
+                  <div style="flex: 1;">
+                      <label for="docPrefix">อักษรนำหน้า บันทึกรายการสมาชิก</label>
+                      <input name="docPrefix" type="text" id="docPrefix" placeholder="รอโหลด..." required />
+                  </div>
+
+                  <div style="flex: 5;">
+                      <label for="docRunNumber">เลขที่ Running</label>
+                      <input name="docRunNumber" type="text" id="docRunNumber" placeholder="รอโหลด..." required />
+                 </div>
+            </div>   
+            
+            <hr class="">
+
+            <div class="row-inline">
+                  <div style="flex: 1;">
+                      <label for="docPrefix1">อักษรนำหน้า บันทึข้อมูลรายวัน</label>
+                            <input name="docPrefix1" type="text" id="docPrefix1" placeholder="รอโหลด..." required />
+                      <label for="docRunNumbe1r">เลขที่ Running</label>
+                            <input name="docRunNumber1" type="text" id="docRunNumber1" placeholder="รอโหลด..." required />
+                  
+                    </div>
+
+                  <div style="flex: 5;">
+                      
+                 </div>
+            </div>      
+                                
+                
+           
+    </form>
+  </div>    
+ </div>        
+
+{% endblock %}

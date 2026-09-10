@@ -1,0 +1,1494 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}แก้ไขรายการตั้งสมาชิกเสียชีวิต{% endblock %}
+
+{% block content %}
+<!-- External CSS & Libraries -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='save.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='csstran.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup1.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Deceased.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+
+<style>
+/* ===================================================
+   Tab Navigation for DK_EditTransaction
+   =================================================== */
+.tran-main-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid #cbd5e1;
+    padding-bottom: 0;
+}
+
+.tran-main-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Prompt', 'Sarabun', sans-serif;
+    position: relative;
+    top: 2px;
+}
+
+.tran-main-tab-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.tran-main-tab-btn.active {
+    background: #ffffff;
+    color: #1e3c72;
+    border-color: #cbd5e1;
+    border-top: 3px solid #2563eb;
+    border-bottom: 2px solid #ffffff;
+    box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.tran-tab-count-badge {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.tran-main-tab-btn.active .tran-tab-count-badge {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.tran-tab-pane {
+    animation: fadeInTab 0.25s ease;
+}
+
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===================================================
+   Compact Tab 2 Styles: Toolbar, KPI Chips, & Table
+   =================================================== */
+.tran-tab2-compact-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: #ffffff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.tran-tab2-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tran-btn-compact-back {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    font-family: 'Prompt', 'Sarabun', sans-serif;
+}
+
+.tran-btn-compact-back:hover {
+    background: #e2e8f0;
+    color: #1e3c72;
+    border-color: #94a3b8;
+}
+
+.tran-tab2-summary-chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tran-chip-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-family: 'Prompt', 'Sarabun', sans-serif;
+    border: 1px solid transparent;
+}
+
+.tran-chip-icon {
+    font-size: 13px;
+}
+
+.tran-chip-label {
+    color: #475569;
+    font-size: 12px;
+}
+
+.tran-chip-val {
+    font-family: monospace;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.tran-chip-unit {
+    color: #64748b;
+    font-size: 11.5px;
+}
+
+.tran-chip-blue {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e40af;
+}
+.tran-chip-blue .tran-chip-val { color: #1d4ed8; }
+
+.tran-chip-amber {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+}
+.tran-chip-amber .tran-chip-val { color: #b45309; }
+
+.tran-chip-emerald {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #065f46;
+}
+.tran-chip-emerald .tran-chip-highlight {
+    color: #059669;
+    font-size: 14.5px;
+}
+
+/* Compact Table Card & Table Styles for Tab 2 */
+#tabPane2 .tran-table-card {
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+#tabPane2 .tran-table-toolbar {
+    padding: 8px 14px;
+}
+
+#tabPane2 .tran-table-title h3 {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#tabPane2 .tran-table-search-input {
+    font-size: 12.5px;
+    padding: 4px 10px 4px 28px;
+    height: 30px;
+    width: 200px;
+    border-radius: 16px;
+}
+
+#tabPane2 .tran-table-search-input:focus {
+    width: 240px;
+}
+
+#tabPane2 .tran-table-search-icon {
+    left: 9px;
+    font-size: 12px;
+}
+
+#tabPane2 .tran-table-container {
+    max-height: 440px;
+}
+
+#tabPane2 #moneyTable {
+    font-size: 12.5px;
+}
+
+#tabPane2 #moneyTable th {
+    padding: 8px 10px;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+}
+
+#tabPane2 #moneyTable td {
+    padding: 5px 10px;
+    font-size: 12.5px;
+}
+
+#tabPane2 #moneyTable td:nth-child(7) {
+    font-size: 13px;
+}
+
+#tabPane2 #moneyTable td:nth-child(8) {
+    font-size: 13px;
+}
+
+#tabPane2 .tran-table-input {
+    max-width: 95px;
+    height: 27px;
+    padding: 2px 6px;
+    font-size: 12.5px;
+    border-radius: 5px;
+}
+
+#tabPane2 .tran-btn-danger {
+    padding: 2px 7px;
+    font-size: 11.5px;
+    border-radius: 5px;
+}
+
+#tabPane2 .tran-table-footer {
+    padding: 8px 14px;
+}
+
+#tabPane2 .tran-page-info {
+    font-size: 12px;
+}
+
+#tabPane2 .tran-pagination button {
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    font-size: 12px;
+    border-radius: 5px;
+}
+</style>
+
+<div class="tran-page-wrapper">
+    <!-- Breadcrumb -->
+    <div class="tran-breadcrumb">
+        <a href="/DK_Home">HOME</a>
+        <span class="tran-breadcrumb-separator">/</span>
+        <a href="/DK_showTransaction">แสดงรายการตั้งสมาชิกเสียชีวิต</a>
+        <span class="tran-breadcrumb-separator">/</span>
+        <span>แก้ไขรายการ</span>
+    </div>
+
+    <form id="registerForm">
+        <!-- Header Bar & Action Buttons -->
+        <div class="tran-header-bar">
+            <div class="tran-header-title-group">
+                <h1>
+                    <span>✏️</span> แก้ไขรายการตั้งสมาชิกเสียชีวิต
+                </h1>
+                <p>แก้ไขข้อมูลเอกสาร ข้อมูลผู้เสียชีวิต หรือปรับปรุงรายการสมาชิกที่เรียกเก็บเงิน (เลขที่เอกสาร: <span id="headerDocIdDisplay" style="font-weight:700; color:#1e3c72; font-family:monospace;">กำลังโหลด...</span>)</p>
+            </div>
+            <div class="tran-actions-group">
+                <button type="submit" class="tran-btn tran-btn-primary" id="btnSubmitForm">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span>📄 บันทึกการแก้ไข</span>
+                </button>
+                <a href="/DK_showTransaction" class="tran-btn tran-btn-secondary" style="text-decoration:none;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>ย้อนกลับ</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Navigation Tabs -->
+        <div class="tran-main-tabs">
+            <button type="button" class="tran-main-tab-btn active" id="tabBtn1" onclick="switchMainTab('tab1')">
+                <span style="font-size: 18px;">📝</span>
+                <span>1. แก้ไขข้อมูลเอกสาร / ผู้เสียชีวิต</span>
+            </button>
+            <button type="button" class="tran-main-tab-btn" id="tabBtn2" onclick="switchMainTab('tab2')">
+                <span style="font-size: 18px;">📊</span>
+                <span>2. ตารางเรียกเก็บเงินและผลคำนวณ</span>
+                <span class="tran-tab-count-badge" id="tab2CountBadge">0 ราย</span>
+            </button>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TAB 1: แก้ไขข้อมูลเอกสาร & ผู้เสียชีวิต -->
+        <!-- ============================================== -->
+        <div id="tabPane1" class="tran-tab-pane">
+            <!-- 2-Card Grid Layout -->
+            <div class="tran-grid-cards">
+            <!-- Card 1: ข้อมูลเอกสาร & การตั้งหนี้ -->
+            <div class="tran-card">
+                <div class="tran-card-header">
+                    <h2><span>📝</span> ข้อมูลเอกสาร</h2>
+                    <span class="badge-pill" id="docStatusBadge">กำลังโหลด...</span>
+                </div>
+                <div class="tran-card-body">
+                    <div class="tran-form-row single-col">
+                        <div class="tran-field">
+                            <label for="docid">เลขที่เอกสาร</label>
+                            <div class="tran-input-wrapper">
+                                <span class="tran-input-icon">🔖</span>
+                                <input type="text" id="docid" name="docid" class="tran-input tran-input-with-icon" readonly style="font-weight:700; font-family:monospace; background:#f1f5f9; color:#1e3c72;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tran-form-row single-col">
+                        <div class="tran-field">
+                            <label for="thai-date">วันที่บันทึก <span class="required-star">*</span></label>
+                            <div class="tran-input-wrapper">
+                                <span class="tran-input-icon">📅</span>
+                                <input type="text" id="thai-date" name="thai-date" class="tran-input tran-input-with-icon" placeholder="วว/ดด/ปปปป" style="cursor:pointer; background:#ffffff;">
+                                <input type="hidden" id="ad-date" name="date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tran-form-row single-col">
+                        <div class="tran-field">
+                            <label for="collect_amount">ยอดเงินที่ต้องเก็บต่อราย (บาท)</label>
+                            <div class="tran-input-wrapper">
+                                <span class="tran-input-icon">💰</span>
+                                <input type="number" id="collect_amount" name="collect_amount" class="tran-input tran-input-with-icon tran-input-currency" placeholder="0.00" step="0.01">
+                            </div>
+                            <small style="font-size:12px; color:#64748b; margin-top:2px;">* หากแก้ไขยอดเงิน สามารถกดปุ่ม "⚡ คำนวณยอดใหม่" เพื่อปรับปรุงตารางสมาชิกทั้งหมด</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: ข้อมูลผู้เสียชีวิต -->
+            <div class="tran-card">
+                <div class="tran-card-header">
+                    <h2><span>👤</span> ข้อมูลผู้เสียชีวิต</h2>
+                    <button type="button" class="tran-btn tran-btn-search" id="openPopup">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <span>+ เปลี่ยนผู้เสียชีวิต</span>
+                    </button>
+                </div>
+                <div class="tran-card-body">
+                    <!-- Banner for Beneficiary Owner -->
+                    <div id="beneficiaryOwnerTag" style="display:none;"></div>
+
+                    <div class="tran-form-row">
+                        <div class="tran-field">
+                            <label for="Idcustomer">รหัสสมาชิก / ผู้รับผลประโยชน์</label>
+                            <input type="text" id="Idcustomer" name="Idcustomer" class="tran-input" readonly placeholder="-" style="font-weight:600; color:#1e3c72; background:#f8fafc;">
+                        </div>
+                        <div class="tran-field">
+                            <label for="Idcard">เลขบัตรประชาชน</label>
+                            <input type="text" id="Idcard" name="Idcard" class="tran-input" readonly placeholder="-">
+                        </div>
+                    </div>
+
+                    <div class="tran-form-row three-col">
+                        <div class="tran-field">
+                            <label for="prefix">คำนำหน้า</label>
+                            <input type="text" id="prefix" name="prefix" class="tran-input" readonly placeholder="-">
+                        </div>
+                        <div class="tran-field">
+                            <label for="name">ชื่อ</label>
+                            <input type="text" id="name" name="name" class="tran-input" readonly placeholder="-">
+                        </div>
+                        <div class="tran-field">
+                            <label for="lastname">นามสกุล</label>
+                            <input type="text" id="lastname" name="lastname" class="tran-input" readonly placeholder="-">
+                        </div>
+                    </div>
+
+                    <div class="tran-form-row">
+                        <div class="tran-field">
+                            <label for="thai-dateend">วันที่เสียชีวิต</label>
+                            <div class="tran-input-wrapper">
+                                <span class="tran-input-icon">📅</span>
+                                <input type="text" id="thai-dateend" name="thai-dateend" class="tran-input tran-input-with-icon" placeholder="วว/ดด/ปปปป" style="cursor:pointer; background:#ffffff;">
+                                <input type="hidden" id="ad-dateend" name="dateend">
+                            </div>
+                        </div>
+                        <div class="tran-field">
+                            <label for="numberend">เลขที่มรณะ</label>
+                            <input type="text" id="numberend" name="numberend" class="tran-input" placeholder="ระบุเลขที่มรณบัตร" style="background:#ffffff; border-color:#cbd5e1;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="tran-btn tran-btn-calculate" id="calculateTable">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            <span>⚡ คำนวณยอดใหม่</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TAB 2: ตารางเก็บเงิน & ผลการคำนวณ -->
+        <!-- ============================================== -->
+        <div id="tabPane2" class="tran-tab-pane" style="display: none;">
+            <!-- Tab 2 Sub-toolbar (รวมปุ่มย้อนกลับและยอดสรุปแบบกะทัดรัด) -->
+            <div class="tran-tab2-compact-toolbar">
+                <div class="tran-tab2-toolbar-left">
+                    <button type="button" class="tran-btn-compact-back" onclick="switchMainTab('tab1')">
+                        <span>⬅️ กลับไปแก้ไขข้อมูล (แท็บ 1)</span>
+                    </button>
+                    <span class="tran-tab2-toolbar-tip">💡 ตรวจสอบรายชื่อสมาชิกและยอดเรียกเก็บเรียบร้อยแล้ว กดปุ่ม <strong>"📄 บันทึกการแก้ไข"</strong> ด้านบน</span>
+                </div>
+                <div class="tran-tab2-summary-chips">
+                    <div class="tran-chip-item tran-chip-blue" title="จำนวนสมาชิกที่ต้องเรียกเก็บ">
+                        <span class="tran-chip-icon">👥</span>
+                        <span class="tran-chip-label">สมาชิก:</span>
+                        <strong id="statMemberCount" class="tran-chip-val">0</strong>
+                        <span class="tran-chip-unit">คน</span>
+                    </div>
+                    <div class="tran-chip-item tran-chip-amber" title="ยอดเรียกเก็บต่อราย">
+                        <span class="tran-chip-icon">🏷️</span>
+                        <span class="tran-chip-label">ยอดเรียกเก็บต่อราย:</span>
+                        <strong id="statAmountPerPerson" class="tran-chip-val">0.00</strong>
+                        <span class="tran-chip-unit">บาท</span>
+                    </div>
+                    <div class="tran-chip-item tran-chip-emerald" title="ยอดรวมเงินที่ต้องเก็บทั้งหมด">
+                        <span class="tran-chip-icon">💰</span>
+                        <span class="tran-chip-label">ยอดรวมเงินที่ต้องเก็บทั้งหมด:</span>
+                        <strong id="statTotalAmount" class="tran-chip-val tran-chip-highlight">0.00</strong>
+                        <span class="tran-chip-unit">บาท</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: ตารางเก็บเงิน -->
+            <div class="tran-table-card">
+                <div class="tran-table-toolbar">
+                    <div class="tran-table-title">
+                        <h3><span>📊</span> รายการสมาชิกที่เรียกเก็บ (<span id="tableRowsCount">0</span> ราย)</h3>
+                    </div>
+                    <div class="tran-table-actions">
+                        <div class="tran-table-search-wrapper">
+                            <span class="tran-table-search-icon">🔍</span>
+                            <input type="text" id="memberTableSearch" class="tran-table-search-input" placeholder="ค้นหาในตารางสมาชิก...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tran-table-container">
+                    <table id="moneyTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 55px; text-align: center;">ลำดับ</th>
+                                <th style="width: 130px;">รหัสสมาชิก</th>
+                                <th style="width: 90px;">คำนำหน้า</th>
+                                <th>ชื่อ</th>
+                                <th>นามสกุล</th>
+                                <th style="width: 130px; text-align: center;">เลขที่มรณะ</th>
+                                <th style="width: 140px; text-align: right;">เงินที่ต้องเก็บ</th>
+                                <th style="width: 120px; text-align: right;">เงินที่ชำระ</th>
+                                <th style="width: 80px; text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="emptyRowPlaceholder">
+                                <td colspan="9" style="text-align: center; padding: 45px 20px; color: #94a3b8;">
+                                    <div style="font-size: 38px; margin-bottom: 8px;">⏳</div>
+                                    <div style="font-size: 15px; font-weight: 600; color: #64748b;">กำลังโหลดข้อมูลรายการ...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Pagination Footer -->
+                <div class="tran-table-footer" id="moneyTableFooter" style="display: none;">
+                    <span class="tran-page-info" id="tablePageInfo">แสดง 0 - 0 จากทั้งหมด 0 รายการ</span>
+                    <div class="tran-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POPUP MODAL (เลือกสมาชิก / ผู้รับผลประโยชน์ที่เสียชีวิต) -->
+        <div id="popupForm" class="popup-bg">
+            <div class="popup-box" style="width: 95%; max-width: 960px; height: 680px; max-height: 90vh; display: flex; flex-direction: column;">
+                <span class="close-btn" id="closePopup">&times;</span>
+                <h3>👥 เลือกสมาชิก / ผู้รับผลประโยชน์ที่เสียชีวิต</h3>
+                <p style="color: #64748b; font-size: 14px; margin-top: -10px; margin-bottom: 12px;">
+                    เลือกรายชื่อเพื่อเปลี่ยนผู้เสียชีวิตของเอกสารนี้
+                </p>
+
+                <!-- TAB PILLS -->
+                <div class="tab-pills">
+                    <button type="button" class="tab-pill active" id="btnPopupAll">
+                        ทั้งหมด (<span id="countPopupAll">0</span>)
+                    </button>
+                    <button type="button" class="tab-pill" id="btnPopupMember">
+                        👤 สมาชิกเสียชีวิต (<span id="countPopupMember">0</span>)
+                    </button>
+                    <button type="button" class="tab-pill" id="btnPopupBen">
+                        👥 ผู้รับผลประโยชน์ (ตาย) (<span id="countPopupBen">0</span>)
+                    </button>
+                </div>
+
+                <!-- SEARCH BAR -->
+                <div class="search-wrapper" style="width: 100%; margin-bottom: 12px;">
+                    <input type="text" id="popupSearchInput" class="search-input" placeholder="🔍 ค้นหารหัส, ชื่อ-นามสกุล, เลขบัตรประชาชน...">
+                </div>
+
+                <!-- TABLE CONTAINER -->
+                <div class="popup-table-container">
+                    <table class="popup-table" id="popupDeceasedTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 55px; text-align: center;">ลำดับ</th>
+                                <th style="width: 140px;">รหัส</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th style="width: 155px; text-align: center;">สถานะ</th>
+                                <th style="width: 140px;">เลขบัตรประชาชน</th>
+                                <th style="width: 130px; text-align: center;">วันที่เสียชีวิต</th>
+                                <th style="width: 80px; text-align: center;">เลือก</th>
+                            </tr>
+                        </thead>
+                        <tbody id="popupTableBody">
+                            <tr><td colspan="7" style="text-align:center; padding: 25px; color: #888;">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAGINATION -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+                    <span id="popupPageInfo" style="font-size: 13.5px; color: #64748b; font-weight: 500;"></span>
+                    <div id="popupPagination" class="pagination" style="margin-top: 0;"></div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+// ==========================================
+// Main Tab Navigation (Tab 1 & Tab 2)
+// ==========================================
+window.switchMainTab = function(tabId) {
+    const tabBtn1 = document.getElementById("tabBtn1");
+    const tabBtn2 = document.getElementById("tabBtn2");
+    const pane1 = document.getElementById("tabPane1");
+    const pane2 = document.getElementById("tabPane2");
+
+    if (tabId === "tab2") {
+        tabBtn1?.classList.remove("active");
+        tabBtn2?.classList.add("active");
+        if (pane1) pane1.style.display = "none";
+        if (pane2) {
+            pane2.style.display = "block";
+            pane2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    } else {
+        tabBtn2?.classList.remove("active");
+        tabBtn1?.classList.add("active");
+        if (pane2) pane2.style.display = "none";
+        if (pane1) {
+            pane1.style.display = "block";
+            pane1.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+};
+
+window.updateTab2Badge = function(count) {
+    const badge = document.getElementById("tab2CountBadge");
+    if (badge) {
+        badge.innerText = `${count.toLocaleString('th-TH')} ราย`;
+    }
+};
+
+// ==========================================
+// Helper Format Functions & Stats
+// ==========================================
+function formatCurrency(val) {
+    const num = Number(val) || 0;
+    return num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function updateKPIStats(count, amountPerPerson) {
+    const statCount = document.getElementById("statMemberCount");
+    const statPer = document.getElementById("statAmountPerPerson");
+    const statTotal = document.getElementById("statTotalAmount");
+    const tableCount = document.getElementById("tableRowsCount");
+
+    // คำนวณยอดรวมจากทุกแถวใน allMembers
+    let total = 0;
+    if (Array.isArray(allMembers) && allMembers.length > 0) {
+        total = allMembers.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    } else {
+        total = count * amountPerPerson;
+    }
+
+    if (statCount) statCount.innerText = count.toLocaleString('th-TH');
+    if (statPer) statPer.innerText = formatCurrency(amountPerPerson);
+    if (statTotal) statTotal.innerText = formatCurrency(total);
+    if (tableCount) tableCount.innerText = count.toLocaleString('th-TH');
+}
+
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+    }, 1);
+}
+
+function formatThaiDate(date) {
+    if (!date || isNaN(date.getTime())) return "-";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+
+function updateHiddenDate(date) {
+    if (!date || isNaN(date.getTime())) {
+        document.getElementById("ad-date").value = "";
+        return;
+    }
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    document.getElementById("ad-date").value = `${yyyy}-${mm}-${dd}`;
+}
+
+function updateHiddenDateEnd(date) {
+    if (!date || isNaN(date.getTime())) {
+        document.getElementById("ad-dateend").value = "";
+        return;
+    }
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    document.getElementById("ad-dateend").value = `${yyyy}-${mm}-${dd}`;
+}
+
+// Flatpickr for Date
+const fpDate = flatpickr("#thai-date", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (!selectedDates.length) return;
+        const date = selectedDates[0];
+        instance.input.value = formatThaiDate(date);
+        updateHiddenDate(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    }
+});
+
+// Flatpickr for Death Date
+const fpDateEnd = flatpickr("#thai-dateend", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (!selectedDates.length) return;
+        const date = selectedDates[0];
+        instance.input.value = formatThaiDate(date);
+        updateHiddenDateEnd(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    }
+});
+
+// ==========================================
+// LOAD DATA BY DOCID
+// ==========================================
+const params = new URLSearchParams(window.location.search);
+const docid = params.get("docid");
+
+if (!docid) {
+    alert("❌ ไม่พบรหัสเอกสาร (docid)");
+    window.location.href = "/DK_showTransaction";
+}
+
+const headerDocIdDisplay = document.getElementById("headerDocIdDisplay");
+if (headerDocIdDisplay) headerDocIdDisplay.innerText = docid;
+
+let allMembers = [];
+
+fetch(`${API_BASE}/transaction1/${docid}`)
+.then(res => res.json())
+.then(data => {
+    if (data.error !== "0" || !data.results) {
+        alert("❌ ไม่พบข้อมูลเอกสาร " + docid);
+        window.location.href = "/DK_showTransaction";
+        return;
+    }
+
+    const emp = data.results;
+    document.getElementById("docid").value = emp.docid || "";
+    document.getElementById("collect_amount").value = emp.amount || 0;
+    document.getElementById("Idcustomer").value = emp.Idcustomer || "";
+    document.getElementById("prefix").value = emp.prefix || "";
+    document.getElementById("name").value = emp.name || "";
+    document.getElementById("lastname").value = emp.lastname || "";
+    document.getElementById("Idcard").value = emp.Idcard || "";
+    document.getElementById("numberend").value = emp.numberend || "";
+
+    const docStatusBadge = document.getElementById("docStatusBadge");
+    if (docStatusBadge) {
+        docStatusBadge.innerText = (emp.status == 1 || emp.status == "1") ? "สถานะ: ปกติ" : `สถานะ: ${emp.status || "-"}`;
+    }
+
+    // วันที่บันทึก
+    if (emp.date) {
+        const dbDate = new Date(emp.date);
+        if (!isNaN(dbDate.getTime())) {
+            fpDate.setDate(dbDate);
+            document.getElementById("thai-date").value = formatThaiDate(dbDate);
+            updateHiddenDate(dbDate);
+        }
+    }
+
+    // วันที่เสียชีวิต
+    if (emp.dateend) {
+        const deadDate = new Date(emp.dateend);
+        if (!isNaN(deadDate.getTime())) {
+            fpDateEnd.setDate(deadDate);
+            document.getElementById("thai-dateend").value = formatThaiDate(deadDate);
+            updateHiddenDateEnd(deadDate);
+        }
+    }
+
+    // เช็คกรณีเป็นผู้รับผลประโยชน์
+    const ownerTag = document.getElementById("beneficiaryOwnerTag");
+    if (ownerTag && emp.Idcustomer && emp.Idcustomer.includes("-")) {
+        fetch(`${API_BASE}/beneficiary_deceased`)
+        .then(r => r.json())
+        .then(bData => {
+            const ben = (bData.results || []).find(b => b.Idbeneficiary === emp.Idcustomer);
+            if (ben) {
+                ownerTag.style.display = "block";
+                ownerTag.innerHTML = `👥 ผู้รับผลประโยชน์ของ: <strong>${ben.customer_fullname || ben.Idcustomer}</strong> ${ben.relation ? `(${ben.relation})` : ''}`;
+            }
+        })
+        .catch(() => {});
+    }
+
+    // โหลดตารางรายละเอียด
+    allMembers = Array.isArray(emp.details) ? emp.details.map(d => ({
+        ...d,
+        amount: Number(d.amount) || Number(emp.amount) || 0,
+        payamount: Number(d.payamount) || 0
+    })) : [];
+
+    tableFilteredList = [...allMembers];
+    tableCurrentPage = 1;
+    renderMoneyTable();
+    updateKPIStats(allMembers.length, Number(emp.amount) || 0);
+    updateTab2Badge(allMembers.length);
+})
+.catch(err => {
+    console.error("Load Transaction Error:", err);
+    alert("❌ เกิดข้อผิดพลาดในการโหลดข้อมูล");
+});
+
+// ==========================================
+// RENDER MONEY TABLE & PAGINATION (10 รายการต่อหน้า)
+// ==========================================
+let tableFilteredList = [];
+let tableCurrentPage = 1;
+const tableRowsPerPage = 10;
+
+function renderMoneyTable() {
+    const tbody = document.querySelector("#moneyTable tbody");
+    const footer = document.getElementById("moneyTableFooter");
+    tbody.innerHTML = "";
+
+    if (!allMembers || allMembers.length === 0) {
+        tbody.innerHTML = `
+            <tr id="emptyRowPlaceholder">
+                <td colspan="9" style="text-align: center; padding: 45px 20px; color: #94a3b8;">
+                    <div style="font-size: 38px; margin-bottom: 8px;">📋</div>
+                    <div style="font-size: 15px; font-weight: 600; color: #64748b; margin-bottom: 4px;">ไม่มีสมาชิกในรายการ</div>
+                    <div style="font-size: 13px; color: #94a3b8;">กรุณากดปุ่ม "⚡ คำนวณยอดใหม่" เพื่อดึงรายชื่อสมาชิกปกติทั้งหมด</div>
+                </td>
+            </tr>
+        `;
+        if (footer) footer.style.display = "none";
+        return;
+    }
+
+    if (!tableFilteredList || tableFilteredList.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 35px 20px; color: #94a3b8;">
+                    🔍 ไม่พบข้อมูลสมาชิกที่ค้นหา
+                </td>
+            </tr>
+        `;
+        if (footer) footer.style.display = "none";
+        return;
+    }
+
+    if (footer) footer.style.display = "flex";
+
+    const totalPages = Math.ceil(tableFilteredList.length / tableRowsPerPage) || 1;
+    if (tableCurrentPage > totalPages) tableCurrentPage = totalPages;
+    if (tableCurrentPage < 1) tableCurrentPage = 1;
+
+    const start = (tableCurrentPage - 1) * tableRowsPerPage;
+    const end = start + tableRowsPerPage;
+    const pageData = tableFilteredList.slice(start, end);
+
+    const numberendGlobal = document.getElementById("numberend").value || "-";
+
+    pageData.forEach((row, index) => {
+        const actualIndex = allMembers.indexOf(row);
+        const amt = Number(row.amount) || 0;
+        const pay = Number(row.payamount) || 0;
+        const numEnd = row.numberend || numberendGlobal;
+        const rowNumber = start + index + 1;
+
+        const tr = `
+            <tr data-index="${actualIndex}">
+                <td style="text-align:center;">${rowNumber}</td>
+                <td><strong>${row.Idcustomer || ""}</strong></td>
+                <td>${row.prefix || ""}</td>
+                <td>${row.name || ""}</td>
+                <td>${row.lastname || ""}</td>
+                <td style="text-align:center;">${numEnd}</td>
+                <td style="text-align:right;">
+                    <input type="number" step="0.01" class="tran-table-input" value="${amt}" onchange="updateRowAmount(${actualIndex}, this.value)">
+                </td>
+                <td style="text-align:right; font-weight:600; color:#64748b; font-family:monospace;">
+                    ${formatCurrency(pay)}
+                </td>
+                <td style="text-align:center;">
+                    <button type="button" class="tran-btn-danger" onclick="removeMemberRow(${actualIndex})" title="ลบรายการนี้">
+                        🗑️ ลบ
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.insertAdjacentHTML("beforeend", tr);
+    });
+
+    renderTablePagination(totalPages, start + 1, Math.min(end, tableFilteredList.length), tableFilteredList.length);
+}
+
+function renderTablePagination(totalPages, startItem, endItem, totalItems) {
+    const pageInfo = document.getElementById("tablePageInfo");
+    const pagination = document.getElementById("tablePagination");
+
+    if (pageInfo) {
+        pageInfo.innerText = `แสดง ${startItem} - ${endItem} จากทั้งหมด ${totalItems} รายการ (หน้า ${tableCurrentPage}/${totalPages})`;
+    }
+
+    if (!pagination) return;
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // Previous Button
+    const prevBtn = document.createElement("button");
+    prevBtn.type = "button";
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.title = "หน้าก่อนหน้า";
+    prevBtn.disabled = tableCurrentPage === 1;
+    prevBtn.onclick = () => {
+        if (tableCurrentPage > 1) {
+            tableCurrentPage--;
+            renderMoneyTable();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    // Page numbers with ellipsis
+    let startPage = Math.max(1, tableCurrentPage - 2);
+    let endPage = Math.min(totalPages, tableCurrentPage + 2);
+
+    if (startPage > 1) {
+        const btn1 = document.createElement("button");
+        btn1.type = "button";
+        btn1.innerText = "1";
+        btn1.onclick = () => { tableCurrentPage = 1; renderMoneyTable(); };
+        pagination.appendChild(btn1);
+
+        if (startPage > 2) {
+            const ellipsis = document.createElement("span");
+            ellipsis.innerText = "...";
+            ellipsis.style.padding = "0 4px";
+            ellipsis.style.color = "#94a3b8";
+            pagination.appendChild(ellipsis);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerText = i;
+        if (i === tableCurrentPage) btn.classList.add("active");
+        btn.onclick = () => {
+            tableCurrentPage = i;
+            renderMoneyTable();
+        };
+        pagination.appendChild(btn);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement("span");
+            ellipsis.innerText = "...";
+            ellipsis.style.padding = "0 4px";
+            ellipsis.style.color = "#94a3b8";
+            pagination.appendChild(ellipsis);
+        }
+
+        const btnLast = document.createElement("button");
+        btnLast.type = "button";
+        btnLast.innerText = totalPages;
+        btnLast.onclick = () => { tableCurrentPage = totalPages; renderMoneyTable(); };
+        pagination.appendChild(btnLast);
+    }
+
+    // Next Button
+    const nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.title = "หน้าถัดไป";
+    nextBtn.disabled = tableCurrentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (tableCurrentPage < totalPages) {
+            tableCurrentPage++;
+            renderMoneyTable();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+function applyTableFilter(resetPage = true) {
+    const query = (memberTableSearch ? memberTableSearch.value : "").toLowerCase().trim();
+    if (!query) {
+        tableFilteredList = [...allMembers];
+    } else {
+        tableFilteredList = allMembers.filter(row => {
+            const fullStr = `${row.Idcustomer || ""} ${row.prefix || ""} ${row.name || ""} ${row.lastname || ""} ${row.numberend || ""}`.toLowerCase();
+            return fullStr.includes(query);
+        });
+    }
+    if (resetPage) {
+        tableCurrentPage = 1;
+    } else {
+        const maxPage = Math.ceil(tableFilteredList.length / tableRowsPerPage) || 1;
+        if (tableCurrentPage > maxPage) tableCurrentPage = maxPage;
+    }
+    renderMoneyTable();
+}
+
+// Global functions for inline actions
+window.removeMemberRow = function(index) {
+    if (index >= 0 && index < allMembers.length) {
+        const member = allMembers[index];
+        const name = `${member.prefix || ""}${member.name || ""} ${member.lastname || ""}`;
+        if (confirm(`ต้องการลบรายชื่อ "${name}" (${member.Idcustomer}) ออกจากรายการเรียกเก็บนี้ใช่หรือไม่?`)) {
+            allMembers.splice(index, 1);
+            applyTableFilter(false);
+            const amtPerPerson = Number(document.getElementById("collect_amount").value) || 0;
+            updateKPIStats(allMembers.length, amtPerPerson);
+            updateTab2Badge(allMembers.length);
+        }
+    }
+};
+
+window.updateRowAmount = function(index, newVal) {
+    const val = Number(newVal) || 0;
+    if (index >= 0 && index < allMembers.length) {
+        allMembers[index].amount = val;
+        const amtPerPerson = Number(document.getElementById("collect_amount").value) || 0;
+        updateKPIStats(allMembers.length, amtPerPerson);
+    }
+};
+
+// Real-time table search
+const memberTableSearch = document.getElementById("memberTableSearch");
+if (memberTableSearch) {
+    memberTableSearch.addEventListener("input", () => applyTableFilter(true));
+}
+
+// When user changes collect_amount in header input
+const collectAmountInput = document.getElementById("collect_amount");
+if (collectAmountInput) {
+    collectAmountInput.addEventListener("change", function() {
+        const newAmt = Number(this.value) || 0;
+        updateKPIStats(allMembers.length, newAmt);
+    });
+}
+
+// ==========================================
+// CALCULATE / RE-FETCH ACTIVE MEMBERS
+// ==========================================
+const calculateBtn = document.getElementById("calculateTable");
+if (calculateBtn) {
+    calculateBtn.addEventListener("click", async () => {
+        const amount = Number(document.getElementById("collect_amount").value) || 0;
+        if (amount <= 0) {
+            alert("กรุณากรอกยอดเงินที่ต้องเก็บต่อรายให้ถูกต้อง (> 0)");
+            document.getElementById("collect_amount").focus();
+            return;
+        }
+
+        if (!confirm("⚠️ ต้องการดึงรายชื่อสมาชิกปกติทั้งหมด และคำนวณยอดเงินใหม่ตามยอดที่ระบุใช่หรือไม่?")) {
+            return;
+        }
+
+        const origText = calculateBtn.innerHTML;
+        calculateBtn.innerHTML = `<span>⏳ กำลังคำนวณ...</span>`;
+        calculateBtn.disabled = true;
+
+        try {
+            const numberend = document.getElementById("numberend").value || "-";
+            const response = await fetch(`${API_BASE}/customer`);
+            const data = await response.json();
+
+            if (data.error !== "0" || !Array.isArray(data.results)) {
+                alert("โหลดข้อมูลสมาชิกไม่สำเร็จ: " + (data.message || ""));
+                return;
+            }
+
+            const activeMembers = data.results.filter(row => row.status == 1 || row.status == "1");
+            if (activeMembers.length === 0) {
+                alert("ไม่พบสมาชิกสถานะปกติ (status=1)");
+                return;
+            }
+
+            allMembers = activeMembers.map(row => ({
+                Idcustomer: row.Idcustomer,
+                prefix: row.prefix || "",
+                name: row.name || "",
+                lastname: row.lastname || "",
+                numberend: numberend,
+                amount: amount,
+                payamount: 0,
+                status: 1
+            }));
+
+            tableFilteredList = [...allMembers];
+            tableCurrentPage = 1;
+            renderMoneyTable();
+            updateKPIStats(allMembers.length, amount);
+            updateTab2Badge(allMembers.length);
+            switchMainTab('tab2');
+            alert(`✅ คำนวณยอดใหม่สำเร็จ (${allMembers.length} รายการ)`);
+
+        } catch (err) {
+            console.error("Calculate error:", err);
+            alert("เกิดข้อผิดพลาดในการคำนวณยอดใหม่");
+        } finally {
+            calculateBtn.innerHTML = origText;
+            calculateBtn.disabled = false;
+        }
+    });
+}
+
+// ==========================================
+// POPUP DECEASED PERSON SELECTION
+// ==========================================
+const popup = document.getElementById("popupForm");
+const openBtn = document.getElementById("openPopup");
+const closeBtn = document.getElementById("closePopup");
+
+let popupAllDeceased = [];
+let popupMembersOnly = [];
+let popupBeneficiariesOnly = [];
+let popupFilteredList = [];
+let currentPopupTab = "all";
+const popupRowsPerPage = 10;
+let popupCurrentPage = 1;
+
+if (openBtn) {
+    openBtn.addEventListener("click", function() {
+        popup.style.display = "flex";
+        loadPopupMembers();
+    });
+}
+if (closeBtn) {
+    closeBtn.addEventListener("click", function() {
+        popup.style.display = "none";
+    });
+}
+popup.addEventListener("click", function(e) {
+    if (e.target === popup) {
+        popup.style.display = "none";
+    }
+});
+
+const btnPopupAll = document.getElementById("btnPopupAll");
+const btnPopupMember = document.getElementById("btnPopupMember");
+const btnPopupBen = document.getElementById("btnPopupBen");
+
+if (btnPopupAll) btnPopupAll.addEventListener("click", () => switchPopupTab("all"));
+if (btnPopupMember) btnPopupMember.addEventListener("click", () => switchPopupTab("member"));
+if (btnPopupBen) btnPopupBen.addEventListener("click", () => switchPopupTab("beneficiary"));
+
+function switchPopupTab(tab) {
+    currentPopupTab = tab;
+    [btnPopupAll, btnPopupMember, btnPopupBen].forEach(b => {
+        if (b) b.classList.remove("active");
+    });
+    if (tab === "all" && btnPopupAll) btnPopupAll.classList.add("active");
+    if (tab === "member" && btnPopupMember) btnPopupMember.classList.add("active");
+    if (tab === "beneficiary" && btnPopupBen) btnPopupBen.classList.add("active");
+
+    popupCurrentPage = 1;
+    applyPopupFilter();
+}
+
+function loadPopupMembers() {
+    const tbody = document.getElementById("popupTableBody");
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#888;">กำลังโหลดข้อมูล...</td></tr>`;
+
+    Promise.all([
+        fetch(`${API_BASE}/customer`).then(r => r.json()),
+        fetch(`${API_BASE}/beneficiary_deceased?status=2,3`).then(r => r.json())
+    ])
+    .then(([custData, benData]) => {
+        // สมาชิกเสียชีวิต (status == 3 หรือ 4)
+        const members = (custData.results || []).filter(c => c.status == 3 || c.status == "3" || c.status == 4 || c.status == "4").map(m => ({
+            ...m,
+            record_type: "member",
+            search_key: `${m.Idcustomer} ${m.prefix || ""} ${m.name || ""} ${m.lastname || ""} ${m.Idcard || ""}`.toLowerCase()
+        }));
+
+        // ผู้รับผลประโยชน์
+        const beneficiaries = (benData.results || []).map(b => ({
+            ...b,
+            record_type: "beneficiary",
+            search_key: `${b.Idbeneficiary} ${b.prefix || ""} ${b.name || ""} ${b.lastname || ""} ${b.Idcard || ""} ${b.customer_fullname || ""} ${b.relation || ""}`.toLowerCase()
+        }));
+
+        popupMembersOnly = members;
+        popupBeneficiariesOnly = beneficiaries;
+        popupAllDeceased = [...members, ...beneficiaries];
+
+        const countAll = document.getElementById("countPopupAll");
+        const countM = document.getElementById("countPopupMember");
+        const countB = document.getElementById("countPopupBen");
+        if (countAll) countAll.innerText = popupAllDeceased.length;
+        if (countM) countM.innerText = popupMembersOnly.length;
+        if (countB) countB.innerText = popupBeneficiariesOnly.length;
+
+        popupCurrentPage = 1;
+        applyPopupFilter();
+    })
+    .catch(err => {
+        console.error("Popup load error:", err);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#ef4444;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+    });
+}
+
+function applyPopupFilter() {
+    const input = document.getElementById("popupSearchInput");
+    const keyword = (input ? input.value : "").trim().toLowerCase();
+
+    let list = popupAllDeceased;
+    if (currentPopupTab === "member") list = popupMembersOnly;
+    if (currentPopupTab === "beneficiary") list = popupBeneficiariesOnly;
+
+    if (!keyword) {
+        popupFilteredList = list;
+    } else {
+        popupFilteredList = list.filter(item => item.search_key.includes(keyword));
+    }
+
+    popupCurrentPage = 1;
+    renderPopupTable();
+}
+
+const popupSearchInput = document.getElementById("popupSearchInput");
+if (popupSearchInput) {
+    popupSearchInput.addEventListener("input", applyPopupFilter);
+}
+
+function renderPopupTable() {
+    const tbody = document.getElementById("popupTableBody");
+    tbody.innerHTML = "";
+
+    if (!popupFilteredList || popupFilteredList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#888;">ไม่พบข้อมูลรายการ</td></tr>`;
+        const pageInfo = document.getElementById("popupPageInfo");
+        if (pageInfo) pageInfo.innerText = "ไม่พบรายการ";
+        const pagination = document.getElementById("popupPagination");
+        if (pagination) pagination.innerHTML = "";
+        return;
+    }
+
+    const start = (popupCurrentPage - 1) * popupRowsPerPage;
+    const end = start + popupRowsPerPage;
+    const pageData = popupFilteredList.slice(start, end);
+
+    pageData.forEach((item, index) => {
+        let idHtml = "";
+        let nameHtml = "";
+        let statusBadge = "";
+
+        if (item.record_type === "beneficiary") {
+            idHtml = `<span class="badge-ben-id">${item.Idbeneficiary}</span>`;
+            nameHtml = `
+                <strong>${item.prefix || ""}${item.name || ""} ${item.lastname || ""}</strong>
+                <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">
+                    👥 ผู้รับผลประโยชน์ของ: <span style="color:#1e3c72; font-weight:600;">${item.customer_fullname || item.Idcustomer}</span>
+                    ${item.relation ? `<span style="color:#0284c7;">(${item.relation})</span>` : ""}
+                </div>
+            `;
+            statusBadge = `<span class="badge-status badge-red" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;">ผู้รับผลประโยชน์ (ตาย)</span>`;
+        } else {
+            idHtml = `<strong>${item.Idcustomer}</strong>`;
+            nameHtml = `<strong>${item.prefix || ""}${item.name || ""} ${item.lastname || ""}</strong>`;
+            statusBadge = `<span class="badge-status badge-red">สมาชิกเสียชีวิต</span>`;
+        }
+
+        const dateStr = item.dateend ? formatThaiDate(new Date(item.dateend)) : "-";
+        const itemJson = JSON.stringify(item).replace(/'/g, "&apos;");
+
+        const row = `
+            <tr>
+                <td style="text-align: center;">${start + index + 1}</td>
+                <td>${idHtml}</td>
+                <td>${nameHtml}</td>
+                <td style="text-align: center;">${statusBadge}</td>
+                <td>${item.Idcard || "-"}</td>
+                <td style="text-align: center;">${dateStr}</td>
+                <td style="text-align: center;">
+                    <button type="button" class="select-btn" onclick='selectDeceasedPerson(${itemJson})'>
+                        เลือก
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+
+    createPopupPagination();
+}
+
+function createPopupPagination() {
+    const totalPages = Math.ceil(popupFilteredList.length / popupRowsPerPage) || 1;
+    const pagination = document.getElementById("popupPagination");
+    const pageInfo = document.getElementById("popupPageInfo");
+
+    const start = (popupCurrentPage - 1) * popupRowsPerPage + 1;
+    const end = Math.min(popupCurrentPage * popupRowsPerPage, popupFilteredList.length);
+    if (pageInfo) {
+        pageInfo.innerText = `แสดง ${start} - ${end} จากทั้งหมด ${popupFilteredList.length} รายการ (หน้า ${popupCurrentPage}/${totalPages})`;
+    }
+
+    if (!pagination) return;
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement("button");
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.disabled = popupCurrentPage === 1;
+    prevBtn.onclick = () => {
+        if (popupCurrentPage > 1) {
+            popupCurrentPage--;
+            renderPopupTable();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        if (i === popupCurrentPage) btn.classList.add("active");
+        btn.onclick = () => {
+            popupCurrentPage = i;
+            renderPopupTable();
+        };
+        pagination.appendChild(btn);
+    }
+
+    const nextBtn = document.createElement("button");
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.disabled = popupCurrentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (popupCurrentPage < totalPages) {
+            popupCurrentPage++;
+            renderPopupTable();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+window.selectDeceasedPerson = function(emp) {
+    popup.style.display = "none";
+    const isBeneficiary = emp.record_type === "beneficiary";
+
+    document.getElementById("Idcustomer").value = isBeneficiary ? emp.Idbeneficiary : emp.Idcustomer;
+    document.getElementById("prefix").value = emp.prefix || "";
+    document.getElementById("name").value = emp.name || "";
+    document.getElementById("lastname").value = emp.lastname || "";
+    document.getElementById("Idcard").value = emp.Idcard || "";
+
+    const ownerTag = document.getElementById("beneficiaryOwnerTag");
+    if (ownerTag) {
+        if (isBeneficiary) {
+            ownerTag.style.display = "block";
+            ownerTag.innerHTML = `👥 ผู้รับผลประโยชน์ของ: <strong>${emp.customer_fullname || emp.Idcustomer}</strong> ${emp.relation ? `(${emp.relation})` : ''}`;
+        } else {
+            ownerTag.style.display = "none";
+        }
+    }
+
+    if (emp.dateend) {
+        const deadDate = new Date(emp.dateend);
+        if (!isNaN(deadDate.getTime())) {
+            fpDateEnd.setDate(deadDate);
+            document.getElementById("thai-dateend").value = formatThaiDate(deadDate);
+            updateHiddenDateEnd(deadDate);
+        }
+    }
+};
+
+window.selectMember = window.selectDeceasedPerson;
+
+// ==========================================
+// SUBMIT UPDATE FORM
+// ==========================================
+const registerForm = document.getElementById("registerForm");
+if (registerForm) {
+    registerForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        if (!allMembers || allMembers.length === 0) {
+            alert("⚠️ กรุณากด '⚡ คำนวณยอดใหม่' เพื่อสร้างรายการสมาชิกก่อนบันทึก");
+            return;
+        }
+
+        const deceasedId = document.getElementById("Idcustomer").value;
+        if (!deceasedId) {
+            alert("⚠️ กรุณาเลือกผู้เสียชีวิต");
+            return;
+        }
+
+        const amount = Number(document.getElementById("collect_amount").value) || 0;
+        const numberend = document.getElementById("numberend").value || "";
+
+        const submitBtn = document.getElementById("btnSubmitForm");
+        const origText = submitBtn ? submitBtn.innerHTML : "";
+        if (submitBtn) {
+            submitBtn.innerHTML = `<span>⏳ กำลังบันทึกการแก้ไข...</span>`;
+            submitBtn.disabled = true;
+        }
+
+        const detailsPayload = allMembers.map(m => ({
+            Idcustomer: m.Idcustomer,
+            prefix: m.prefix || "",
+            name: m.name || "",
+            lastname: m.lastname || "",
+            numberend: m.numberend || numberend,
+            amount: Number(m.amount) || amount,
+            payamount: Number(m.payamount) || 0,
+            status: 1
+        }));
+
+        const payload = {
+            docid: document.getElementById("docid").value,
+            amount: amount,
+            Idcustomer: deceasedId,
+            prefix: document.getElementById("prefix").value || "",
+            name: document.getElementById("name").value || "",
+            lastname: document.getElementById("lastname").value || "",
+            Idcard: document.getElementById("Idcard").value || "",
+            date: document.getElementById("ad-date").value,
+            dateend: document.getElementById("ad-dateend").value,
+            numberend: numberend,
+            status: 1,
+            details: detailsPayload
+        };
+
+        console.log("Submitting update payload:", payload);
+
+        try {
+            const response = await fetch(`${API_BASE}/updatetransaction`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            console.log("Update response:", result);
+
+            if (!response.ok || result.error !== "0") {
+                alert("❌ บันทึกการแก้ไขไม่สำเร็จ: " + (result.message || ""));
+                return;
+            }
+
+            alert("✅ บันทึกการแก้ไขรายการเรียบร้อยแล้ว (" + (result.message || "สำเร็จ") + ")");
+            window.location.href = "/DK_showTransaction";
+
+        } catch (err) {
+            console.error("Save error:", err);
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+        } finally {
+            if (submitBtn) {
+                submitBtn.innerHTML = origText;
+                submitBtn.disabled = false;
+            }
+        }
+    });
+}
+
+</script>
+
+{% endblock %}

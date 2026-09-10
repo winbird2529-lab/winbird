@@ -1,0 +1,484 @@
+
+/* กล่องหลัก */
+.report-box{
+    max-width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+
+/* แถวข้อมูล */
+.form-row{
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.form-row label{
+    width: 180px;
+    text-align: right;
+    margin-right: 15px;
+    color: #555;
+    font-weight: 500;
+}
+
+/* input */
+.form-row input,
+.form-row select{
+    width: 320px;
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0 12px;
+    font-size: 14px;
+}
+
+/* ปุ่มค้นหา */
+.search-btn{
+    width: 42px;
+    height: 40px;
+    margin-left: 5px;
+    border: none;
+    border-radius: 5px;
+    background: #4d8ef7;
+    color: #fff;
+    cursor: pointer;
+}
+
+.search-btn:hover{
+    background: #3b7be0;
+}
+
+/* radio */
+.radio-group{
+    display: flex;
+    gap: 25px;
+    align-items: center;
+}
+
+.radio-group label{
+    width: auto;
+    margin: 0;
+    font-weight: normal;
+}
+
+.radio-group input{
+    width: auto;
+    margin-right: 5px;
+}
+
+/* รายงาน */
+.report-type{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ปุ่มพิมพ์ */
+.print-area{
+    text-align: center;
+    margin-top: 40px;
+}
+
+.print-btn{
+    background: #273B4A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 30px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.print-btn:hover{
+    background: #c6cbcf;
+}
+
+
+/* ปุ่มเลือกสมาชิก */
+
+.btn-search-member{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+
+    padding:10px 18px;
+
+    background:#4cc8e7;
+    color:#fff;
+
+    border:none;
+    border-radius:8px;
+
+    font-size:14px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:all .25s ease;
+
+    box-shadow:
+        0 4px 10px rgba(59,130,246,.25);
+}
+
+.btn-search-member:hover{
+
+    background:#4cc8e7;
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 8px 18px rgba(59,130,246,.35);
+}
+
+.btn-search-member:active{
+
+    transform:translateY(0);
+
+    box-shadow:
+        0 2px 5px rgba(0,0,0,.15);
+}
+
+.btn-search-member span{
+    font-size:16px;
+}
+
+/* ปุ่มเลือกสมาชิก */
+
+
+
+
+/* ===================================================
+   Custom Styles for Member Report Criteria Window
+   =================================================== */
+.report-window-container {
+    max-width: 920px;
+    margin: 20px auto 40px auto;
+    font-family: 'Prompt', 'Sarabun', sans-serif;
+}
+
+/* Tabs Bar */
+.report-tab-bar {
+    display: flex;
+    gap: 6px;
+    border-bottom: 2px solid #cbd5e1;
+    margin-bottom: -1px;
+    padding-left: 8px;
+}
+
+.report-tab-item {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 22px;
+    font-size: 15px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.report-tab-item:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.report-tab-item.active {
+    background: #ffffff;
+    color: #1e3c72;
+    border: 1px solid #94a3b8;
+    border-top: 3px solid #2563eb;
+    border-bottom: 2px solid #ffffff;
+    margin-bottom: -2px;
+    z-index: 3;
+}
+
+/* Main Dialog Card */
+.report-dialog-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0 8px 12px 12px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+    padding: 26px 32px;
+}
+
+/* Top Radio Filter Bar */
+.report-top-radios {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 22px;
+}
+
+.report-radio-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    align-items: center;
+}
+
+.report-radio-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    color: #1e293b;
+    cursor: pointer;
+    user-select: none;
+}
+
+.report-radio-label input[type="radio"] {
+    accent-color: #1e3c72;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* Criteria Form Grid */
+.report-criteria-grid {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 14px 16px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.report-criteria-label {
+    text-align: right;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    padding-right: 6px;
+}
+
+.report-criteria-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Inputs styling */
+.crit-input {
+    height: 38px;
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Prompt', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #ffffff;
+}
+
+.crit-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.crit-input-readonly {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+    cursor: default;
+}
+
+.crit-btn-search {
+    height: 38px;
+    width: 40px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    color: #0d0d0e;
+    transition: all 0.15s ease;
+}
+
+.crit-btn-search:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+}
+
+.crit-btn-clear {
+    height: 38px;
+    padding: 0 10px;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: #e11d48;
+    font-family: 'Prompt', sans-serif;
+    transition: all 0.15s ease;
+}
+
+.crit-btn-clear:hover {
+    background: #ffe4e6;
+    border-color: #fda4af;
+}
+
+/* Fieldset: เงื่อนไขรายงาน */
+.report-fieldset {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 16px 24px 18px 24px;
+    margin: 20px 0 24px 0;
+    background: #ffffff;
+}
+
+.report-legend {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    padding: 0 10px;
+}
+
+.report-checkbox-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.report-chk-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14.5px;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: background 0.15s ease;
+}
+
+.report-chk-label:hover {
+    background: #f8fafc;
+}
+
+.report-chk-label input[type="checkbox"] {
+    accent-color: #1e3c72;
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+}
+
+/* Action Buttons */
+.report-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding-top: 18px;
+    border-top: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+}
+
+/* Date Preset Buttons */
+.date-presets-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.btn-date-preset {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 5px 11px;
+    font-size: 12.5px;
+    font-family: 'Prompt', sans-serif;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.btn-date-preset:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+.btn-date-preset.preset-clear {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.btn-date-preset.preset-clear:hover {
+    background: #fee2e2;
+    border-color: #f87171;
+}
+
+/* Print Button (Exact design matching user image) */
+.btn-print-official {
+    background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+    border: 1px solid #94a3b8;
+    border-radius: 6px;
+    padding: 8px 24px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #0f172a;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.btn-print-official:hover {
+    background: linear-gradient(to bottom, #ffffff, #cbd5e1);
+    border-color: #64748b;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.btn-preview-official {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px 22px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+}
+
+.btn-preview-official:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+
+
+
+
+
+

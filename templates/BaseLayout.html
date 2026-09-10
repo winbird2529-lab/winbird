@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css.css') }}">
+    <title>{% block title %}DK_Home{% endblock %}</title>
+    
+  </head>
+
+  <body>
+    <div class="layout">
+        
+      <div class="header">
+        
+        <h2>ระบบบันทึกรายการ</h2>
+          
+      </div>
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <nav>
+           <h2>ค่าคงที่</h2>
+           <ul class="navbar">
+            <li><a href="/DK_Home">HOME</a></li>
+            <li><a href="/DK_Running">เลขที่เอกสาร</a></li>
+            <li><a href="/DK_customer">ทะเบียนสมาชิก</a></li>
+            <li><a href="/DK_Employee">ทะเบียนพนักงาน</a></li>
+            <li><a href="/DK_Beneficiary">ทะเบียนผู้รับผลประโยชน์</a></li>
+           </ul>
+          
+          
+          <h2>เมนู</h2>
+          <ul class="navbar">
+            <li><a href="/DK_customerDeceased">สมาชิกลาออก/เสียชีวิต</a></li>
+            <li><a href="/DK_Transaction">บันทึกรายการตั้งสมาชิกเสียชีวิต</a></li>
+            <li><a href="/DK_showTransaction">แสดงรายการตั้งสมาชิกเสียชีวิต</a></li>
+            <li><a href="/DK_Movement">บันทึกรายการเก็บเงิน</a></li>
+            <li><a href="/DK_showMovement">แสดงบันทึกรายการเก็บเงิน</a></li>
+          </ul>
+        
+
+          <h2>รายงาน</h2>
+          <ul class="navbar">
+            <li><a href="/DK_Viwecustomer">รายงานทะเบียนสมาชิก</a></li>
+            <li><a href="/DK_Viweemployee">รายงานทะเบียนพนักงาน</a></li>
+            <li><a href="/DK_ViweMovement">รายงานการรับชำระเงิน</a></li>
+            <li><a href="/DK_Test">ทดสอบ form</a></li>
+            <li><a href="/fromdate">ทดสอบ บันทึกวันที</a></li>
+          </ul>
+
+          <h2>APPS</h2>
+          <ul class="navbar">
+            <li><a href="/login">login</a></li>
+            <li><a href="/">ออกจากระบบ</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main">
+        <h2>{% block page_title %}{% endblock %}</h2>
+        <p>{% block description %}{% endblock %}</p>
+        
+        {% block content %}
+        {% endblock %}
+      </div>
+
+    </div>
+
+
+  </body>
+</html>
+
+

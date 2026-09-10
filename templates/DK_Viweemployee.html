@@ -1,0 +1,1086 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}รายงานทะเบียนพนักงาน{% endblock %}
+
+{% block content %}
+<!-- External Libraries & CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='csstran.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Viwecustomer.css') }}">
+
+
+
+<div class="tran-page-wrapper">
+    <!-- Breadcrumb -->
+    <div class="tran-breadcrumb">
+        <a href="/DK_Home">HOME</a>
+        <span class="tran-breadcrumb-separator">/</span>
+        <span>รายงาน</span>
+        <span class="tran-breadcrumb-separator">/</span>
+        <span>รายงานทะเบียนพนักงาน</span>
+    </div>
+
+    <!-- ===================================================
+         CRITERIA DIALOG CONTAINER
+         =================================================== -->
+    <div class="report-window-container">
+        <!-- Window Tab Bar -->
+        <div class="report-tab-bar">
+            <div class="report-tab-item">
+                <span>📋 รายงานทะเบียนพนักงาน</span>
+            </div>
+        </div>
+
+        <!-- Main Dialog Form Card -->
+        <div class="report-dialog-card">
+
+            <!-- Banner if redirected from single employee -->
+          
+
+            <!-- Conditions Form -->
+            <div class="report-criteria-grid">
+                <!-- 1. ช่วงวันที่ (วันที่เริ่มงาน) พร้อมปุ่มจุดเลือก -->
+                <div class="report-criteria-label">
+                    <label class="report-radio-label" style="cursor: pointer; display: inline-flex; align-items: center; gap: 7px; justify-content: flex-end; width: 100%;">
+                        <input type="radio" name="dateFilterType" id="radioDateRange" value="range" checked onchange="selectDateFilterMode('range')">
+                        <span style="font-weight: 600;">ช่วงวันที่ (วันที่เริ่มงาน)</span>
+                    </label>
+                </div>
+                <div class="report-criteria-field">
+                    <input type="text" id="critFromDate" class="crit-input" style="width: 135px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                    <span style="font-size: 13.5px; color: #64748b; font-weight: 500;">ถึง วันที่</span>
+                    <input type="text" id="critToDate" class="crit-input" style="width: 135px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                    
+                </div>
+
+                <!-- 2. ณ วันที่ พร้อมปุ่มจุดเลือก -->
+                <div class="report-criteria-label">
+                    <label class="report-radio-label" style="cursor: pointer; display: inline-flex; align-items: center; gap: 7px; justify-content: flex-end; width: 100%;">
+                        <input type="radio" name="dateFilterType" id="radioDateAsOf" value="asof" onchange="selectDateFilterMode('asof')">
+                        <span style="font-weight: 600;">ณ วันที่</span>
+                    </label>
+                </div>
+                <div class="report-criteria-field">
+                    <input type="text" id="critAsOfDate" class="crit-input" style="width: 140px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                    <span style="font-size: 12.5px; color: #64748b;">(ตัดยอดข้อมูล ณ วันที่กำหนด)</span>
+                </div>
+
+                <!-- จาก รหัสพนักงาน -->
+                <div class="report-criteria-label">จาก รหัสพนักงาน</div>
+                <div class="report-criteria-field">
+                    <input type="text" id="critFromId" class="crit-input" style="width: 140px;" placeholder="รหัสเริ่มต้น">
+                    <button type="button" class="crit-btn-search" id="btnPickFromId" title="ค้นหารหัสพนักงานเริ่มต้น">
+                        🔍
+                    </button>
+                    <input type="text" id="critFromName" class="crit-input crit-input-readonly" style="width: 250px;" readonly placeholder="ชื่อ - นามสกุล">
+                </div>
+
+                <!-- ถึง รหัสพนักงาน -->
+                <div class="report-criteria-label">ถึง รหัสพนักงาน</div>
+                <div class="report-criteria-field">
+                    <input type="text" id="critToId" class="crit-input" style="width: 140px;" placeholder="รหัสสิ้นสุด">
+                    <button type="button" class="crit-btn-search" id="btnPickToId" title="ค้นหารหัสพนักงานสิ้นสุด">
+                        🔍
+                    </button>
+                    <input type="text" id="critToName" class="crit-input crit-input-readonly" style="width: 250px;" readonly placeholder="ชื่อ - นามสกุล">
+                </div>
+                <!-- ตำแหน่ง / แผนก -->
+                <div class="report-criteria-label">ตำแหน่ง / แผนก</div>
+                <div class="report-criteria-field">
+                    <select id="critPosition" class="crit-input" style="min-width: 220px;">
+                        <option value="">-- แสดงทุกตำแหน่ง --</option>
+                    </select>
+                    
+                </div>
+            </div>
+
+            <!-- Fieldset: เงื่อนไขรายงาน (สถานะพนักงาน) -->
+            <fieldset class="report-fieldset">
+                <legend class="report-legend">เงื่อนไขรายงาน (สถานะพนักงาน)</legend>
+                <div class="report-checkbox-grid">
+                    <label class="report-chk-label">
+                        <input type="checkbox" id="chkActive" name="reportCond" value="1" checked>
+                        <span style="font-weight: 600; color: #166534;"> ปกติ (กำลังปฏิบัติงาน)</span>
+                    </label>
+                    <label class="report-chk-label">
+                        <input type="checkbox" id="chkResigned" name="reportCond" value="2" checked>
+                        <span style="font-weight: 600; color: #b91c1c;"> ลาออก / พ้นสภาพ</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <!-- Fieldset: เรียงลำดับข้อมูล -->
+            <fieldset class="report-fieldset">
+                <legend class="report-legend">การเรียงลำดับข้อมูล</legend>
+                <div class="report-checkbox-grid">
+                    <label class="report-chk-label">
+                        <input type="radio" name="sortOrder" value="id_asc" checked>
+                        <span>ตามรหัสพนักงาน (น้อย ➔ มาก)</span>
+                    </label>
+                    <label class="report-chk-label">
+                        <input type="radio" name="sortOrder" value="date_asc">
+                        <span>ตามวันที่เริ่มงาน</span>
+                    </label>
+                    <label class="report-chk-label">
+                        <input type="radio" name="sortOrder" value="name_asc">
+                        <span>ตามชื่อ - นามสกุล</span>
+                    </label>
+                    <label class="report-chk-label">
+                        <input type="radio" name="sortOrder" value="pos_asc">
+                        <span>ตามตำแหน่ง / แผนก</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <!-- Action Buttons Row -->
+            <div class="report-actions-row">
+                <button type="button" class="btn-print-official" id="btnPrintReport">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                        <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
+                    <span>พิมพ์รายงาน</span>
+                </button>
+
+                <button type="button" class="btn-preview-official" id="btnPreviewReport">
+                    <span>📊 แสดงตัวอย่างรายงาน</span>
+                </button>
+
+                <button type="button" class="btn-preview-official" id="btnExportExcel" style="color: #059669; border-color: #86efac;">
+                    <span>📥 ส่งออก Excel</span>
+                </button>
+
+                <button type="button" class="btn-preview-official" id="btnResetAllCriteria" style="color: #dc2626; border-color: #fca5a5;" title="ล้างตัวกรองและเงื่อนไขทั้งหมด">
+                    <span>🔄 ล้างเงื่อนไขทั้งหมด</span>
+                </button>
+
+                <a href="/DK_Employee" class="btn-preview-official" style="text-decoration: none; color: #475569;">
+                    <span>👥 จัดการข้อมูลพนักงาน</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================
+     MODAL PICK EMPLOYEE POPUP (เลือกพนักงาน จาก / ถึง)
+     =================================================== -->
+<div id="modalPickEmployee" class="popup-bg" style="display: none;">
+    <div class="popup-box" style="width: 90%; max-width: 760px; max-height: 85vh; padding: 22px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+            <h3 style="margin: 0; color: #1e3c72; font-size: 17px;" id="modalPickTitle">🔍 เลือกรหัสพนักงาน</h3>
+            <span class="close-btn" id="closeModalPick" style="position: static; font-size: 24px; cursor: pointer;">&times;</span>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <input type="text" id="modalPickSearch" class="tran-input" placeholder="พิมพ์ค้นหารหัส, ชื่อ-สกุล, ตำแหน่ง หรือเลขบัตรประชาชน..." style="width: 100%;">
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13.5px;">
+                <thead style="background: #f8fafc; position: sticky; top: 0; border-bottom: 1px solid #cbd5e1;">
+                    <tr>
+                        <th style="padding: 8px 12px; text-align: center; width: 50px;">ลำดับ</th>
+                        <th style="padding: 8px 12px; text-align: left; width: 110px;">รหัสพนักงาน</th>
+                        <th style="padding: 8px 12px; text-align: left;">ชื่อ - นามสกุล</th>
+                        <th style="padding: 8px 12px; text-align: left; width: 120px;">ตำแหน่ง</th>
+                        <th style="padding: 8px 12px; text-align: center; width: 80px;">สถานะ</th>
+                        <th style="padding: 8px 12px; text-align: center; width: 70px;">เลือก</th>
+                    </tr>
+                </thead>
+                <tbody id="modalPickBody">
+                    <tr><td colspan="6" style="text-align: center; padding: 25px; color: #94a3b8;">กำลังค้นหาข้อมูล...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="modalPickPageInfo" style="font-size: 13px; color: #64748b;">แสดง 0 - 0 รายการ</span>
+            <div id="modalPickPagination" class="tran-pagination"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+// ==========================================
+// Date Helpers
+// ==========================================
+function formatThaiDate(dateStr) {
+    if (!dateStr || String(dateStr).startsWith("0000")) return "-";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear() + 543;
+    return `${d}/${m}/${y}`;
+}
+
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+    }, 1);
+}
+
+function formatDateToYMD(dateObj) {
+    if (!dateObj || isNaN(dateObj.getTime())) return "";
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function parseDateToYMD(val) {
+    if (!val || String(val).startsWith("0000")) return null;
+    if (typeof val === "string") {
+        const clean = val.trim();
+        if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
+            return clean.slice(0, 10);
+        }
+    }
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return null;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+// ==========================================
+// State Variables
+// ==========================================
+let allEmployees = [];
+let targetPickField = null; // 'from' or 'to'
+let modalPickFiltered = [];
+let modalPickPage = 1;
+const modalPickPerPage = 8;
+
+let fromDateYMD = formatDateToYMD(new Date());
+let toDateYMD = formatDateToYMD(new Date());
+let asOfDateYMD = formatDateToYMD(new Date());
+
+// Flatpickr setup
+const fpFrom = flatpickr("#critFromDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        fromDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            fromDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+            if (fpTo) fpTo.set('minDate', selectedDates[0]);
+        } else {
+            fromDateYMD = "";
+            instance.input.value = "";
+            if (fpTo) fpTo.set('minDate', null);
+        }
+        selectDateFilterMode('range');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+const fpTo = flatpickr("#critToDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        toDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            toDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+            if (fpFrom) fpFrom.set('maxDate', selectedDates[0]);
+        } else {
+            toDateYMD = "";
+            instance.input.value = "";
+            if (fpFrom) fpFrom.set('maxDate', null);
+        }
+        selectDateFilterMode('range');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+const fpAsOf = flatpickr("#critAsOfDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        asOfDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            asOfDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+        } else {
+            asOfDateYMD = "";
+            instance.input.value = "";
+        }
+        selectDateFilterMode('asof');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+// ==========================================
+// สลับโหมดเงื่อนไขวันที่ (ปุ่มจุด ช่วงวันที่ vs ณ วันที่)
+// ==========================================
+function selectDateFilterMode(mode) {
+    const radioRange = document.getElementById("radioDateRange");
+    const radioAsOf = document.getElementById("radioDateAsOf");
+    const elFrom = document.getElementById("critFromDate");
+    const elTo = document.getElementById("critToDate");
+    const elAsOf = document.getElementById("critAsOfDate");
+    const btnClear = document.getElementById("btnClearDateRange");
+
+    if (mode === 'asof') {
+        if (radioAsOf) radioAsOf.checked = true;
+        if (elAsOf) {
+            elAsOf.style.opacity = "1";
+            elAsOf.style.pointerEvents = "auto";
+            elAsOf.style.background = "#ffffff";
+        }
+        if (elFrom) {
+            elFrom.style.opacity = "0.4";
+            elFrom.style.pointerEvents = "none";
+            elFrom.style.background = "#f1f5f9";
+        }
+        if (elTo) {
+            elTo.style.opacity = "0.4";
+            elTo.style.pointerEvents = "none";
+            elTo.style.background = "#f1f5f9";
+        }
+        if (btnClear) btnClear.style.opacity = "0.4";
+    } else {
+        if (radioRange) radioRange.checked = true;
+        if (elFrom) {
+            elFrom.style.opacity = "1";
+            elFrom.style.pointerEvents = "auto";
+            elFrom.style.background = "#ffffff";
+        }
+        if (elTo) {
+            elTo.style.opacity = "1";
+            elTo.style.pointerEvents = "auto";
+            elTo.style.background = "#ffffff";
+        }
+        if (btnClear) btnClear.style.opacity = "1";
+        if (elAsOf) {
+            elAsOf.style.opacity = "0.4";
+            elAsOf.style.pointerEvents = "none";
+            elAsOf.style.background = "#f1f5f9";
+        }
+    }
+}
+window.selectDateFilterMode = selectDateFilterMode;
+
+document.getElementById("critFromDate")?.addEventListener("click", () => selectDateFilterMode('range'));
+document.getElementById("critToDate")?.addEventListener("click", () => selectDateFilterMode('range'));
+document.getElementById("critAsOfDate")?.addEventListener("click", () => selectDateFilterMode('asof'));
+
+document.getElementById("btnClearDateRange")?.addEventListener("click", () => {
+    selectDateFilterMode('range');
+    fpFrom.clear();
+    fpTo.clear();
+    fromDateYMD = "";
+    toDateYMD = "";
+    document.getElementById("critFromDate").value = "";
+    document.getElementById("critToDate").value = "";
+    if (fpFrom) fpFrom.set('maxDate', null);
+    if (fpTo) fpTo.set('minDate', null);
+});
+
+// Initialize default date filter visual state to 'range'
+selectDateFilterMode('range');
+
+// ==========================================
+// Load Initial Data
+// ==========================================
+async function loadEmployeeData() {
+    try {
+        const response = await fetch(`${API_BASE}/employees`);
+        const data = await response.json();
+
+        if (data.error !== "0" || !Array.isArray(data.results)) {
+            console.error("Failed to load employee list");
+            return;
+        }
+
+        const positionsSet = new Set();
+
+        allEmployees = data.results.map(item => {
+            const fullName = `${item.prefix || ''}${item.name || ''} ${item.lastname || ''}`.trim();
+            const pos = (item.position || '').trim();
+            if (pos) positionsSet.add(pos);
+
+            return {
+                ...item,
+                fullName: fullName,
+                searchStr: `${item.IdEmployee || ''} ${fullName} ${item.Idcard || ''} ${item.Tel || ''} ${pos}`.toLowerCase()
+            };
+        });
+
+        // Populate Position dropdown
+        const posSelect = document.getElementById("critPosition");
+        if (posSelect) {
+            posSelect.innerHTML = `<option value="">-- แสดงทุกตำแหน่ง --</option>`;
+            Array.from(positionsSet).sort().forEach(p => {
+                const opt = document.createElement("option");
+                opt.value = p;
+                opt.textContent = p;
+                posSelect.appendChild(opt);
+            });
+        }
+
+        // Check if query param ?id= exists
+        handleUrlParams();
+
+    } catch (err) {
+        console.error("Load employee error:", err);
+    }
+}
+
+function handleUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const targetId = params.get("id");
+    if (targetId) {
+        const cleanId = targetId.trim();
+        const found = allEmployees.find(e => (e.IdEmployee || "").toLowerCase() === cleanId.toLowerCase());
+        if (found) {
+            document.getElementById("critFromId").value = found.IdEmployee;
+            document.getElementById("critFromName").value = found.fullName;
+            document.getElementById("critToId").value = found.IdEmployee;
+            document.getElementById("critToName").value = found.fullName;
+
+            const banner = document.getElementById("noticeBanner");
+            if (banner) {
+                document.getElementById("noticeEmpName").textContent = found.fullName;
+                document.getElementById("noticeEmpId").textContent = found.IdEmployee;
+                banner.style.display = "flex";
+            }
+        }
+    }
+}
+
+document.getElementById("btnClearNotice")?.addEventListener("click", () => {
+    document.getElementById("critFromId").value = "";
+    document.getElementById("critFromName").value = "";
+    document.getElementById("critToId").value = "";
+    document.getElementById("critToName").value = "";
+    document.getElementById("noticeBanner").style.display = "none";
+});
+
+// ==========================================
+// Lookup Employee Name by Code
+// ==========================================
+function lookupEmployeeName(id) {
+    if (!id) return "";
+    const cleanId = id.trim().toLowerCase();
+    const found = allEmployees.find(e => (e.IdEmployee || "").toLowerCase() === cleanId);
+    return found ? found.fullName : "";
+}
+
+document.getElementById("critFromId").addEventListener("input", function() {
+    document.getElementById("critFromName").value = lookupEmployeeName(this.value);
+});
+document.getElementById("critToId").addEventListener("input", function() {
+    document.getElementById("critToName").value = lookupEmployeeName(this.value);
+});
+
+// ==========================================
+// Employee Selector Modal
+// ==========================================
+const modalPick = document.getElementById("modalPickEmployee");
+const closeModalPick = document.getElementById("closeModalPick");
+
+closeModalPick.addEventListener("click", () => { modalPick.style.display = "none"; });
+modalPick.addEventListener("click", (e) => {
+    if (e.target === modalPick) modalPick.style.display = "none";
+});
+
+document.getElementById("btnPickFromId").addEventListener("click", () => {
+    openEmployeePicker("from");
+});
+document.getElementById("btnPickToId").addEventListener("click", () => {
+    openEmployeePicker("to");
+});
+
+function openEmployeePicker(type) {
+    targetPickField = type;
+    document.getElementById("modalPickTitle").innerText = type === "from" 
+        ? "🔍 เลือกรหัสพนักงานเริ่มต้น (จาก รหัสพนักงาน)" 
+        : "🔍 เลือกรหัสพนักงานสิ้นสุด (ถึง รหัสพนักงาน)";
+    document.getElementById("modalPickSearch").value = "";
+    modalPickPage = 1;
+    filterAndRenderPickModal();
+    modalPick.style.display = "flex";
+}
+
+document.getElementById("modalPickSearch").addEventListener("input", () => {
+    modalPickPage = 1;
+    filterAndRenderPickModal();
+});
+
+function filterAndRenderPickModal() {
+    const q = (document.getElementById("modalPickSearch")?.value || "").toLowerCase().trim();
+    modalPickFiltered = allEmployees.filter(e => !q || e.searchStr.includes(q));
+
+    const total = modalPickFiltered.length;
+    const totalPages = Math.ceil(total / modalPickPerPage) || 1;
+    if (modalPickPage > totalPages) modalPickPage = totalPages;
+    if (modalPickPage < 1) modalPickPage = 1;
+
+    const start = (modalPickPage - 1) * modalPickPerPage;
+    const pageData = modalPickFiltered.slice(start, start + modalPickPerPage);
+
+    const tbody = document.getElementById("modalPickBody");
+    tbody.innerHTML = "";
+
+    if (pageData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 25px; color: #94a3b8;">ไม่พบข้อมูลพนักงาน</td></tr>`;
+    } else {
+        pageData.forEach((item, idx) => {
+            const stName = item.status == 2 ? '<span style="color:#dc2626; font-weight:600;">ลาออก</span>' : '<span style="color:#16a34a; font-weight:600;">ปกติ</span>';
+            const tr = `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 8px 12px; text-align: center;">${start + idx + 1}</td>
+                    <td style="padding: 8px 12px; font-weight: 600; color: #1e3c72; font-family: monospace;">${item.IdEmployee}</td>
+                    <td style="padding: 8px 12px; font-weight: 500;">${item.fullName}</td>
+                    <td style="padding: 8px 12px; color: #475569;">${item.position || '-'}</td>
+                    <td style="padding: 8px 12px; text-align: center;">${stName}</td>
+                    <td style="padding: 8px 12px; text-align: center;">
+                        <button type="button" class="btn-preview-official" style="padding: 3px 10px; font-size: 12px; background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;" onclick="selectPickEmployee('${item.IdEmployee}', '${item.fullName.replace(/'/g, "\\'")}')">
+                            เลือก
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML("beforeend", tr);
+        });
+    }
+
+    const pageInfo = document.getElementById("modalPickPageInfo");
+    if (pageInfo) {
+        pageInfo.innerText = `แสดง ${total ? start + 1 : 0} - ${Math.min(start + modalPickPerPage, total)} จากทั้งหมด ${total} รายการ`;
+    }
+
+    const pagEl = document.getElementById("modalPickPagination");
+    pagEl.innerHTML = "";
+    if (totalPages > 1) {
+        const prev = document.createElement("button");
+        prev.type = "button";
+        prev.innerHTML = "&laquo;";
+        prev.disabled = modalPickPage === 1;
+        prev.onclick = () => { modalPickPage--; filterAndRenderPickModal(); };
+        pagEl.appendChild(prev);
+
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= modalPickPage - 1 && i <= modalPickPage + 1)) {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.innerText = i;
+                if (i === modalPickPage) b.classList.add("active");
+                b.onclick = () => { modalPickPage = i; filterAndRenderPickModal(); };
+                pagEl.appendChild(b);
+            }
+        }
+
+        const next = document.createElement("button");
+        next.type = "button";
+        next.innerHTML = "&raquo;";
+        next.disabled = modalPickPage === totalPages;
+        next.onclick = () => { modalPickPage++; filterAndRenderPickModal(); };
+        pagEl.appendChild(next);
+    }
+}
+
+window.selectPickEmployee = function(id, name) {
+    if (targetPickField === "from") {
+        document.getElementById("critFromId").value = id;
+        document.getElementById("critFromName").value = name;
+    } else if (targetPickField === "to") {
+        document.getElementById("critToId").value = id;
+        document.getElementById("critToName").value = name;
+    }
+    modalPick.style.display = "none";
+};
+
+// ==========================================
+// Filter Data according to Criteria
+// ==========================================
+function getFilteredEmployees() {
+    const fromId = (document.getElementById("critFromId")?.value || "").trim().toLowerCase();
+    const toId = (document.getElementById("critToId")?.value || "").trim().toLowerCase();
+
+    // Condition Checkboxes (1 = ปกติ, 2 = ลาออก)
+    const allowActive = document.getElementById("chkActive")?.checked;
+    const allowResigned = document.getElementById("chkResigned")?.checked;
+
+    // Position filter
+    const selectedPos = (document.getElementById("critPosition")?.value || "").trim().toLowerCase();
+
+    // Sort order
+    const sortType = document.querySelector('input[name="sortOrder"]:checked')?.value || "id_asc";
+
+    let list = allEmployees.filter(item => {
+        // Status filter
+        const st = String(item.status);
+        if (st === "1" && !allowActive) return false;
+        if (st === "2" && !allowResigned) return false;
+
+        // Code range filter
+        const itemId = (item.IdEmployee || "").toLowerCase();
+        if (fromId && itemId < fromId) return false;
+        if (toId && itemId > toId) return false;
+
+        // Position filter
+        if (selectedPos && (item.position || "").toLowerCase() !== selectedPos) {
+            return false;
+        }
+
+        // Date Filter (ตามโหมดปุ่มจุด: ช่วงวันที่ หรือ ณ วันที่)
+        const dateFilterType = document.querySelector('input[name="dateFilterType"]:checked')?.value || 'range';
+        if (dateFilterType === 'range') {
+            if (fromDateYMD || toDateYMD) {
+                const itemDateStr = parseDateToYMD(item.date);
+                if (!itemDateStr) return false;
+                if (fromDateYMD && itemDateStr < fromDateYMD) return false;
+                if (toDateYMD && itemDateStr > toDateYMD) return false;
+            }
+        } else if (dateFilterType === 'asof') {
+            if (asOfDateYMD) {
+                const itemDateStr = parseDateToYMD(item.date);
+                if (!itemDateStr) return false;
+                if (itemDateStr > asOfDateYMD) return false;
+            }
+        }
+
+        return true;
+    });
+
+    // Sorting
+    list.sort((a, b) => {
+        if (sortType === "date_asc") {
+            const da = a.date || "";
+            const db = b.date || "";
+            return da.localeCompare(db);
+        } else if (sortType === "name_asc") {
+            return (a.name || "").localeCompare(b.name || "", 'th');
+        } else if (sortType === "pos_asc") {
+            return (a.position || "").localeCompare(b.position || "", 'th');
+        } else {
+            // id_asc
+            return (a.IdEmployee || "").localeCompare(b.IdEmployee || "");
+        }
+    });
+
+    return list;
+}
+
+// ==========================================
+// Generate Official Report HTML for Print & Preview
+// ==========================================
+function buildOfficialReportDocument(filteredList, autoPrint = false) {
+    const asOf = document.getElementById("critAsOfDate")?.value || formatThaiDate(new Date().toISOString());
+    const fromId = document.getElementById("critFromId")?.value || "เริ่มต้น";
+    const toId = document.getElementById("critToId")?.value || "สิ้นสุด";
+    const posFilter = document.getElementById("critPosition")?.value || "ทุกตำแหน่ง";
+    const dateFilterType = document.querySelector('input[name="dateFilterType"]:checked')?.value || 'range';
+
+    let dateRangeDisplay = "ทั้งหมด";
+    const fromVal = document.getElementById("critFromDate")?.value;
+    const toVal = document.getElementById("critToDate")?.value;
+    if (fromVal && toVal) {
+        dateRangeDisplay = `${fromVal} ถึง ${toVal}`;
+    } else if (fromVal) {
+        dateRangeDisplay = `ตั้งแต่ ${fromVal}`;
+    } else if (toVal) {
+        dateRangeDisplay = `ถึง ${toVal}`;
+    }
+
+    const dateFilterHeaderText = dateFilterType === 'asof'
+        ? `ข้อมูล ณ วันที่: <strong>${asOf}</strong>`
+        : `ช่วงวันที่เริ่มงาน: <strong>${dateRangeDisplay}</strong>`;
+
+    // Count by status
+    let countActive = 0, countResigned = 0;
+    filteredList.forEach(e => {
+        const s = String(e.status);
+        if (s === "1") countActive++;
+        else if (s === "2") countResigned++;
+    });
+
+    let rowsHtml = "";
+    filteredList.forEach((e, idx) => {
+        const s = String(e.status);
+        let stText = "ปกติ";
+        if (s === "2") stText = "ลาออก";
+
+        rowsHtml += `
+            <tr>
+                <td style="text-align: center;">${idx + 1}</td>
+                <td style="text-align: center; font-family: monospace; font-weight: 600;">${e.IdEmployee || '-'}</td>
+                <td>${e.fullName || '-'}</td>
+                <td style="text-align: center;">${e.Idcard || '-'}</td>
+                <td style="text-align: center;">${e.Tel || '-'}</td>
+                <td>${e.position || '-'}</td>
+                <td style="text-align: center;">${formatThaiDate(e.date)}</td>
+                <td style="text-align: center; font-weight: ${s === '2' ? 'bold; color: red;' : 'normal;'}">${stText}</td>
+            </tr>
+        `;
+    });
+
+    if (!rowsHtml) {
+        rowsHtml = `<tr><td colspan="8" style="text-align: center; padding: 25px; color: #64748b;">ไม่พบข้อมูลพนักงานตามเงื่อนไขที่ระบุ</td></tr>`;
+    }
+
+    const printScript = autoPrint ? `
+        <script>
+            function triggerPrint() {
+                setTimeout(function() {
+                    window.focus();
+                    window.print();
+                }, 300);
+            }
+            if (document.readyState === 'complete') {
+                triggerPrint();
+            } else {
+                window.addEventListener('load', triggerPrint);
+            }
+        <\/script>
+    ` : "";
+
+    return `
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <title>รายงานทะเบียนพนักงาน</title>
+            <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                @page {
+                    size: A4 landscape;
+                    margin: 10mm;
+                }
+                body {
+                    font-family: 'Sarabun', 'Prompt', sans-serif;
+                    color: #000;
+                    margin: 0;
+                    padding: 15px;
+                    font-size: 13px;
+                }
+                .report-header {
+                    text-align: center;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 8px;
+                    margin-bottom: 12px;
+                }
+                .report-header h2 {
+                    margin: 0 0 4px 0;
+                    font-size: 19px;
+                    font-weight: 700;
+                }
+                .report-header h3 {
+                    margin: 0 0 4px 0;
+                    font-size: 15px;
+                    font-weight: 600;
+                }
+                .report-header p {
+                    margin: 0;
+                    font-size: 12.5px;
+                    color: #333;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                    margin-bottom: 14px;
+                }
+                th {
+                    background: #f1f5f9;
+                    border: 1px solid #000;
+                    padding: 6px 8px;
+                    text-align: center;
+                    font-weight: 600;
+                }
+                td {
+                    border: 1px solid #000;
+                    padding: 5px 8px;
+                }
+                .summary-box {
+                    font-size: 12.5px;
+                    font-weight: 600;
+                    margin-bottom: 24px;
+                    padding: 8px 14px;
+                    border: 1px dashed #000;
+                    display: flex;
+                    justify-content: space-around;
+                    background: #fafafa;
+                }
+                .signatures-grid {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 36px;
+                    page-break-inside: avoid;
+                }
+                .sign-box {
+                    text-align: center;
+                    width: 240px;
+                    font-size: 12.5px;
+                }
+                @media print {
+                    .no-print { display: none !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <!-- Toolbar for Preview Mode -->
+            <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Prompt', sans-serif; margin: -15px -15px 15px -15px;">
+                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">📋 รายงานทะเบียนพนักงาน (${filteredList.length} รายการ)</div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="window.print()" style="padding: 7px 18px; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">🖨️ สั่งพิมพ์เอกสาร</button>
+                    <button onclick="window.close()" style="padding: 7px 18px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">❌ ปิดหน้าต่าง</button>
+                </div>
+            </div>
+
+            <div class="report-header">
+                <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
+                <h3>รายงานทะเบียนพนักงาน</h3>
+                <p>${dateFilterHeaderText} | ช่วงรหัส: ${fromId} ถึง ${toId} | ตำแหน่ง: ${posFilter}</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 45px;">ลำดับ</th>
+                        <th style="width: 100px;">รหัสพนักงาน</th>
+                        <th style="text-align: left;">คำนำหน้า - ชื่อ - นามสกุล</th>
+                        <th style="width: 130px;">เลขบัตรประชาชน</th>
+                        <th style="width: 110px;">เบอร์โทรศัพท์</th>
+                        <th style="text-align: left; width: 140px;">ตำแหน่ง / แผนก</th>
+                        <th style="width: 100px;">วันที่เริ่มงาน</th>
+                        <th style="width: 80px;">สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+
+            <div class="summary-box">
+                <span>สรุปยอด: ปกติ ${countActive.toLocaleString()} คน</span>
+                <span>ลาออก / พ้นสภาพ ${countResigned.toLocaleString()} คน</span>
+                <span><strong>รวมทั้งสิ้น ${filteredList.length.toLocaleString()} คน</strong></span>
+            </div>
+
+            <div class="signatures-grid">
+                <div class="sign-box">
+                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>เจ้าหน้าที่ผู้จัดทำรายงาน</p>
+                    <p>(.......................................................)</p>
+                </div>
+                <div class="sign-box">
+                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>หัวหน้าฝ่ายบุคคล / ผู้มีอำนาจลงนาม</p>
+                    <p>(.......................................................)</p>
+                </div>
+            </div>
+
+            ${printScript}
+        </body>
+        </html>
+    `;
+}
+
+// ==========================================
+// Action Buttons: Print, Preview, Export & Reset
+// ==========================================
+
+// Function for direct printing via hidden iframe (Never freezes parent window or select dropdowns!)
+function printReportViaIframe(htmlContent) {
+    let printFrame = document.getElementById("reportPrintIframe");
+    if (printFrame) {
+        printFrame.remove();
+    }
+    printFrame = document.createElement("iframe");
+    printFrame.id = "reportPrintIframe";
+    printFrame.style.position = "fixed";
+    printFrame.style.top = "-9999px";
+    printFrame.style.left = "-9999px";
+    printFrame.style.width = "1px";
+    printFrame.style.height = "1px";
+    printFrame.style.border = "none";
+    document.body.appendChild(printFrame);
+
+    const frameDoc = printFrame.contentWindow.document;
+    frameDoc.open();
+    frameDoc.write(htmlContent);
+    frameDoc.close();
+
+    setTimeout(() => {
+        try {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+        } catch (e) {
+            console.error("Iframe print fallback to window:", e);
+            openReportInNewWindow(htmlContent, true);
+        }
+    }, 350);
+}
+
+// Function for opening report in clean new window via Blob (completely detached from opener)
+function openReportInNewWindow(htmlContent, autoPrint = false) {
+    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(blob);
+    const win = window.open(blobUrl, "_blank");
+    if (win) {
+        win.opener = null; // Sever opener so child window never locks parent window!
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 120000);
+    } else {
+        alert("กรุณาอนุญาตให้เปิดหน้าต่าง Pop-up บนเบราว์เซอร์เพื่อดูรายงาน");
+    }
+}
+
+// 1. พิมพ์ (Print) - เปิดในแท็บใหม่ (New Tab) และสั่งพิมพ์อัตโนมัติ โดยแยกกระบวนการผ่าน Blob URL ไม่ล็อกหน้าหลัก
+document.getElementById("btnPrintReport").addEventListener("click", () => {
+    const filtered = getFilteredEmployees();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลพนักงานตามเงื่อนไขที่ระบุ");
+        return;
+    }
+
+    const htmlContent = buildOfficialReportDocument(filtered, true);
+    openReportInNewWindow(htmlContent, true);
+});
+
+// 2. แสดงตัวอย่างรายงาน (Preview) - เปิดผ่าน Blob URL ตัดการเชื่อมต่อ opener ทันที
+document.getElementById("btnPreviewReport").addEventListener("click", () => {
+    const filtered = getFilteredEmployees();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลพนักงานตามเงื่อนไขที่ระบุ");
+        return;
+    }
+
+    const htmlContent = buildOfficialReportDocument(filtered, false);
+    openReportInNewWindow(htmlContent, false);
+});
+
+// ปุ่มล้างรหัสพนักงานเริ่มต้น
+document.getElementById("btnClearFromId")?.addEventListener("click", () => {
+    document.getElementById("critFromId").value = "";
+    document.getElementById("critFromName").value = "";
+});
+
+// ปุ่มล้างรหัสพนักงานสิ้นสุด
+document.getElementById("btnClearToId")?.addEventListener("click", () => {
+    document.getElementById("critToId").value = "";
+    document.getElementById("critToName").value = "";
+});
+
+// ปุ่มล้างการเลือกตำแหน่ง
+document.getElementById("btnClearPosition")?.addEventListener("click", () => {
+    const posSelect = document.getElementById("critPosition");
+    if (posSelect) {
+        posSelect.value = "";
+        posSelect.dispatchEvent(new Event("change"));
+    }
+});
+
+// ปุ่มล้างเงื่อนไขทั้งหมด
+document.getElementById("btnResetAllCriteria")?.addEventListener("click", () => {
+    setDatePreset("all");
+    document.getElementById("critFromId").value = "";
+    document.getElementById("critFromName").value = "";
+    document.getElementById("critToId").value = "";
+    document.getElementById("critToName").value = "";
+    const posSelect = document.getElementById("critPosition");
+    if (posSelect) posSelect.value = "";
+    const banner = document.getElementById("noticeBanner");
+    if (banner) banner.style.display = "none";
+    document.getElementById("chkActive").checked = true;
+    document.getElementById("chkResigned").checked = true;
+    const radioDefault = document.querySelector('input[name="sortOrder"][value="id_asc"]');
+    if (radioDefault) radioDefault.checked = true;
+});
+
+// ปลดล็อก Focus ทันทีเมื่อสลับกลับมาที่หน้าต่างหลัก
+window.addEventListener("focus", () => {
+    const posSelect = document.getElementById("critPosition");
+    if (posSelect) {
+        posSelect.disabled = false;
+        posSelect.blur();
+    }
+});
+
+// 3. ส่งออก Excel (CSV UTF-8 BOM)
+document.getElementById("btnExportExcel").addEventListener("click", () => {
+    const filtered = getFilteredEmployees();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลพนักงานที่จะส่งออก");
+        return;
+    }
+
+    const headers = ["ลำดับ", "รหัสพนักงาน", "คำนำหน้า", "ชื่อ", "นามสกุล", "เลขบัตรประชาชน", "เบอร์โทรศัพท์", "ตำแหน่ง/แผนก", "วันที่เริ่มงาน", "สถานะ"];
+    const rows = filtered.map((e, idx) => {
+        let stName = e.status == 2 ? "ลาออก" : "ปกติ";
+        return [
+            idx + 1,
+            `"${e.IdEmployee || ''}"`,
+            `"${e.prefix || ''}"`,
+            `"${e.name || ''}"`,
+            `"${e.lastname || ''}"`,
+            `"${e.Idcard || ''}"`,
+            `"${e.Tel || ''}"`,
+            `"${e.position || ''}"`,
+            `"${formatThaiDate(e.date)}"`,
+            `"${stName}"`
+        ];
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateRangeSuffix = fromDateYMD || toDateYMD ? `_${fromDateYMD || ''}_ถึง_${toDateYMD || ''}` : '';
+    link.setAttribute("href", url);
+    link.setAttribute("download", `รายงานทะเบียนพนักงาน${dateRangeSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+// Load on start
+selectDateFilterMode('range');
+loadEmployeeData();
+
+</script>
+{% endblock %}

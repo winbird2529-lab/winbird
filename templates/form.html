@@ -1,0 +1,65 @@
+
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Home Page{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to DK_home</h2>
+<p>Hello Flask layout!</p>
+
+<form action="http://127.0.0.1:8000/saveuseremployee" 
+      method="POST" 
+      enctype="multipart/form-data">
+    
+    <label for="Id">รหัสพนักงาน :</label><br>
+    <input type="text" name="IdEmployee"><br>
+    <label for="prefix">คำนำหน้า :</label><br>
+    <input type="text" name="prefix"><br>
+    <label for="name">ชื่อ :</label><br>
+    <input type="text" name="name"><br>
+    <label for="Lname">นามสกุล :</label><br>
+    <input type="text" name="lastname"><br>
+    <label for="idcard">เลขบัตรประชาชน :</label><br>
+    <input type="text" name="Idcard"><br>
+    <label for="Tel">เบอร์โทรศัพย์ :</label><br>
+    <input type="text" name="Tel"><br>
+    <label for="Position">ตำแหน่ง :</label><br>
+    <input type="text" name="position"><br><br>
+    
+
+    <button type="submit">บันทึก</button>
+</form>
+
+<script>
+document.getElementById("employeeForm").addEventListener("submit", async function(e) {
+    e.preventDefault(); // ป้องกัน submit ปกติ
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/saveuseremployee", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.error === "0") {
+            alert("✅ " + result.message); // popup success
+            form.reset(); // ล้าง form
+        } else {
+            alert("❌ " + result.message); // popup error
+        }
+
+    } catch (err) {
+        alert("❌ เกิดข้อผิดพลาด: " + err);
+    }
+});
+</script>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,314 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}แสดงรายการตั้งสมาชิกเสียชีวิต{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to DK_showTransaction</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+
+<p>Hello Flask layout!</p>
+<h3><a href="/DK_Home">HOME</a> \ แสดงรายการตั้งสมาชิกเสียชีวิต</h3>
+<div class="main">
+    <div class="form-group1">
+        <p>แสดงรายการตั้งสมาชิกเสียชีวิต</p>
+        <div style="display: flex; gap: 12px; justify-content: flex-end; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+            <div class="search-box" style="margin-bottom: 0;">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="ค้นหาเลขที่เอกสาร, รหัสสมาชิก, ชื่อ, นามสกุล, เลขที่มรณะ...">
+                </div>
+                <button type="button" class="search-button">ค้นหา</button>
+            </div>
+            <a href="/DK_Transaction" class="btn-add-customer">
+                <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>+ เพิ่มรายการ</span>
+            </a>
+        </div>
+    
+        <table id="customerTable">
+            <thead>
+                <tr>
+                    <th style="width: 60px; text-align: center;">ลำดับ</th>
+                    <th style="width: 140px;">เลขที่เอกสาร</th>
+                    <th style="width: 130px;">รหัสสมาชิก</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th style="width: 140px; text-align: center;">วันที่เสียชีวิต</th>
+                    <th style="width: 130px; text-align: center;">เลขที่มรณะ</th>
+                    <th style="width: 190px; text-align: center;">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <hr class="my-box">
+        <div id="pagination" class="pagination"></div>
+    </div>
+</div>  
+
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+const rowsPerPage = 10;
+let currentPage = 1;
+let allData = [];
+let filteredData = [];
+
+function formatThaiDate(dateString) {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    const thaiMonths = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
+    const day = date.getDate();
+    const month = thaiMonths[date.getMonth()];
+    const year = date.getFullYear() + 543;
+    return `${day} ${month} ${year}`;
+}
+
+// =========================
+// SEARCH
+// =========================
+function applySearch() {
+    const searchInput = document.querySelector(".search-input");
+    const rawKeyword = (searchInput ? searchInput.value : "").trim();
+    const keyword = rawKeyword.toLowerCase();
+
+    if (!keyword) {
+        filteredData = allData;
+    } else {
+        // แยกคำค้นหาตามช่องว่าง เผื่อผู้ใช้พิมพ์ชื่อ เว้นวรรค นามสกุล
+        const terms = keyword.split(/\s+/).filter(Boolean);
+
+        // ตรวจสอบกรณีพิมพ์ค้นหาเป็นตัวเลขรหัส เช่น "1", "dw1", "tr1", "pc1"
+        let numberMatchStr = null;
+        const compact = keyword.replace(/\s+/g, '');
+        const dwMatch = compact.match(/^dw-?(\d+)$/i);
+        const trMatch = compact.match(/^tr-?(\d+)$/i);
+        const pcMatch = compact.match(/^pc-?(\d+)$/i);
+
+        if (dwMatch) {
+            numberMatchStr = String(parseInt(dwMatch[1], 10));
+        } else if (trMatch) {
+            numberMatchStr = String(parseInt(trMatch[1], 10));
+        } else if (pcMatch) {
+            numberMatchStr = String(parseInt(pcMatch[1], 10));
+        } else if (/^\d+$/.test(compact)) {
+            numberMatchStr = String(parseInt(compact, 10));
+        }
+
+        filteredData = allData.filter(item => {
+            const docId = (item.docId || "").toLowerCase();
+            const custId = (item.Idcustomer || "").toLowerCase();
+            const prefix = (item.prefix || "").toLowerCase();
+            const name = (item.name || "").toLowerCase();
+            const lastname = (item.lastname || "").toLowerCase();
+            const fullname = `${prefix}${name} ${lastname}`.toLowerCase();
+            const nameAndLast = `${name} ${lastname}`.toLowerCase();
+            const numberend = (item.numberend || "").toLowerCase();
+            const dateStr = (item.dateend || "").toLowerCase();
+
+            // 1. ตรวจสอบเลข running เช่น DW000001, PC000001 เทียบกับเลข 1
+            if (numberMatchStr !== null) {
+                const docNum = docId.replace(/\D/g, '');
+                const custNum = custId.replace(/\D/g, '');
+                if (docNum && String(parseInt(docNum, 10)) === numberMatchStr) return true;
+                if (custNum && String(parseInt(custNum, 10)) === numberMatchStr) return true;
+            }
+
+            // 2. ตรวจสอบแบบคำต่อคำ
+            const matchesAllTerms = terms.every(t =>
+                docId.includes(t) ||
+                custId.includes(t) ||
+                prefix.includes(t) ||
+                name.includes(t) ||
+                lastname.includes(t) ||
+                fullname.includes(t) ||
+                nameAndLast.includes(t) ||
+                numberend.includes(t) ||
+                dateStr.includes(t)
+            );
+
+            return matchesAllTerms;
+        });
+    }
+
+    currentPage = 1;
+    renderTable();
+    createPagination();
+}
+
+const searchInput = document.querySelector(".search-input");
+const searchBtn = document.querySelector(".search-button");
+
+if (searchInput) {
+    searchInput.addEventListener("input", applySearch);
+    searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            applySearch();
+        }
+    });
+}
+
+if (searchBtn) {
+    searchBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        applySearch();
+    });
+}
+
+// =========================
+// LOAD DATA
+// =========================
+fetch(`${API_BASE}/transaction`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.error !== "0") {
+            console.log("Error:", data.message);
+            const tbody = document.querySelector("#customerTable tbody");
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#ef4444;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${data.message || ''}</td></tr>`;
+            return;
+        }
+        allData = Array.isArray(data.results) ? data.results : [];
+        filteredData = allData;
+        renderTable();
+        createPagination();
+    })
+    .catch(err => {
+        console.log("Fetch error:", err);
+        const tbody = document.querySelector("#customerTable tbody");
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#ef4444;">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>`;
+    });
+
+// =========================
+// RENDER TABLE
+// =========================
+function renderTable() {
+    const tbody = document.querySelector("#customerTable tbody");
+    tbody.innerHTML = "";
+
+    if (!filteredData || filteredData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color: #888;">🔍 ไม่พบข้อมูลรายการที่ค้นหา</td></tr>`;
+        return;
+    }
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageData = filteredData.slice(start, end);
+
+    pageData.forEach((emp, index) => {
+        const rowNumber = start + index + 1;
+        const rowClass = emp.status == 3 ? 'row-dead' : emp.status == 2 ? 'row-orange' : '';
+        const row = `
+            <tr class="${rowClass}">
+                <td style="text-align: center;">${rowNumber}</td>
+                <td><strong style="color: #1e3c72; font-family: monospace;">${emp.docId || '-'}</strong></td>
+                <td><strong style="color: #475569;">${emp.Idcustomer || '-'}</strong></td>
+                <td><strong>${emp.prefix || ''}${emp.name || ''} ${emp.lastname || ''}</strong></td>
+                <td style="text-align: center;">${formatThaiDate(emp.dateend)}</td>
+                <td style="text-align: center;">${emp.numberend || '-'}</td>
+                <td class="action-col" style="text-align: center;">
+                    <button class="btn-viwe" data-id="${emp.docId}" title="ดูข้อมูล">
+                        ดูข้อมูล
+                    </button>
+                    <button class="btn-edit" data-id="${emp.docId}" title="แก้ไข">
+                        แก้ไข
+                    </button>
+                    <button class="btn-cancel" data-id="${emp.docId}" title="ยกเลิก">
+                        ยกเลิก
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+// =========================
+// PAGINATION
+// =========================
+function createPagination() {
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+    const pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // ปุ่มก่อนหน้า
+    const prevBtn = document.createElement("button");
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.title = "หน้าก่อนหน้า";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+            createPagination();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    // ปุ่มเลขหน้า
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        if (i === currentPage) {
+            btn.classList.add("active");
+        }
+        btn.onclick = () => {
+            currentPage = i;
+            renderTable();
+            createPagination();
+        };
+        pagination.appendChild(btn);
+    }
+
+    // ปุ่มถัดไป
+    const nextBtn = document.createElement("button");
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.title = "หน้าถัดไป";
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+            createPagination();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+// =========================
+// ACTION BUTTONS
+// =========================
+document.addEventListener("click", function (e) {
+    const viweBtn = e.target.closest(".btn-viwe");
+    if (viweBtn) {
+        const id = viweBtn.dataset.id;
+        window.location.href = `/DK_Viwecustomer?id=${id}`;
+        return;
+    }
+
+    const editBtn = e.target.closest(".btn-edit");
+    if (editBtn) {
+        const id = editBtn.dataset.id;
+        window.location.href = `/DK_EditTransaction?docid=${id}`;
+        return;
+    }
+
+    const cancelBtn = e.target.closest(".btn-cancel");
+    if (cancelBtn) {
+        const id = cancelBtn.dataset.id;
+        window.location.href = `/DK_cancelTransaction?docid=${id}`;
+        return;
+    }
+});
+</script>
+{% endblock %}

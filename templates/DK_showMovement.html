@@ -1,0 +1,1110 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}แสดงบันทึกรายการเก็บเงิน (ฌาปนกิจ){% endblock %}
+
+{% block content %}
+<!-- External Stylesheets & Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='csstran.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Movement.css') }}">
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+
+
+<div class="tran-page-wrapper">
+    <!-- Breadcrumb Navigation -->
+    <div class="tran-breadcrumb">
+        <a href="/DK_Home">HOME</a>
+        <span class="tran-breadcrumb-separator">/</span>
+        <span>บันทึกรายการเก็บเงิน</span>
+        <span class="tran-breadcrumb-separator">/</span>
+        <span>แสดงบันทึกรายการเก็บเงิน</span>
+    </div>
+
+    <!-- Main Container Card -->
+    <div class="movement-main-card">
+        <!-- Toolbar: Date Range + View All + Search + Add Payment -->
+        <div class="movement-toolbar">
+            <!-- Date Filter: จาก - ถึง - ดูรายการทั้งหมด -->
+            <div class="date-filter-group">
+                <span style="font-weight: 600; color: #1e3c72; font-size: 14.5px;">📅 วันที่:</span>
+                <input type="text" id="critFromDate" class="date-filter-input" placeholder="วว/ดด/ปปปป" title="เลือกวันที่เริ่มต้น">
+                <span style="color: #64748b; font-size: 14px; font-weight: 500;">ถึง</span>
+                <input type="text" id="critToDate" class="date-filter-input" placeholder="วว/ดด/ปปปป" title="เลือกวันที่สิ้นสุด">
+                <button type="button" id="btnViewAll" class="btn-view-all" title="ล้างตัวกรองวันที่เพื่อดูรายการทั้งหมด">
+                    📋 ดูรายการทั้งหมด
+                </button>
+            </div>
+
+            <!-- Search Input & Add Button -->
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div class="search-box" style="margin-bottom: 0;">
+                    <div class="search-wrapper" style="width: 320px;">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="ค้นหาเลขที่เอกสาร, รหัสสมาชิก, ชื่อ-นามสกุล, เลขบัตร...">
+                    </div>
+                    <button type="button" class="search-button">ค้นหา</button>
+                </div>
+                <a href="/DK_Movement" class="btn-add-customer" style="padding: 9px 18px; font-size: 14px; border-radius: 8px;">
+                    <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>+ บันทึกรับเงิน</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Movement Data Table -->
+        <table id="movementTable">
+            <thead>
+                <tr>
+                    <th style="width: 85px; text-align: center;">ดูรายการ</th>
+                    <th style="width: 50px; text-align: center;">ลำดับ</th>
+                    <th style="width: 125px;">เลขที่เอกสาร</th>
+                    <th style="width: 115px; text-align: center;">วันที่รับเงิน</th>
+                    <th style="width: 110px;">รหัสสมาชิก</th>
+                    <th style="min-width: 170px;">ชื่อ - นามสกุลสมาชิก</th>
+                    <th style="width: 130px; text-align: center;">ช่องทางชำระ</th>
+                    <th style="width: 120px; text-align: right;">ยอดหนี้รวม</th>
+                    <th style="width: 130px; text-align: right;">ยอดรับชำระ</th>
+                    <th style="width: 115px; text-align: right;">คงเหลือ</th>
+                    <th style="width: 105px; text-align: center;">สถานะ</th>
+                    <th style="width: 180px; text-align: center;">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="12" style="text-align:center; padding: 35px; color:#888;">กำลังโหลดข้อมูลรายการรับเงิน...</td></tr>
+            </tbody>
+        </table>
+        
+        <hr class="my-box" style="margin: 20px 0;">
+
+        <!-- Pagination & Page Info -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 4px 2px;">
+            <span id="pageInfo" style="font-size: 14.5px; color: #64748b; font-weight: 500;"></span>
+            <div id="pagination" class="pagination" style="margin: 0;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: รายละเอียดใบเสร็จรับเงิน & สั่งพิมพ์ -->
+<!-- ========================================== -->
+<div id="receiptModal" class="popup-bg">
+    <div class="popup-box" style="width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto;">
+        <span class="close-btn" id="btnCloseReceiptModal">&times;</span>
+        <h3 style="margin-bottom: 16px; font-size: 22px;">🧾 รายละเอียดใบเสร็จรับเงิน</h3>
+
+        <div id="receiptModalContent">
+            <!-- Dynamic Receipt Content Injected Here -->
+            <div style="text-align:center; padding: 40px; color:#888;">กำลังโหลดรายละเอียดเอกสาร...</div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid #e2e8f0;">
+            <button type="button" class="tran-btn" id="btnPrintReceiptInModal" style="background:#10b981; color:#ffffff;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                <span>พิมพ์ใบเสร็จรับเงิน</span>
+            </button>
+            <button type="button" class="tran-btn" id="btnCloseModalBtn" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">
+                ปิดหน้าต่าง
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+const rowsPerPage = 10;
+let currentPage = 1;
+let allData = [];
+let filteredData = [];
+let currentDocDetail = null;
+const docDetailsCache = new Map();
+
+let fromDateYMD = "";
+let toDateYMD = "";
+
+// ==========================================
+// Formatting Helpers
+// ==========================================
+function formatCurrency(val) {
+    const num = Number(val) || 0;
+    return num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatThaiDate(dateString) {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    const thaiMonths = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
+    const day = date.getDate();
+    const month = thaiMonths[date.getMonth()];
+    const year = date.getFullYear() + 543;
+    return `${day} ${month} ${year}`;
+}
+
+function formatThaiDateShort(dateString) {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+
+function formatDateToYMD(d) {
+    if (!d || isNaN(d.getTime())) return "";
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+    }, 1);
+}
+
+// ==========================================
+// FLATPICKR INITIALIZATION
+// ==========================================
+let fpFrom = null;
+let fpTo = null;
+
+if (typeof flatpickr !== "undefined") {
+    fpFrom = flatpickr("#critFromDate", {
+        locale: "th",
+        dateFormat: "d/m/Y",
+        allowInput: false,
+        onReady: function(selectedDates, dateStr, instance) {
+            changeToBuddhistYear(instance);
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length) {
+                fromDateYMD = formatDateToYMD(selectedDates[0]);
+                instance.input.value = formatThaiDateShort(selectedDates[0]);
+                changeToBuddhistYear(instance);
+                if (fpTo) fpTo.set('minDate', selectedDates[0]);
+            } else {
+                fromDateYMD = "";
+                instance.input.value = "";
+                if (fpTo) fpTo.set('minDate', null);
+            }
+            applyFilterAndSearch();
+        },
+        onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+        onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+    });
+
+    fpTo = flatpickr("#critToDate", {
+        locale: "th",
+        dateFormat: "d/m/Y",
+        allowInput: false,
+        onReady: function(selectedDates, dateStr, instance) {
+            changeToBuddhistYear(instance);
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length) {
+                toDateYMD = formatDateToYMD(selectedDates[0]);
+                instance.input.value = formatThaiDateShort(selectedDates[0]);
+                changeToBuddhistYear(instance);
+                if (fpFrom) fpFrom.set('maxDate', selectedDates[0]);
+            } else {
+                toDateYMD = "";
+                instance.input.value = "";
+                if (fpFrom) fpFrom.set('maxDate', null);
+            }
+            applyFilterAndSearch();
+        },
+        onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+        onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+    });
+}
+
+// Button "ดูรายการทั้งหมด"
+const btnViewAll = document.getElementById("btnViewAll");
+if (btnViewAll) {
+    btnViewAll.addEventListener("click", () => {
+        if (fpFrom) {
+            fpFrom.clear();
+            fpFrom.set('maxDate', null);
+        }
+        if (fpTo) {
+            fpTo.clear();
+            fpTo.set('minDate', null);
+        }
+        fromDateYMD = "";
+        toDateYMD = "";
+        const cFrom = document.getElementById("critFromDate");
+        const cTo = document.getElementById("critToDate");
+        if (cFrom) cFrom.value = "";
+        if (cTo) cTo.value = "";
+
+        applyFilterAndSearch();
+    });
+}
+
+// ==========================================
+// LOAD DATA FROM API
+// ==========================================
+function loadMovements() {
+    fetch(`${API_BASE}/movement`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.error !== "0") {
+                console.error("API Error:", data.message);
+                const tbody = document.querySelector("#movementTable tbody");
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:#ef4444;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${data.message || ''}</td></tr>`;
+                return;
+            }
+            allData = Array.isArray(data.results) ? data.results : [];
+            applyFilterAndSearch();
+        })
+        .catch(err => {
+            console.error("Fetch movements error:", err);
+            const tbody = document.querySelector("#movementTable tbody");
+            tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:#ef4444;">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>`;
+        });
+}
+loadMovements();
+
+// ==========================================
+// FILTER & SEARCH LOGIC
+// ==========================================
+function applyFilterAndSearch() {
+    const searchInput = document.querySelector(".search-input");
+    const rawKeyword = (searchInput ? searchInput.value : "").trim();
+    const keyword = rawKeyword.toLowerCase();
+
+    let result = allData;
+
+    // Filter by Date Range (fromDateYMD <= item.date <= toDateYMD)
+    if (fromDateYMD) {
+        result = result.filter(item => {
+            const itemDate = (item.date || "").substring(0, 10);
+            return itemDate >= fromDateYMD;
+        });
+    }
+    if (toDateYMD) {
+        result = result.filter(item => {
+            const itemDate = (item.date || "").substring(0, 10);
+            return itemDate <= toDateYMD;
+        });
+    }
+
+    // Keyword Search
+    if (keyword) {
+        const terms = keyword.split(/\s+/).filter(Boolean);
+
+        let numberMatchStr = null;
+        const compact = keyword.replace(/\s+/g, '');
+        const trMatch = compact.match(/^tr-?(\d+)$/i);
+        const pcMatch = compact.match(/^pc-?(\d+)$/i);
+
+        if (trMatch) {
+            numberMatchStr = String(parseInt(trMatch[1], 10));
+        } else if (pcMatch) {
+            numberMatchStr = String(parseInt(pcMatch[1], 10));
+        } else if (/^\d+$/.test(compact)) {
+            numberMatchStr = String(parseInt(compact, 10));
+        }
+
+        result = result.filter(item => {
+            const docid = (item.docidmove || "").toLowerCase();
+            const custId = (item.Idcustomer || "").toLowerCase();
+            const prefix = (item.prefix || "").toLowerCase();
+            const name = (item.name || "").toLowerCase();
+            const lastname = (item.lastname || "").toLowerCase();
+            const fullname = `${prefix}${name} ${lastname}`.toLowerCase();
+            
+            const payType = (item.pay_type || "").toLowerCase();
+
+            if (numberMatchStr !== null) {
+                const docNum = docid.replace(/\D/g, '');
+                const custNum = custId.replace(/\D/g, '');
+                if (docNum && String(parseInt(docNum, 10)) === numberMatchStr) return true;
+                if (custNum && String(parseInt(custNum, 10)) === numberMatchStr) return true;
+            }
+
+            return terms.every(t =>
+                docid.includes(t) ||
+                custId.includes(t) ||
+                name.includes(t) ||
+                lastname.includes(t) ||
+                fullname.includes(t) ||
+                
+                payType.includes(t)
+            );
+        });
+    }
+
+    filteredData = result;
+    currentPage = 1;
+    renderTable();
+    createPagination();
+}
+
+const searchInput = document.querySelector(".search-input");
+const searchBtn = document.querySelector(".search-button");
+
+if (searchInput) {
+    searchInput.addEventListener("input", applyFilterAndSearch);
+    searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            applyFilterAndSearch();
+        }
+    });
+}
+if (searchBtn) {
+    searchBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        applyFilterAndSearch();
+    });
+}
+
+// ==========================================
+// RENDER TABLE
+// ==========================================
+function renderTable() {
+    const tbody = document.querySelector("#movementTable tbody");
+    tbody.innerHTML = "";
+
+    if (!filteredData || filteredData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 40px 20px; color: #888; font-size:15px;">🔍 ไม่พบข้อมูลรายการรับชำระเงินที่ค้นหา</td></tr>`;
+        const pageInfo = document.getElementById("pageInfo");
+        if (pageInfo) pageInfo.innerText = "ไม่พบรายการ";
+        return;
+    }
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageData = filteredData.slice(start, end);
+
+    pageData.forEach((row, index) => {
+        const rowNumber = start + index + 1;
+        const totalAmt = Number(row.total_amount) || 0;
+        const payAmt = Number(row.payamount) || 0;
+        const remainAmt = Number(row.remain_amount) || 0;
+        const dateStr = formatThaiDateShort(row.date);
+        const isCanceled = (row.status == 2);
+        const docid = row.docidmove;
+
+        let payTypeBadge = `<span class="badge-pay-type badge-other">🔖 ${row.pay_type || '-'}</span>`;
+        if (row.pay_type === "เงินสด") {
+            payTypeBadge = `<span class="badge-pay-type badge-cash">💵 เงินสด</span>`;
+        } else if (row.pay_type && row.pay_type.includes("โอน")) {
+            payTypeBadge = `<span class="badge-pay-type badge-transfer">📱 โอนเงิน</span>`;
+        }
+
+        const statusBadge = isCanceled 
+            ? `<span class="badge-status-cancel">ยกเลิก</span>` 
+            : `<span class="badge-status-ok">ชำระแล้ว</span>`;
+
+        const actionBtns = isCanceled ? `
+            <div class="action-btn-group">
+                <button type="button" class="btn-sm btn-view-doc" data-docid="${docid}" title="ดูรายละเอียดใบเสร็จ">
+                    👁️ ดู
+                </button>
+                <button type="button" class="btn-sm btn-print-doc" data-docid="${docid}" title="พิมพ์ใบเสร็จรับเงิน">
+                    🖨️ พิมพ์
+                </button>
+                <button type="button" class="btn-sm btn-canceled" disabled title="รายการนี้ถูกยกเลิกแล้ว">
+                    ยกเลิกแล้ว
+                </button>
+            </div>
+        ` : `
+            <div class="action-btn-group">
+                <button type="button" class="btn-sm btn-view-doc" data-docid="${docid}" title="ดูรายละเอียดใบเสร็จ">
+                    👁️ ดู
+                </button>
+                <button type="button" class="btn-sm btn-print-doc" data-docid="${docid}" title="พิมพ์ใบเสร็จรับเงิน">
+                    🖨️ พิมพ์
+                </button>
+                <button type="button" class="btn-sm btn-cancel-doc" data-docid="${docid}" 
+                        data-name="${(row.prefix || '') + (row.name || '') + ' ' + (row.lastname || '')}" 
+                        data-amount="${payAmt}" 
+                        title="ยกเลิกรายการนี้">
+                    ❌ ยกเลิก
+                </button>
+            </div>
+        `;
+
+        // Main Row
+        const trMain = `
+            <tr class="main-row ${isCanceled ? 'row-canceled' : ''}" id="row-${docid}">
+                <td style="text-align: center;">
+                    <button type="button" class="btn-expand-row" data-docid="${docid}" title="ขยายดูรายละเอียดรายการมรณะที่ชำระ">
+                        <span class="expand-icon">➕</span> ขยาย
+                    </button>
+                </td>
+                <td style="text-align: center; color: #64748b; font-weight: 500;">${rowNumber}</td>
+                <td><strong style="color: ${isCanceled ? '#64748b' : '#1e3c72'}; font-family: monospace; font-size: 15px;">${docid}</strong></td>
+                <td style="text-align: center; font-weight: 500;">${dateStr}</td>
+                <td><strong style="color: #475569; font-family: monospace; font-size: 14.5px;">${row.Idcustomer}</strong></td>
+                <td>
+                    <strong style="font-size: 15px;">${row.prefix || ''}${row.name || ''} ${row.lastname || ''}</strong>
+                    ${row.Idcard ? `<div class="sub-idcard">เลขบัตร: ${row.Idcard}</div>` : ''}
+                </td>
+                <td style="text-align: center;">${payTypeBadge}</td>
+                <td style="text-align: right; color: #64748b;">${formatCurrency(totalAmt)}</td>
+                <td style="text-align: right; font-weight: 700; color: ${isCanceled ? '#94a3b8; text-decoration: line-through;' : '#059669;'}; font-size: 15.5px;">${formatCurrency(payAmt)}</td>
+                <td style="text-align: right; color: ${remainAmt > 0 ? '#dc2626' : '#64748b'}; font-weight: ${remainAmt > 0 ? '700' : '500'};">${formatCurrency(remainAmt)}</td>
+                <td style="text-align: center;">${statusBadge}</td>
+                <td style="text-align: center;">${actionBtns}</td>
+            </tr>
+            <!-- Expandable Sub-Detail Row -->
+            <tr class="detail-row" id="detail-row-${docid}" style="display: none;">
+                <td colspan="12">
+                    <div id="detail-content-${docid}" style="padding: 6px 0;">
+                        <div style="text-align:center; padding: 20px; color: #64748b;">
+                            ⏳ กำลังโหลดรายละเอียดรายการมรณะที่ชำระ...
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+        tbody.insertAdjacentHTML("beforeend", trMain);
+    });
+
+    const pageInfo = document.getElementById("pageInfo");
+    if (pageInfo) {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+        const startItem = start + 1;
+        const endItem = Math.min(end, filteredData.length);
+        pageInfo.innerText = `แสดง ${startItem} - ${endItem} จากทั้งหมด ${filteredData.length} รายการ (หน้า ${currentPage}/${totalPages})`;
+    }
+}
+
+// ==========================================
+// PAGINATION
+// ==========================================
+function createPagination() {
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+    const pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // Prev Button
+    const prevBtn = document.createElement("button");
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.title = "หน้าก่อนหน้า";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+            createPagination();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    // Page Numbers with smart ellipsis
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    if (startPage > 1) {
+        const btn1 = document.createElement("button");
+        btn1.innerText = "1";
+        btn1.onclick = () => { currentPage = 1; renderTable(); createPagination(); };
+        pagination.appendChild(btn1);
+
+        if (startPage > 2) {
+            const ellipsis = document.createElement("span");
+            ellipsis.innerText = "...";
+            ellipsis.style.padding = "0 4px";
+            ellipsis.style.color = "#94a3b8";
+            pagination.appendChild(ellipsis);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        if (i === currentPage) btn.classList.add("active");
+        btn.onclick = () => {
+            currentPage = i;
+            renderTable();
+            createPagination();
+        };
+        pagination.appendChild(btn);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement("span");
+            ellipsis.innerText = "...";
+            ellipsis.style.padding = "0 4px";
+            ellipsis.style.color = "#94a3b8";
+            pagination.appendChild(ellipsis);
+        }
+        const btnLast = document.createElement("button");
+        btnLast.innerText = totalPages;
+        btnLast.onclick = () => { currentPage = totalPages; renderTable(); createPagination(); };
+        pagination.appendChild(btnLast);
+    }
+
+    // Next Button
+    const nextBtn = document.createElement("button");
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.title = "หน้าถัดไป";
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+            createPagination();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+// ==========================================
+// EXPANDABLE ROW SUB-TABLE LOGIC
+// ==========================================
+async function toggleRowDetail(docidmove, forceState = null) {
+    const detailRow = document.getElementById(`detail-row-${docidmove}`);
+    const mainRow = document.getElementById(`row-${docidmove}`);
+    const btn = document.querySelector(`.btn-expand-row[data-docid="${docidmove}"]`);
+    const contentDiv = document.getElementById(`detail-content-${docidmove}`);
+
+    if (!detailRow || !btn || !contentDiv) return;
+
+    const isCurrentlyOpen = detailRow.style.display !== "none";
+    const shouldOpen = (forceState !== null) ? forceState : !isCurrentlyOpen;
+
+    if (!shouldOpen) {
+        // Collapse
+        detailRow.style.display = "none";
+        btn.classList.remove("expanded");
+        btn.innerHTML = `<span class="expand-icon">➕</span> ขยาย`;
+        if (mainRow) mainRow.classList.remove("row-active-expanded");
+        return;
+    }
+
+    // Expand
+    detailRow.style.display = "";
+    btn.classList.add("expanded");
+    btn.innerHTML = `<span class="expand-icon">➖</span> ยุบ`;
+    if (mainRow) mainRow.classList.add("row-active-expanded");
+
+    // Check Cache
+    if (docDetailsCache.has(docidmove)) {
+        renderSubDetailCard(docDetailsCache.get(docidmove), contentDiv);
+        return;
+    }
+
+    // Fetch Details
+    contentDiv.innerHTML = `
+        <div style="text-align:center; padding: 22px; color: #1e3c72;">
+            <div style="font-size: 24px; margin-bottom: 6px;">⏳</div>
+            กำลังโหลดรายละเอียดรายการมรณะที่ชำระ (${docidmove})...
+        </div>
+    `;
+
+    try {
+        const response = await fetch(`${API_BASE}/movement/${docidmove}`);
+        const data = await response.json();
+
+        if (data.error !== "0" || !data.results) {
+            contentDiv.innerHTML = `<div style="text-align:center; padding: 20px; color:#ef4444;">ไม่สามารถโหลดรายละเอียดเอกสารได้: ${data.message || ''}</div>`;
+            return;
+        }
+
+        const docData = data.results;
+        docDetailsCache.set(docidmove, docData);
+        renderSubDetailCard(docData, contentDiv);
+
+    } catch (err) {
+        console.error("Fetch detail error:", err);
+        contentDiv.innerHTML = `<div style="text-align:center; padding: 20px; color:#ef4444;">เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์</div>`;
+    }
+}
+
+function renderSubDetailCard(doc, container) {
+    const details = Array.isArray(doc.details) ? doc.details : [];
+    let detailRowsHtml = "";
+
+    if (details.length === 0) {
+        detailRowsHtml = `<tr><td colspan="9" style="text-align:center; padding:18px; color:#888;">ไม่มีรายการมรณะแยกย่อย</td></tr>`;
+    } else {
+        details.forEach((item, idx) => {
+            const dateStr = item.dateend ? formatThaiDateShort(item.dateend) : "-";
+            detailRowsHtml += `
+                <tr>
+                    <td style="text-align: center; color: #64748b;">${idx + 1}</td>
+                    <td><strong style="color: #1e3c72; font-family: monospace; font-size: 14px;">${item.docid || '-'}</strong></td>
+                    <td><strong style="color: #1e293b;">${item.deceased_name || '-'}</strong></td>
+                    <td style="text-align: center; color: #475569;">${dateStr}</td>
+                    <td style="text-align: center; color: #475569;">${item.numberend || '-'}</td>
+                    <td style="text-align: right; color: #64748b;">${formatCurrency(item.amount)}</td>
+                    <td style="text-align: right; color: #64748b;">${formatCurrency(item.paid_prev)}</td>
+                    <td style="text-align: right; font-weight: 700; color: #059669; font-size: 15px;">${formatCurrency(item.payamount)}</td>
+                    <td style="text-align: right; color: ${Number(item.remain) > 0 ? '#dc2626' : '#64748b'}; font-weight: ${Number(item.remain) > 0 ? '700' : 'normal'};">${formatCurrency(item.remain)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    container.innerHTML = `
+        <div class="sub-detail-card">
+            <div class="sub-detail-header">
+                <div class="sub-detail-title">
+                    <span>📋 รายการมรณะที่ชำระในเอกสารนี้:</span>
+                    <strong style="font-family: monospace; color: #1e3c72; font-size: 16px;">${doc.docidmove}</strong>
+                    <span style="font-size: 13.5px; color: #0284c7; font-weight: 600;">(${details.length} รายการ)</span>
+                </div>
+                <div class="sub-detail-badges">
+                    <span class="sub-meta-pill">👤 สมาชิก: <strong>${doc.Idcustomer} - ${doc.prefix || ''}${doc.name || ''} ${doc.lastname || ''}</strong></span>
+                    <span class="sub-meta-pill">📅 วันที่ชำระ: <strong>${formatThaiDate(doc.date)}</strong></span>
+                    <span class="sub-meta-pill">💳 ช่องทาง: <strong>${doc.pay_type || 'เงินสด'}${doc.bank_name ? ` (${doc.bank_name} ${doc.ref_no || ''})` : ''}</strong></span>
+                    <span class="sub-meta-pill">✍️ เจ้าหน้าที่: <strong>${doc.staff_name || 'เจ้าหน้าที่'}</strong></span>
+                    ${doc.remark ? `<span class="sub-meta-pill">📝 <strong>หมายเหตุ:</strong> ${doc.remark}</span>` : ''}
+                </div>
+            </div>
+
+            <table class="sub-table">
+                <thead>
+                    <tr>
+                        <th style="width: 45px; text-align: center;">ลำดับ</th>
+                        <th style="width: 130px;">เลขที่เอกสารมรณะ</th>
+                        <th>ชื่อผู้เสียชีวิต</th>
+                        <th style="width: 110px; text-align: center;">วันที่เสียชีวิต</th>
+                        <th style="width: 100px; text-align: center;">เลขที่มรณะ</th>
+                        <th style="width: 115px; text-align: right;">ยอดเรียกเก็บ</th>
+                        <th style="width: 110px; text-align: right;">ชำระก่อนหน้า</th>
+                        <th style="width: 125px; text-align: right;">ยอดชำระครั้งนี้</th>
+                        <th style="width: 115px; text-align: right;">หนี้คงเหลือ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${detailRowsHtml}
+                </tbody>
+            </table>
+
+            <div class="sub-detail-footer">
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-sm btn-print-doc" data-docid="${doc.docidmove}" title="พิมพ์ใบเสร็จรับเงิน">
+                        🖨️ พิมพ์ใบเสร็จรับเงิน
+                    </button>
+                    <button type="button" class="btn-sm btn-view-doc" data-docid="${doc.docidmove}" title="ดูใบเสร็จรับเงินฉบับเต็ม">
+                        👁️ ดูใบเสร็จรับเงิน
+                    </button>
+                </div>
+                <div class="sub-total-summary">
+                    <span>ยอดรับชำระในเอกสารนี้:</span>
+                    <strong class="sub-total-amount">${formatCurrency(doc.payamount)} บาท</strong>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ==========================================
+// RECEIPT MODAL & PRINTING
+// ==========================================
+const receiptModal = document.getElementById("receiptModal");
+const btnCloseReceiptModal = document.getElementById("btnCloseReceiptModal");
+const btnCloseModalBtn = document.getElementById("btnCloseModalBtn");
+const btnPrintReceiptInModal = document.getElementById("btnPrintReceiptInModal");
+
+function closeModal() {
+    if (receiptModal) receiptModal.style.display = "none";
+}
+
+if (btnCloseReceiptModal) btnCloseReceiptModal.addEventListener("click", closeModal);
+if (btnCloseModalBtn) btnCloseModalBtn.addEventListener("click", closeModal);
+if (receiptModal) {
+    receiptModal.addEventListener("click", (e) => {
+        if (e.target === receiptModal) closeModal();
+    });
+}
+
+async function openReceiptModal(docidmove, autoPrint = false) {
+    if (!receiptModal) return;
+    receiptModal.style.display = "flex";
+    const content = document.getElementById("receiptModalContent");
+    content.innerHTML = `<div style="text-align:center; padding: 40px; color:#64748b;"><div style="font-size:32px; margin-bottom:8px;">⏳</div>กำลังโหลดรายละเอียดเอกสาร ${docidmove}...</div>`;
+
+    if (docDetailsCache.has(docidmove)) {
+        currentDocDetail = docDetailsCache.get(docidmove);
+        renderReceiptContent(currentDocDetail);
+        if (autoPrint) {
+            setTimeout(() => {
+                printReceiptDocument(currentDocDetail);
+            }, 300);
+        }
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/movement/${docidmove}`);
+        const data = await response.json();
+
+        if (data.error !== "0" || !data.results) {
+            content.innerHTML = `<div style="text-align:center; padding: 30px; color:#ef4444;">ไม่พบข้อมูลเอกสาร: ${data.message || ''}</div>`;
+            return;
+        }
+
+        currentDocDetail = data.results;
+        docDetailsCache.set(docidmove, currentDocDetail);
+        renderReceiptContent(currentDocDetail);
+
+        if (autoPrint) {
+            setTimeout(() => {
+                printReceiptDocument(currentDocDetail);
+            }, 300);
+        }
+
+    } catch (err) {
+        console.error("Fetch receipt detail error:", err);
+        content.innerHTML = `<div style="text-align:center; padding: 30px; color:#ef4444;">เกิดข้อผิดพลาดในการโหลดรายละเอียดเอกสาร</div>`;
+    }
+}
+
+function renderReceiptContent(doc) {
+    const content = document.getElementById("receiptModalContent");
+    const details = Array.isArray(doc.details) ? doc.details : [];
+
+    let detailsRowsHtml = "";
+    if (details.length === 0) {
+        detailsRowsHtml = `<tr><td colspan="9" style="text-align:center; padding:20px; color:#888;">ไม่มีรายการแยกย่อย</td></tr>`;
+    } else {
+        details.forEach((item, idx) => {
+            const dateStr = item.dateend ? formatThaiDateShort(item.dateend) : "-";
+            detailsRowsHtml += `
+                <tr>
+                    <td style="text-align: center;">${idx + 1}</td>
+                    <td><strong style="color:#1e3c72; font-family: monospace;">${item.docid || '-'}</strong></td>
+                    <td><strong>${item.deceased_name || '-'}</strong></td>
+                    <td style="text-align: center;">${dateStr}</td>
+                    <td style="text-align: center;">${item.numberend || '-'}</td>
+                    <td style="text-align: right;">${formatCurrency(item.amount)}</td>
+                    <td style="text-align: right;">${formatCurrency(item.paid_prev)}</td>
+                    <td style="text-align: right; font-weight:700; color:#059669;">${formatCurrency(item.payamount)}</td>
+                    <td style="text-align: right; color:#64748b;">${formatCurrency(item.remain)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    content.innerHTML = `
+        <div class="receipt-paper" id="printableReceipt">
+            <div class="receipt-header">
+                <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
+                <div style="font-size: 16px; font-weight: 600; color: #1e40af; margin-bottom: 4px;">ใบเสร็จรับเงิน / ใบรับชำระเงินสงเคราะห์</div>
+                <p>เลขที่เอกสาร: <strong style="font-family:monospace; font-size:15px; color:#1e3c72;">${doc.docidmove}</strong> | วันที่รับเงิน: <strong>${formatThaiDate(doc.date)}</strong></p>
+            </div>
+
+            <div class="receipt-grid">
+                <div class="receipt-grid-item">
+                    <strong>รหัสสมาชิก:</strong> <span>${doc.Idcustomer}</span>
+                </div>
+                <div class="receipt-grid-item">
+                    <strong>ชื่อ - นามสกุล:</strong> <span>${doc.prefix || ''}${doc.name || ''} ${doc.lastname || ''}</span>
+                </div>
+                <div class="receipt-grid-item">
+                    <strong>เลขบัตรประชาชน:</strong> <span>${doc.Idcard || '-'}</span>
+                </div>
+                <div class="receipt-grid-item">
+                    <strong>ช่องทางชำระเงิน:</strong> <span>${doc.pay_type || 'เงินสด'}${doc.bank_name ? ` (${doc.bank_name} เลขที่: ${doc.ref_no || '-'})` : ''}</span>
+                </div>
+                <div class="receipt-grid-item">
+                    <strong>ผู้รับเงิน / เจ้าหน้าที่:</strong> <span>${doc.staff_name || 'เจ้าหน้าที่'}</span>
+                </div>
+                <div class="receipt-grid-item">
+                    <strong>หมายเหตุ:</strong> <span>${doc.remark || '-'}</span>
+                </div>
+            </div>
+
+            <h4 style="margin: 16px 0 10px 0; font-size: 15px; color: #334155;">รายการมรณะที่ชำระ (${details.length} รายการ)</h4>
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th style="width: 45px; text-align: center;">ลำดับ</th>
+                        <th style="width: 120px;">เลขที่เอกสารมรณะ</th>
+                        <th>ชื่อผู้เสียชีวิต</th>
+                        <th style="width: 100px; text-align: center;">วันที่เสียชีวิต</th>
+                        <th style="width: 100px; text-align: center;">เลขที่มรณะ</th>
+                        <th style="width: 95px; text-align: right;">ยอดเรียกเก็บ</th>
+                        <th style="width: 95px; text-align: right;">ชำระก่อนหน้า</th>
+                        <th style="width: 110px; text-align: right;">ยอดชำระครั้งนี้</th>
+                        <th style="width: 95px; text-align: right;">หนี้คงเหลือ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${detailsRowsHtml}
+                </tbody>
+            </table>
+
+            <div class="receipt-total-bar">
+                <div class="receipt-total-item">
+                    <strong>ยอดหนี้รวม:</strong>
+                    <span>${formatCurrency(doc.total_amount)} บาท</span>
+                </div>
+                <div class="receipt-total-item">
+                    <strong>ยอดรับชำระในใบเสร็จนี้:</strong>
+                    <span class="total-val">${formatCurrency(doc.payamount)} บาท</span>
+                </div>
+                <div class="receipt-total-item">
+                    <strong>หนี้คงเหลือสุทธิ:</strong>
+                    <span>${formatCurrency(doc.remain_amount)} บาท</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 35px; display: flex; justify-content: space-between; text-align: center; font-size: 14px; color: #475569;">
+                <div style="width: 220px;">
+                    <div style="border-bottom: 1px dotted #94a3b8; height: 35px; margin-bottom: 8px;"></div>
+                    <div>( ลงชื่อ ............................................ )</div>
+                    <div style="margin-top: 4px; font-size: 13px;">ผู้ชำระเงิน</div>
+                </div>
+                <div style="width: 220px;">
+                    <div style="border-bottom: 1px dotted #94a3b8; height: 35px; margin-bottom: 8px;"></div>
+                    <div>( ลงชื่อ ${doc.staff_name || '............................................'} )</div>
+                    <div style="margin-top: 4px; font-size: 13px;">ผู้รับเงิน / เจ้าหน้าที่</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function printReceiptDocument(doc) {
+    if (!doc) return;
+    const printWindow = window.open('', '_blank', 'width=850,height=750');
+    const details = Array.isArray(doc.details) ? doc.details : [];
+
+    let detailsRows = "";
+    details.forEach((item, idx) => {
+        detailsRows += `
+            <tr>
+                <td style="text-align:center; padding:6px; border-bottom:1px solid #ddd;">${idx + 1}</td>
+                <td style="padding:6px; border-bottom:1px solid #ddd; font-family:monospace;">${item.docid || '-'}</td>
+                <td style="padding:6px; border-bottom:1px solid #ddd;">${item.deceased_name || '-'}</td>
+                <td style="text-align:center; padding:6px; border-bottom:1px solid #ddd;">${formatThaiDateShort(item.dateend)}</td>
+                <td style="text-align:center; padding:6px; border-bottom:1px solid #ddd;">${item.numberend || '-'}</td>
+                <td style="text-align:right; padding:6px; border-bottom:1px solid #ddd;">${formatCurrency(item.amount)}</td>
+                <td style="text-align:right; padding:6px; border-bottom:1px solid #ddd;">${formatCurrency(item.paid_prev)}</td>
+                <td style="text-align:right; padding:6px; border-bottom:1px solid #ddd; font-weight:bold;">${formatCurrency(item.payamount)}</td>
+                <td style="text-align:right; padding:6px; border-bottom:1px solid #ddd;">${formatCurrency(item.remain)}</td>
+            </tr>
+        `;
+    });
+
+    const html = `
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <title>ใบเสร็จรับเงิน ${doc.docidmove}</title>
+            <style>
+                @page { size: A4 portrait; margin: 15mm; }
+                body { font-family: "Sarabun", "Prompt", Tahoma, sans-serif; font-size: 14px; color: #111; margin: 0; padding: 15px; }
+                .header { text-align: center; border-bottom: 2px solid #222; padding-bottom: 12px; margin-bottom: 15px; }
+                .header h2 { margin: 0 0 5px 0; font-size: 22px; }
+                .header p { margin: 0; font-size: 14px; }
+                .meta-table { width: 100%; margin-bottom: 15px; border-collapse: collapse; }
+                .meta-table td { padding: 5px 4px; vertical-align: top; }
+                .detail-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                .detail-table th { background: #f2f2f2; border: 1px solid #bbb; padding: 7px 5px; font-size: 13px; }
+                .detail-table td { border: 1px solid #ccc; font-size: 13px; }
+                .totals { float: right; width: 340px; border: 1px solid #bbb; padding: 10px; margin-bottom: 25px; }
+                .totals table { width: 100%; border-collapse: collapse; }
+                .totals td { padding: 4px; }
+                .sign-row { clear: both; display: flex; justify-content: space-between; margin-top: 50px; text-align: center; }
+                .sign-box { width: 220px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
+                <p><strong>ใบเสร็จรับเงิน / ใบรับชำระเงินค่าสงเคราะห์ (ต้นฉบับ)</strong></p>
+                <p>เลขที่เอกสาร: <strong>${doc.docidmove}</strong> &nbsp;|&nbsp; วันที่รับเงิน: <strong>${formatThaiDate(doc.date)}</strong></p>
+            </div>
+
+            <table class="meta-table">
+                <tr>
+                    <td style="width: 50%;"><strong>รหัสสมาชิก:</strong> ${doc.Idcustomer}</td>
+                    <td style="width: 50%;"><strong>ช่องทางชำระเงิน:</strong> ${doc.pay_type || 'เงินสด'}${doc.bank_name ? ' (' + doc.bank_name + ' ' + (doc.ref_no || '') + ')' : ''}</td>
+                </tr>
+                <tr>
+                    <td><strong>ชื่อ-นามสกุลสมาชิก:</strong> ${doc.prefix || ''}${doc.name || ''} ${doc.lastname || ''}</td>
+                    <td><strong>เจ้าหน้าที่ผู้รับเงิน:</strong> ${doc.staff_name || '-'}</td>
+                </tr>
+                <tr>
+                    <td><strong>เลขประจำตัวประชาชน:</strong> ${doc.Idcard || '-'}</td>
+                    <td><strong>หมายเหตุ:</strong> ${doc.remark || '-'}</td>
+                </tr>
+            </table>
+
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">ลำดับ</th>
+                        <th style="width:110px;">เลขที่เอกสารมรณะ</th>
+                        <th>ชื่อผู้เสียชีวิต</th>
+                        <th style="width:90px;">วันที่เสียชีวิต</th>
+                        <th style="width:90px;">เลขที่มรณะ</th>
+                        <th style="width:90px;">ยอดเรียกเก็บ</th>
+                        <th style="width:85px;">ชำระก่อนหน้า</th>
+                        <th style="width:95px;">ยอดชำระครั้งนี้</th>
+                        <th style="width:85px;">หนี้คงเหลือ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${detailsRows}
+                </tbody>
+            </table>
+
+            <div class="totals">
+                <table>
+                    <tr>
+                        <td>ยอดหนี้รวม:</td>
+                        <td style="text-align:right;">${formatCurrency(doc.total_amount)} บาท</td>
+                    </tr>
+                    <tr style="font-weight:bold; font-size:15px;">
+                        <td>ยอดรับชำระเงิน:</td>
+                        <td style="text-align:right;">${formatCurrency(doc.payamount)} บาท</td>
+                    </tr>
+                    <tr>
+                        <td>ยอดหนี้คงเหลือ:</td>
+                        <td style="text-align:right;">${formatCurrency(doc.remain_amount)} บาท</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="sign-row">
+                <div class="sign-box">
+                    <br><br>
+                    ( ลงชื่อ ............................................ )<br>
+                    ผู้ชำระเงิน
+                </div>
+                <div class="sign-box">
+                    <br><br>
+                    ( ลงชื่อ ${doc.staff_name || '............................................'} )<br>
+                    ผู้รับเงิน / เจ้าหน้าที่
+                </div>
+            </div>
+
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            <\/script>
+        </body>
+        </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+}
+
+if (btnPrintReceiptInModal) {
+    btnPrintReceiptInModal.addEventListener("click", () => {
+        if (currentDocDetail) {
+            printReceiptDocument(currentDocDetail);
+        }
+    });
+}
+
+// Table Action & Expand Event Delegation
+document.addEventListener("click", function(e) {
+    // 1. Expand / Collapse Row
+    const expandBtn = e.target.closest(".btn-expand-row");
+    if (expandBtn) {
+        const docid = expandBtn.dataset.docid;
+        if (docid) toggleRowDetail(docid);
+        return;
+    }
+
+    // 2. View Receipt Modal
+    const viewBtn = e.target.closest(".btn-view-doc");
+    if (viewBtn) {
+        const docid = viewBtn.dataset.docid;
+        if (docid) openReceiptModal(docid, false);
+        return;
+    }
+
+    // 3. Print Receipt Directly
+    const printBtn = e.target.closest(".btn-print-doc");
+    if (printBtn) {
+        const docid = printBtn.dataset.docid;
+        if (docid) openReceiptModal(docid, true);
+        return;
+    }
+
+    // 4. Cancel Receipt
+    const cancelBtn = e.target.closest(".btn-cancel-doc");
+    if (cancelBtn) {
+        const docid = cancelBtn.dataset.docid;
+        const name = (cancelBtn.dataset.name || "").trim();
+        const amount = Number(cancelBtn.dataset.amount) || 0;
+
+        if (!confirm(`⚠️ ยืนยันการยกเลิกรายการรับเงิน ${docid} ?\n\nผู้ชำระ: ${name}\nยอดเงิน: ${formatCurrency(amount)} บาท\n\n*ระบบจะคืนยอดหนี้มรณะให้สมาชิกใหม่อัตโนมัติ*`)) {
+            return;
+        }
+
+        cancelBtn.disabled = true;
+        const origText = cancelBtn.innerHTML;
+        cancelBtn.innerHTML = "⏳ รอ...";
+
+        fetch(`${API_BASE}/cancelmovement`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                docidmove: docid,
+                staff_name: "เจ้าหน้าที่",
+                remark: "ยกเลิกรายการรับเงิน"
+            })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.error !== "0") {
+                alert("❌ ไม่สามารถยกเลิกได้: " + (result.message || "เกิดข้อผิดพลาด"));
+                cancelBtn.disabled = false;
+                cancelBtn.innerHTML = origText;
+                return;
+            }
+            alert(`✅ ยกเลิกรายการรับเงิน ${docid} เรียบร้อยแล้ว!\nยอดหนี้ได้ถูกคืนกลับเข้าบัญชีสมาชิกเรียบร้อยแล้ว`);
+            // Clear detail cache for this doc
+            docDetailsCache.delete(docid);
+            loadMovements();
+        })
+        .catch(err => {
+            console.error("Cancel error:", err);
+            alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            cancelBtn.disabled = false;
+            cancelBtn.innerHTML = origText;
+        });
+        return;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,404 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Beneficiary - ทะเบียนผู้รับผลประโยชน์{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to DK_Beneficiary</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Deceased.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Beneficiary.css') }}">
+
+
+
+<p>Hello Flask layout!</p>
+<h3><a href="/DK_Home">HOME</a> \ ทะเบียนผู้รับผลประโยชน์</h3>
+
+<div class="main">
+    <div class="form-group1">
+        <p>ทะเบียนผู้รับผลประโยชน์</p>
+
+        <!-- TOP BAR: TABS, SEARCH & ACTION -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+            <!-- Status Filter Tabs -->
+            <div class="filter-tabs">
+                <button type="button" class="tab-filter-btn active" data-filter="all">
+                    📋 ทั้งหมด <span class="count-badge" id="countAll">0</span>
+                </button>
+                <button type="button" class="tab-filter-btn" data-filter="active">
+                    🟢 ปกติ <span class="count-badge" id="countActive">0</span>
+                </button>
+                <button type="button" class="tab-filter-btn" data-filter="deceased">
+                    🕊️ เสียชีวิต <span class="count-badge" id="countDeceased">0</span>
+                </button>
+            </div>
+
+            <!-- Search Box & Member Registry Button -->
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <div class="search-box" style="margin-bottom: 0;">
+                    <div class="search-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" id="searchInput" placeholder="ค้นหารหัส, ชื่อผู้รับผลประโยชน์, สมาชิกเจ้าของ...">
+                    </div>
+                    <button type="button" class="search-button" id="searchBtn">ค้นหา</button>
+                </div>
+
+                <a href="/DK_customer" class="btn-add-customer" title="ไปที่ทะเบียนสมาชิกเพื่อจัดการข้อมูล">
+                    <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>ทะเบียนสมาชิก</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- PAGE SUMMARY -->
+        <div class="page-summary" id="pageSummary">กำลังโหลดข้อมูล...</div>
+
+        <!-- BENEFICIARY TABLE -->
+        <table id="beneficiaryTable">
+            <thead>
+                <tr>
+                    <th style="width: 55px;">ลำดับ</th>
+                    <th style="width: 140px;">รหัสผู้รับผลประโยชน์</th>
+                    <th style="width: 90px;">คำนำหน้า</th>
+                    <th>ชื่อผู้รับผลประโยชน์</th>
+                    <th>นามสกุล</th>
+                    <th style="width: 120px;">ความสัมพันธ์</th>
+                    <th>สมาชิกเจ้าของ</th>
+                    <th style="width: 140px;">เลขบัตรประชาชน</th>
+                    <th style="width: 120px;">สถานะ</th>
+                    <th style="width: 160px;">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody id="beneficiaryTableBody">
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 35px; color: #64748b;">
+                        กำลังโหลดข้อมูลผู้รับผลประโยชน์...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr class="my-box">
+        <div id="pagination" class="pagination"></div>
+    </div>
+</div>
+
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+const rowsPerPage = 10;
+let currentPage = 1;
+let rawBeneficiaries = [];
+let filteredBeneficiaries = [];
+let currentFilter = "all"; // "all" | "active" | "deceased"
+
+// ==========================================
+// LOAD BENEFICIARY DATA
+// ==========================================
+async function loadBeneficiaries() {
+    const tbody = document.getElementById("beneficiaryTableBody");
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="10" style="text-align: center; padding: 35px; color: #64748b;">
+                ⏳ กำลังโหลดข้อมูลผู้รับผลประโยชน์จากระบบ...
+            </td>
+        </tr>
+    `;
+
+    try {
+        // Fetch all beneficiaries (support both active and deceased)
+        const [resAll, resActive] = await Promise.allSettled([
+            fetch(`${API_BASE}/beneficiary_deceased?status=0,1,2,3,4,5`).then(r => r.json()),
+            fetch(`${API_BASE}/beneficiary_active_select`).then(r => r.json())
+        ]);
+
+        let itemsMap = new Map();
+
+        // Add from resAll (has full deceased + status info)
+        if (resAll.status === "fulfilled" && resAll.value && resAll.value.error === "0" && Array.isArray(resAll.value.results)) {
+            resAll.value.results.forEach(item => {
+                if (item.Idbeneficiary) {
+                    itemsMap.set(item.Idbeneficiary, item);
+                }
+            });
+        }
+
+        // Merge from resActive (ensure no active item is missing)
+        if (resActive.status === "fulfilled" && resActive.value && resActive.value.error === "0" && Array.isArray(resActive.value.results)) {
+            resActive.value.results.forEach(item => {
+                if (item.Idbeneficiary && !itemsMap.has(item.Idbeneficiary)) {
+                    itemsMap.set(item.Idbeneficiary, item);
+                }
+            });
+        }
+
+        rawBeneficiaries = Array.from(itemsMap.values());
+
+        // Sort by Idbeneficiary
+        rawBeneficiaries.sort((a, b) => {
+            return (a.Idbeneficiary || "").localeCompare(b.Idbeneficiary || "", undefined, { numeric: true });
+        });
+
+        // Update counts
+        updateCounts();
+
+        // Apply initial filter & search
+        applyFilterAndSearch();
+
+    } catch (err) {
+        console.error("Error loading beneficiaries:", err);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" style="text-align: center; padding: 35px; color: #ef4444;">
+                    ❌ เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล (${err.message})
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// ==========================================
+// UPDATE BADGE COUNTS
+// ==========================================
+function updateCounts() {
+    const countAll = rawBeneficiaries.length;
+    const countActive = rawBeneficiaries.filter(b => b.status == 1 || !b.status).length;
+    const countDeceased = rawBeneficiaries.filter(b => b.status == 3 || b.status == 4).length;
+
+    const elAll = document.getElementById("countAll");
+    const elActive = document.getElementById("countActive");
+    const elDeceased = document.getElementById("countDeceased");
+
+    if (elAll) elAll.innerText = countAll;
+    if (elActive) elActive.innerText = countActive;
+    if (elDeceased) elDeceased.innerText = countDeceased;
+}
+
+// ==========================================
+// FILTER & SEARCH LOGIC
+// ==========================================
+function applyFilterAndSearch() {
+    const searchInput = document.getElementById("searchInput");
+    const rawQuery = (searchInput ? searchInput.value : "").trim();
+    const query = rawQuery.toLowerCase();
+    const queryTerms = query.split(/\s+/).filter(Boolean);
+
+    filteredBeneficiaries = rawBeneficiaries.filter(item => {
+        // 1. Status Filter
+        const st = item.status;
+        if (currentFilter === "active" && (st == 3 || st == 4)) return false;
+        if (currentFilter === "deceased" && st != 3 && st != 4) return false;
+
+        // 2. Search Query Filter
+        if (queryTerms.length === 0) return true;
+
+        const benId = (item.Idbeneficiary || "").toLowerCase();
+        const custId = (item.Idcustomer || "").toLowerCase();
+        const prefix = (item.prefix || "").toLowerCase();
+        const name = (item.name || "").toLowerCase();
+        const lastname = (item.lastname || "").toLowerCase();
+        const fullname = (item.fullname || `${prefix}${name} ${lastname}`).toLowerCase();
+        const relation = (item.relation || "").toLowerCase();
+        const idcard = (item.Idcard || "").toLowerCase();
+        const custName = (item.customer_fullname || `${item.c_prefix || ''}${item.c_name || ''} ${item.c_lastname || ''}`).toLowerCase();
+        const statusName = (item.status_name || "").toLowerCase();
+
+        return queryTerms.every(term => 
+            benId.includes(term) ||
+            custId.includes(term) ||
+            name.includes(term) ||
+            lastname.includes(term) ||
+            fullname.includes(term) ||
+            relation.includes(term) ||
+            idcard.includes(term) ||
+            custName.includes(term) ||
+            statusName.includes(term)
+        );
+    });
+
+    currentPage = 1;
+    renderTable();
+    renderPagination();
+}
+
+// ==========================================
+// RENDER TABLE
+// ==========================================
+function renderTable() {
+    const tbody = document.getElementById("beneficiaryTableBody");
+    const summary = document.getElementById("pageSummary");
+    tbody.innerHTML = "";
+
+    if (filteredBeneficiaries.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" style="text-align: center; padding: 40px; color: #888;">
+                    🔍 ไม่พบข้อมูลผู้รับผลประโยชน์ตามเงื่อนไขที่ระบุ
+                </td>
+            </tr>
+        `;
+        if (summary) summary.innerText = `แสดง 0 จากทั้งหมด ${rawBeneficiaries.length} รายการ`;
+        return;
+    }
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, filteredBeneficiaries.length);
+    const pageData = filteredBeneficiaries.slice(start, end);
+
+    if (summary) {
+        summary.innerText = `แสดง ${start + 1} - ${end} จากที่ค้นหาพบ ${filteredBeneficiaries.length} รายการ (ทั้งหมด ${rawBeneficiaries.length} รายการ)`;
+    }
+
+    pageData.forEach((item, index) => {
+        const isDead = item.status == 3 || item.status == 4;
+        let statusBadge = "";
+        if (item.status == 3) {
+            statusBadge = `<span class="badge-status badge-red">เสียชีวิต</span>`;
+        } else if (item.status == 4) {
+            statusBadge = `<span class="badge-status badge-purple">เสียชีวิต/ตั้งหนี้</span>`;
+        } else if (item.status == 2) {
+            statusBadge = `<span class="badge-status badge-orange">ลาออก</span>`;
+        } else {
+            statusBadge = `<span class="badge-status badge-green">ปกติ</span>`;
+        }
+
+        const benName = item.name || "-";
+        const benLastname = item.lastname || "-";
+        const benPrefix = item.prefix || "";
+        const custFullName = item.customer_fullname || `${item.c_prefix || ''}${item.c_name || ''} ${item.c_lastname || ''}`.trim() || "-";
+        const custId = item.Idcustomer || "";
+
+        const row = `
+            <tr class="${isDead ? 'row-dead' : ''}">
+                <td>${start + index + 1}</td>
+                <td><span class="badge-ben-id">${item.Idbeneficiary || "-"}</span></td>
+                <td>${benPrefix}</td>
+                <td style="text-align: left; font-weight: 500;">${benName}</td>
+                <td style="text-align: left;">${benLastname}</td>
+                <td><span class="relation-tag">${item.relation || "-"}</span></td>
+                <td style="text-align: left;">
+                    <a href="/DK_Viwecustomer?id=${encodeURIComponent(custId)}" class="owner-tag" title="ดูข้อมูลสมาชิก">
+                        ${custFullName}
+                    </a>
+                    <span class="owner-id">(${custId})</span>
+                </td>
+                <td><span class="idcard-text">${item.Idcard || "-"}</span></td>
+                <td>${statusBadge}</td>
+                <td>
+                    
+                      <div class="action-buttons">
+                        
+                        <a href="/DK_Editcustomer?id=${encodeURIComponent(custId)}" class="btn-owner-edit" title="แก้ไขข้อมูลสมาชิกและผู้รับผลประโยชน์">
+                        ✏️ แก้ไข
+                        </a>
+                    </div>
+                    
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+// ==========================================
+// RENDER PAGINATION
+// ==========================================
+function renderPagination() {
+    const totalPages = Math.ceil(filteredBeneficiaries.length / rowsPerPage) || 1;
+    const pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // Previous Button
+    const prevBtn = document.createElement("button");
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+            renderPagination();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    // Number Buttons
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        if (i === currentPage) {
+            btn.classList.add("active");
+        }
+        btn.onclick = () => {
+            currentPage = i;
+            renderTable();
+            renderPagination();
+        };
+        pagination.appendChild(btn);
+    }
+
+    // Next Button
+    const nextBtn = document.createElement("button");
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+            renderPagination();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+// ==========================================
+// EVENT LISTENERS
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // Filter Tabs
+    document.querySelectorAll(".tab-filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-filter-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentFilter = btn.dataset.filter;
+            applyFilterAndSearch();
+        });
+    });
+
+    // Search Input
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", applyFilterAndSearch);
+        searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                applyFilterAndSearch();
+            }
+        });
+    }
+
+    // Search Button
+    const searchBtn = document.getElementById("searchBtn");
+    if (searchBtn) {
+        searchBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            applyFilterAndSearch();
+        });
+    }
+
+    // Load initial data
+    loadBeneficiaries();
+});
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,674 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}ทะเบียนสมาชิกลาออก/เสียชีวิต{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Deceased.css') }}">
+
+
+
+<h3>
+    <a href="/DK_Home">HOME</a>
+    \ ทะเบียนสมาชิกลาออก/เสียชีวิต
+</h3>
+
+<div class="main">
+    <div class="form-group1">
+        <p>ข้อมูลสมาชิกลาออก / เสียชีวิต</p>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+            <div class="search-box" style="margin-bottom: 0;">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="mainSearchInput" class="search-input" placeholder="ค้นหารหัส, ชื่อ-นามสกุล...">
+                </div>
+                <button type="button" id="mainSearchBtn" class="search-button">ค้นหา</button>
+            </div>
+            <button type="button" class="btn-add-customer" id="openPopup">
+                <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>+ เพิ่มสมาชิกลาออก/เสียชีวิต</span>
+            </button>
+        </div>
+
+        <!-- POPUP SELECT MEMBER / BENEFICIARY -->
+        <div id="popupForm" class="popup-bg">
+            <div class="popup-box">
+                <span class="close-btn" id="closePopup">&times;</span>
+                <h3>👥 เลือกสมาชิกลาออก / เสียชีวิต</h3>
+                <p style="color: #64748b; font-size: 14px; margin-top: -10px; margin-bottom: 12px;">
+                    เลือกสมาชิกสถานะปกติ หรือ ผู้รับผลประโยชน์ เพื่อบันทึกเป็นผู้เสียชีวิต
+                </p>
+
+                <!-- MODE TABS -->
+                <div class="tab-pills">
+                    <button type="button" class="tab-pill active" id="btnModeMember">
+                        👤 สมาชิกสถานะปกติ (<span id="countMember">0</span>)
+                    </button>
+                    <button type="button" class="tab-pill" id="btnModeBen">
+                        👥 ผู้รับผลประโยชน์ / Idbeneficiary (<span id="countBeneficiary">0</span>)
+                    </button>
+                </div>
+
+                <div class="search-wrapper" style="width: 100%; margin-bottom: 12px;">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="popupSearchInput" class="search-input" placeholder="🔍 ค้นหารหัส, ชื่อ-นามสกุล...">
+                </div>
+
+                <div class="popup-table-container">
+                    <table class="popup-table" id="modalPopupTable">
+                        <thead id="popupTableHead">
+                            <!-- Populated dynamically based on mode -->
+                        </thead>
+                        <tbody id="popupTableBody">
+                            <tr><td colspan="7" style="text-align:center; padding: 25px; color: #888;">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- POPUP PAGINATION (10 รายการคงที่) -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+                    <span id="popupPageInfo" style="font-size: 13.5px; color: #64748b; font-weight: 500;"></span>
+                    <div id="popupPagination" class="pagination" style="margin-top: 0;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN FILTER TABS -->
+        <div class="tab-pills" style="margin-bottom: 12px; margin-top: 5px;">
+            <button type="button" class="tab-pill active" id="mainFilterAll">
+                ทั้งหมด (<span id="countMainAll">0</span>)
+            </button>
+            <button type="button" class="tab-pill" id="mainFilterMember">
+                👤 สมาชิกลาออก/เสียชีวิต (<span id="countMainMember">0</span>)
+            </button>
+            <button type="button" class="tab-pill" id="mainFilterBen">
+                👥 ผู้รับผลประโยชน์เสียชีวิต (<span id="countMainBen">0</span>)
+            </button>
+        </div>
+
+        <!-- MAIN TABLE -->
+        <table id="customerTable">
+            <thead>
+                <tr>
+                    <th>ลำดับ</th>
+                    <th>รหัสสมาชิก/รหัสผู้รับผลประโยชน์</th>
+                    <th>คำนำหน้า</th>
+                    <th>ชื่อ</th>
+                    <th>นามสกุล</th>
+                    <th>วันที่ลาออก/เสียชีวิต</th>
+                    <th>สถานะ</th>
+                    <th style="text-align: center;">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="8" style="text-align:center; padding: 25px; color: #888;">กำลังโหลดข้อมูล...</td></tr>
+            </tbody>
+        </table>
+        <hr class="my-box">
+        <div id="pagination" class="pagination"></div>
+    </div>
+</div>
+
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+const rowsPerPage = 10;
+let currentPage = 1;
+let allDeceasedMembers = [];
+let allDeceasedBeneficiaries = [];
+let allDeceasedData = [];
+let filteredDeceasedData = [];
+let currentMainFilter = "all"; // "all" | "member" | "beneficiary"
+
+// Popup state (10 รายการคงที่)
+const popupRowsPerPage = 10;
+let popupCurrentPage = 1;
+let currentPopupMode = "member"; // "member" | "beneficiary"
+let popupMembersData = [];
+let popupBeneficiariesData = [];
+let popupFilteredData = [];
+
+// =========================
+// FORMAT DATE
+// =========================
+function formatThaiDate(dateString) {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    const thaiMonths = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
+    const day = date.getDate();
+    const month = thaiMonths[date.getMonth()];
+    const year = date.getFullYear() + 543;
+    return `${day} ${month} ${year}`;
+}
+
+// =========================
+// RENDER MAIN TABLE
+// =========================
+function renderMainTable() {
+    const tbody = document.querySelector("#customerTable tbody");
+    tbody.innerHTML = "";
+
+    if (!filteredDeceasedData || filteredDeceasedData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 25px; color: #888;">ไม่พบข้อมูลสมาชิกลาออก/เสียชีวิต</td></tr>`;
+        return;
+    }
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageData = filteredDeceasedData.slice(start, end);
+    pageData.forEach((item, index) => {
+        let idHtml = "";
+        let nameDetail = "";
+        let statusBadge = "";
+        let editBtn = "";
+
+        if (item.record_type === "beneficiary") {
+            idHtml = `<span class="badge-ben-id">${item.Idbeneficiary}</span>`;
+            nameDetail = `
+                ${item.lastname || ""}
+            `;
+            statusBadge = `<span class="badge-status badge-red" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;">ตาย (ผู้รับผลประโยชน์)</span>`;
+            editBtn = `
+                <button type="button" class="btn-edit" data-id="${item.Idbeneficiary}" data-type="beneficiary">
+                    แก้ไข
+                </button>
+            `;
+        } else {
+            idHtml = `<strong>${item.Idcustomer}</strong>`;
+            nameDetail = `${item.lastname || ""}`;
+            if (item.status == 2) {
+                statusBadge = `<span class="badge-status badge-orange">ลาออก</span>`;
+            } else if (item.status == 3) {
+                statusBadge = `<span class="badge-status badge-red">เสียชีวิต</span>`;
+            } else if (item.status == 4) {
+                statusBadge = `<span class="badge-status badge-purple">เสียชีวิต/ตั้งหนี้</span>`;
+            } else {
+                statusBadge = `<span class="badge-status">${item.status_name || '-'}</span>`;
+            }
+            editBtn = `
+                <button type="button" class="btn-edit" data-id="${item.Idcustomer}" data-type="member">
+                    แก้ไข
+                </button>
+            `;
+        }
+
+        const row = `
+            <tr>
+                <td>${start + index + 1}</td>
+                <td>${idHtml}</td>
+                <td>${item.prefix || ""}</td>
+                <td>${item.name || ""}</td>
+                <td>${nameDetail}</td>
+                <td>${formatThaiDate(item.dateend)}</td>
+                <td>${statusBadge}</td>
+                <td style="text-align: center;">
+                    ${editBtn}
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+function createPagination() {
+    const totalPages = Math.ceil(filteredDeceasedData.length / rowsPerPage) || 1;
+    const pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement("button");
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderMainTable();
+            createPagination();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        if (i === currentPage) btn.classList.add("active");
+        btn.onclick = () => {
+            currentPage = i;
+            renderMainTable();
+            createPagination();
+        };
+        pagination.appendChild(btn);
+    }
+
+    const nextBtn = document.createElement("button");
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderMainTable();
+            createPagination();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+function applyMainSearch() {
+    const input = document.getElementById("mainSearchInput");
+    const keyword = (input ? input.value : "").trim().toLowerCase();
+
+    let baseList = allDeceasedData;
+    if (currentMainFilter === "member") {
+        baseList = allDeceasedMembers;
+    } else if (currentMainFilter === "beneficiary") {
+        baseList = allDeceasedBeneficiaries;
+    }
+
+    if (!keyword) {
+        filteredDeceasedData = baseList;
+    } else {
+        filteredDeceasedData = baseList.filter(emp => {
+            const id = (emp.Idcustomer || "").toLowerCase();
+            const benId = (emp.Idbeneficiary || "").toLowerCase();
+            const name = (emp.name || "").toLowerCase();
+            const lastname = (emp.lastname || "").toLowerCase();
+            const fullname = `${emp.prefix || ""}${name} ${lastname}`.toLowerCase();
+            const ben = (emp.beneficiary || "").toLowerCase();
+            const owner = (emp.customer_fullname || "").toLowerCase();
+            return id.includes(keyword) ||
+                   benId.includes(keyword) ||
+                   name.includes(keyword) ||
+                   lastname.includes(keyword) ||
+                   fullname.includes(keyword) ||
+                   ben.includes(keyword) ||
+                   owner.includes(keyword);
+        });
+    }
+    currentPage = 1;
+    renderMainTable();
+    createPagination();
+}
+
+const mainSearchInput = document.getElementById("mainSearchInput");
+const mainSearchBtn = document.getElementById("mainSearchBtn");
+if (mainSearchInput) {
+    mainSearchInput.addEventListener("input", applyMainSearch);
+    mainSearchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            applyMainSearch();
+        }
+    });
+}
+if (mainSearchBtn) {
+    mainSearchBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        applyMainSearch();
+    });
+}
+
+// =========================
+// MAIN FILTER SWITCH
+// =========================
+const filterAllBtn = document.getElementById("mainFilterAll");
+const filterMemberBtn = document.getElementById("mainFilterMember");
+const filterBenBtn = document.getElementById("mainFilterBen");
+
+function switchMainFilter(mode) {
+    currentMainFilter = mode;
+    [filterAllBtn, filterMemberBtn, filterBenBtn].forEach(b => {
+        if (b) b.classList.remove("active");
+    });
+    if (mode === "all" && filterAllBtn) filterAllBtn.classList.add("active");
+    if (mode === "member" && filterMemberBtn) filterMemberBtn.classList.add("active");
+    if (mode === "beneficiary" && filterBenBtn) filterBenBtn.classList.add("active");
+
+    currentPage = 1;
+    applyMainSearch();
+}
+
+if (filterAllBtn) filterAllBtn.addEventListener("click", () => switchMainFilter("all"));
+if (filterMemberBtn) filterMemberBtn.addEventListener("click", () => switchMainFilter("member"));
+if (filterBenBtn) filterBenBtn.addEventListener("click", () => switchMainFilter("beneficiary"));
+
+// =========================
+// LOAD MAIN DATA (ทั้ง สมาชิก และ ผู้รับผลประโยชน์ ที่มีสถานะตาย)
+// =========================
+function loadMainData() {
+    Promise.all([
+        fetch(`${API_BASE}/customer`).then(res => res.json()),
+        fetch(`${API_BASE}/beneficiary_deceased`).then(res => res.json())
+    ])
+    .then(([custRes, benRes]) => {
+        const custData = (custRes.results || []).filter(emp =>
+            emp.status == 2 || emp.status == 3 || emp.status == 4
+        ).map(c => ({
+            ...c,
+            record_type: "member"
+        }));
+
+        const benData = (benRes.results || []).map(b => ({
+            ...b,
+            record_type: "beneficiary"
+        }));
+
+        allDeceasedMembers = custData;
+        allDeceasedBeneficiaries = benData;
+        allDeceasedData = [...custData, ...benData];
+
+        const countAll = document.getElementById("countMainAll");
+        const countM = document.getElementById("countMainMember");
+        const countB = document.getElementById("countMainBen");
+        if (countAll) countAll.innerText = allDeceasedData.length;
+        if (countM) countM.innerText = allDeceasedMembers.length;
+        if (countB) countB.innerText = allDeceasedBeneficiaries.length;
+
+        applyMainSearch();
+    })
+    .catch(err => {
+        console.error("Main load error:", err);
+        const tbody = document.querySelector("#customerTable tbody");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 25px; color: #ef4444;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+        }
+    });
+}
+
+loadMainData();
+
+// =========================
+// POPUP LOGIC
+// =========================
+const popup = document.getElementById("popupForm");
+const openBtn = document.getElementById("openPopup");
+const closeBtn = document.getElementById("closePopup");
+const btnModeMember = document.getElementById("btnModeMember");
+const btnModeBen = document.getElementById("btnModeBen");
+
+openBtn.addEventListener("click", () => {
+    popup.style.display = "flex";
+    loadPopupData();
+});
+
+closeBtn.addEventListener("click", () => {
+    popup.style.display = "none";
+});
+
+popup.addEventListener("click", (e) => {
+    if (e.target === popup) {
+        popup.style.display = "none";
+    }
+});
+
+btnModeMember.addEventListener("click", () => switchPopupMode("member"));
+btnModeBen.addEventListener("click", () => switchPopupMode("beneficiary"));
+
+function switchPopupMode(mode) {
+    currentPopupMode = mode;
+    if (mode === "member") {
+        btnModeMember.classList.add("active");
+        btnModeBen.classList.remove("active");
+        document.getElementById("popupSearchInput").placeholder = "🔍 ค้นหารหัสสมาชิก, ชื่อ-นามสกุล...";
+    } else {
+        btnModeMember.classList.remove("active");
+        btnModeBen.classList.add("active");
+        document.getElementById("popupSearchInput").placeholder = "🔍 ค้นหารหัสผู้รับผลประโยชน์ (Idbeneficiary), ชื่อ-นามสกุล, สมาชิกเจ้าของ...";
+    }
+    popupCurrentPage = 1;
+    applyPopupSearch();
+}
+
+// =========================
+// LOAD & RENDER POPUP (10 รายการคงที่ + รองรับ 2 โหมด)
+// =========================
+function renderPopupTableHeader() {
+    const thead = document.getElementById("popupTableHead");
+    if (currentPopupMode === "member") {
+        thead.innerHTML = `
+            <tr>
+                <th style="width: 55px; text-align: center;">ลำดับ</th>
+                <th style="width: 120px;">รหัสสมาชิก</th>
+                <th style="width: 85px;">คำนำหน้า</th>
+                <th>ชื่อ</th>
+                <th>นามสกุล</th>
+                <th style="width: 85px; text-align: center;">สถานะ</th>
+                <th style="width: 85px; text-align: center;">เลือก</th>
+            </tr>
+        `;
+    } else {
+        thead.innerHTML = `
+            <tr>
+                <th style="width: 55px; text-align: center;">ลำดับ</th>
+                <th style="width: 150px;">รหัสผู้รับผลประโยชน์</th>
+                <th>ชื่อ-นามสกุล ผู้รับผลประโยชน์</th>
+                <th style="width: 110px;">ความสัมพันธ์</th>
+                <th>สมาชิกเจ้าของ (รหัส)</th>
+                <th style="width: 85px; text-align: center;">สถานะ</th>
+                <th style="width: 85px; text-align: center;">เลือก</th>
+            </tr>
+        `;
+    }
+}
+
+function renderPopupTable() {
+    renderPopupTableHeader();
+    const tbody = document.getElementById("popupTableBody");
+    tbody.innerHTML = "";
+
+    if (!popupFilteredData || popupFilteredData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color: #888;">ไม่พบข้อมูลรายการ</td></tr>`;
+        const pageInfo = document.getElementById("popupPageInfo");
+        if (pageInfo) pageInfo.innerText = "ไม่พบรายการข้อมูล";
+        const pagination = document.getElementById("popupPagination");
+        if (pagination) pagination.innerHTML = "";
+        return;
+    }
+
+    const start = (popupCurrentPage - 1) * popupRowsPerPage;
+    const end = start + popupRowsPerPage;
+    const pageData = popupFilteredData.slice(start, end);
+
+    pageData.forEach((item, index) => {
+        let row = "";
+        if (currentPopupMode === "member") {
+            row = `
+                <tr>
+                    <td style="text-align: center;">${start + index + 1}</td>
+                    <td><strong style="color: #1e3c72; font-family: monospace;">${item.Idcustomer}</strong></td>
+                    <td>${item.prefix || ""}</td>
+                    <td>${item.name || ""}</td>
+                    <td>${item.lastname || ""}</td>
+                    <td style="text-align: center;"><span class="badge-status badge-green">ปกติ</span></td>
+                    <td style="text-align: center;">
+                        <button type="button" class="select-btn" onclick="selectMember('${item.Idcustomer}')">
+                            เลือก
+                        </button>
+                    </td>
+                </tr>
+            `;
+        } else {
+            row = `
+                <tr>
+                    <td style="text-align: center;">${start + index + 1}</td>
+                    <td><span class="badge-ben-id">${item.Idbeneficiary}</span></td>
+                    <td><strong>${item.fullname || ((item.prefix || "") + (item.name || "") + " " + (item.lastname || ""))}</strong></td>
+                    <td><span style="color: #475569;">${item.relation || "-"}</span></td>
+                    <td>${item.customer_fullname || "-"} <span style="color:#64748b; font-family:monospace; font-size:12px;">(${item.Idcustomer})</span></td>
+                    <td style="text-align: center;"><span class="badge-status badge-green">ปกติ</span></td>
+                    <td style="text-align: center;">
+                        <button type="button" class="select-btn" onclick="selectBeneficiary('${item.Idbeneficiary}')">
+                            เลือก
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+        tbody.innerHTML += row;
+    });
+
+    createPopupPagination();
+}
+
+function createPopupPagination() {
+    const totalPages = Math.ceil(popupFilteredData.length / popupRowsPerPage) || 1;
+    const pagination = document.getElementById("popupPagination");
+    const pageInfo = document.getElementById("popupPageInfo");
+
+    const start = (popupCurrentPage - 1) * popupRowsPerPage + 1;
+    const end = Math.min(popupCurrentPage * popupRowsPerPage, popupFilteredData.length);
+    if (pageInfo) {
+        pageInfo.innerText = `แสดง ${start} - ${end} จากทั้งหมด ${popupFilteredData.length} รายการ (หน้า ${popupCurrentPage}/${totalPages})`;
+    }
+
+    if (!pagination) return;
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // ปุ่มย้อนกลับ
+    const prevBtn = document.createElement("button");
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.disabled = popupCurrentPage === 1;
+    prevBtn.onclick = () => {
+        if (popupCurrentPage > 1) {
+            popupCurrentPage--;
+            renderPopupTable();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    // ปุ่มตัวเลขหน้า
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        if (i === popupCurrentPage) btn.classList.add("active");
+        btn.onclick = () => {
+            popupCurrentPage = i;
+            renderPopupTable();
+        };
+        pagination.appendChild(btn);
+    }
+
+    // ปุ่มถัดไป
+    const nextBtn = document.createElement("button");
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.disabled = popupCurrentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (popupCurrentPage < totalPages) {
+            popupCurrentPage++;
+            renderPopupTable();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+function loadPopupData() {
+    const tbody = document.getElementById("popupTableBody");
+    renderPopupTableHeader();
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color: #888;">กำลังโหลดข้อมูล...</td></tr>`;
+
+    Promise.all([
+        fetch(`${API_BASE}/customer_deceased_select`).then(r => r.json()),
+        fetch(`${API_BASE}/beneficiary_active_select`).then(r => r.json())
+    ])
+    .then(([custData, benData]) => {
+        popupMembersData = custData.results || [];
+        popupBeneficiariesData = benData.results || [];
+
+        const countM = document.getElementById("countMember");
+        const countB = document.getElementById("countBeneficiary");
+        if (countM) countM.innerText = popupMembersData.length;
+        if (countB) countB.innerText = popupBeneficiariesData.length;
+
+        popupCurrentPage = 1;
+        applyPopupSearch();
+    })
+    .catch(err => {
+        console.error("Popup fetch error:", err);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color: #ef4444;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+    });
+}
+
+function applyPopupSearch() {
+    const searchInput = document.getElementById("popupSearchInput");
+    const keyword = (searchInput ? searchInput.value : "").trim().toLowerCase();
+
+    const sourceData = currentPopupMode === "member" ? popupMembersData : popupBeneficiariesData;
+
+    if (!keyword) {
+        popupFilteredData = sourceData;
+    } else {
+        popupFilteredData = sourceData.filter(item => {
+            if (currentPopupMode === "member") {
+                const id = (item.Idcustomer || "").toLowerCase();
+                const prefix = (item.prefix || "").toLowerCase();
+                const name = (item.name || "").toLowerCase();
+                const lastname = (item.lastname || "").toLowerCase();
+                const fullname = `${prefix}${name} ${lastname}`.toLowerCase();
+                return id.includes(keyword) || prefix.includes(keyword) || name.includes(keyword) || lastname.includes(keyword) || fullname.includes(keyword);
+            } else {
+                const benId = (item.Idbeneficiary || "").toLowerCase();
+                const prefix = (item.prefix || "").toLowerCase();
+                const name = (item.name || "").toLowerCase();
+                const lastname = (item.lastname || "").toLowerCase();
+                const fullname = (item.fullname || `${prefix}${name} ${lastname}`).toLowerCase();
+                const rel = (item.relation || "").toLowerCase();
+                const custId = (item.Idcustomer || "").toLowerCase();
+                const custName = (item.customer_fullname || "").toLowerCase();
+                return benId.includes(keyword) || fullname.includes(keyword) || rel.includes(keyword) || custId.includes(keyword) || custName.includes(keyword);
+            }
+        });
+    }
+
+    popupCurrentPage = 1;
+    renderPopupTable();
+}
+
+const popupSearchInput = document.getElementById("popupSearchInput");
+if (popupSearchInput) {
+    popupSearchInput.addEventListener("input", applyPopupSearch);
+}
+
+// =========================
+// SELECT ACTIONS
+// =========================
+window.selectMember = function(id) {
+    popup.style.display = "none";
+    window.location.href = `/DK_EditcustomerDeceased?id=${encodeURIComponent(id)}`;
+};
+
+window.selectBeneficiary = function(id) {
+    popup.style.display = "none";
+    window.location.href = `/DK_EditcustomerDeceased?type=beneficiary&id=${encodeURIComponent(id)}`;
+};
+
+// =========================
+// EDIT BUTTON ON MAIN TABLE
+// =========================
+document.addEventListener("click", function(e) {
+    const btn = e.target.closest(".btn-edit");
+    if (btn) {
+        const id = btn.dataset.id;
+        const type = btn.dataset.type;
+        if (type === "beneficiary") {
+            window.location.href = `/DK_EditcustomerDeceased?type=beneficiary&id=${encodeURIComponent(id)}`;
+        } else {
+            window.location.href = `/DK_EditcustomerDeceased?id=${encodeURIComponent(id)}`;
+        }
+    }
+});
+</script>
+
+{% endblock %}

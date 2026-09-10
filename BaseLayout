@@ -1,0 +1,69 @@
+---
+const { title, description } = Astro.props;
+import "../styles/samplepage.css";
+---
+
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="header">
+         
+        <div class="logo">
+          <img src="https://via.placeholder.com/32x32.png?text=" alt="Logo" />
+          <span>ยินดีตอนรับเข้าสู้ระบบฌาปนกิจ</span>
+        
+        </div>
+        <div class="user">
+          🔔
+          <img src="https://i.pravatar.cc/30" alt="User" style="border-radius: 80%" />
+        
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <nav>
+          <h1>เมนู</h1>
+          <ul class="navbar">
+            <li><a href="/BK_HOME">HOME</a></li>
+            <li><a href="/BK_HOME">บันทึกรายการประจำวัน</a></li>
+          </ul>
+          <h2>ค่าคงที่</h2>
+          <ul class="navbar">
+            <li><a href="/BK_Running">เลขที่เอกสาร</a></li>
+            <li><a href="/BK_Person">ทะเบียนสมาชิก</a></li>
+            <li><a href="/BK_Employee">ทะเบียนพนักงาน</a></li>
+          </ul>
+
+          <h2>รายงาน</h2>
+          <ul class="navbar">
+            <li><a href="/BK_FromReport">รายงานทะเบียนลูกค้า</a></li>
+            <li><a href="/BK_FromReport">รายงานทะเบียนพนักงาน</a></li>
+            <li><a href="/BK_FromReport">รายงานประจำวัน</a></li>
+         </ul>
+
+          <h2>APPS</h2>
+          <ul class="navbar">
+            <li><a href="/login">login</a></li>
+            <li><a href="/">ออกจากระบบ</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="main">
+        <h2>{title}</h2>
+        <p>{description}</p>
+
+        <!-- 📌 เนื้อหาจากหน้าเพจจะถูกแสดงตรงนี้ -->
+        <slot />
+      </div>
+    </div>
+    
+  </body>
+  
+</html>

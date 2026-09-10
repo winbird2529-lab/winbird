@@ -1,0 +1,569 @@
+﻿{% extends "BaseLayout.html" %}
+
+{% block title %}เลขที่เอกสารและตั้งค่ายอดเงิน{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='Running.css') }}">
+
+<h2>Welcome to เลขที่เอกสาร</h2>
+<p>Hello Flask layout!</p>
+<h3><a href="/DK_Home">HOME</a> \ เลขที่เอกสารและตั้งค่ายอดเงิน</h3>
+
+<div class="main">
+    <div class="running-container">
+        <form id="registerForm" onsubmit="event.preventDefault(); handleSave();">
+            
+            <!-- Top Action Bar -->
+            <div class="button-group">
+                <div class="mode-badge view-mode" id="modeBadge">
+                    <span id="modeIcon">🔒</span>
+                    <span id="modeText">ดูข้อมูลเท่านั้น</span>
+                </div>
+                <div class="button-group-right">
+                    <button type="button" class="btn-cancel" id="btnCancel" onclick="cancelEdit()">
+                        ✕ ยกเลิก
+                    </button>
+                    <button type="button" class="btn-edit" id="btnEdit" onclick="toggleEditMode()">
+                        ✏️ แก้ไข
+                    </button>
+                    <button type="button" class="submit-btnsave" id="btnSave" onclick="handleSave()" disabled>
+                        📄 บันทึก
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Card with Tabs -->
+            <div class="form-group1">
+                <div class="tabs">
+                    <button type="button"
+                            class="tab-btn active"
+                            onclick="openTab(event, 'tabRunning')">
+                        🔢 เลขที่ Running
+                    </button>
+                    <button type="button"
+                            class="tab-btn"
+                            onclick="openTab(event, 'tabMoney')">
+                        💰 ตั้งค่ายอดเงิน
+                    </button>
+                </div>
+
+                <!-- Tab 1: เลขที่ Running (เรียงยาวทีละ Row) -->
+                <div id="tabRunning" class="tab-content active">
+                    <div class="running-list">
+                        
+                        <!-- Row 1: บันทึกสมาชิก -->
+                        <div class="running-row-item" id="cardPC">
+                            <div class="row-title-col">
+                                <h4><span>👥</span> บันทึกสมาชิก</h4>
+                                <span class="mode-badge-card auto" id="badgeModePC">AUTO</span>
+                            </div>
+
+                            <div class="row-mode-col">
+                                <span class="field-label">รูปแบบเลขที่:</span>
+                                <div class="mode-radios">
+                                    <label class="mode-radio">
+                                        <input type="radio" name="modePC" value="auto" checked disabled onchange="handleCardModeChange('PC', 'auto')">
+                                        <span>⚡ อัตโนมัติ</span>
+                                    </label>
+                                    <label class="mode-radio">
+                                        <input type="radio" name="modePC" value="manual" disabled onchange="handleCardModeChange('PC', 'manual')">
+                                        <span>✏️ กำหนดเอง (Manual)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="row-field-col">
+                                <label class="field-label" for="docPrefixPC">อักษรนำหน้า</label>
+                                <input type="text" id="docPrefixPC" class="running-input code-input" placeholder="เช่น PC" disabled>
+                            </div>
+
+                            <div class="row-field-col">
+                                <label class="field-label" for="docRunNumberPC">เลขที่ Running ล่าสุด</label>
+                                <input type="text" id="docRunNumberPC" class="running-input code-input" placeholder="000000" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: บันทึกพนักงาน -->
+                        <div class="running-row-item" id="cardEY">
+                            <div class="row-title-col">
+                                <h4><span>👔</span> บันทึกพนักงาน</h4>
+                                <span class="mode-badge-card auto" id="badgeModeEY">AUTO</span>
+                            </div>
+
+                            <div class="row-mode-col">
+                                <span class="field-label">รูปแบบเลขที่:</span>
+                                <div class="mode-radios">
+                                    <label class="mode-radio">
+                                        <input type="radio" name="modeEY" value="auto" checked disabled onchange="handleCardModeChange('EY', 'auto')">
+                                        <span>⚡ อัตโนมัติ</span>
+                                    </label>
+                                    <label class="mode-radio">
+                                        <input type="radio" name="modeEY" value="manual" disabled onchange="handleCardModeChange('EY', 'manual')">
+                                        <span>✏️ กำหนดเอง (Manual)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="row-field-col">
+                                <label class="field-label" for="docPrefixEY">อักษรนำหน้า</label>
+                                <input type="text" id="docPrefixEY" class="running-input code-input" placeholder="เช่น EY" disabled>
+                            </div>
+
+                            <div class="row-field-col">
+                                <label class="field-label" for="docRunNumberEY">เลขที่ Running ล่าสุด</label>
+                                <input type="text" id="docRunNumberEY" class="running-input code-input" placeholder="000" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: บันทึกตั้งเอกสารเสียชีวิต -->
+                        <div class="running-row-item" id="cardDW">
+                            <div class="row-title-col">
+                                <h4><span>🕊️</span> ตั้งเอกสารเสียชีวิต</h4>
+                                <span class="mode-badge-card auto" id="badgeModeDW">AUTO</span>
+                            </div>
+
+                            <div class="row-mode-col">
+                                <span class="field-label">รูปแบบเลขที่:</span>
+                                <div class="mode-radios">
+                                    <label class="mode-radio">
+                                        <input type="radio" name="modeDW" value="auto" checked disabled onchange="handleCardModeChange('DW', 'auto')">
+                                        <span>⚡ อัตโนมัติ</span>
+                                    </label>
+                                    <label class="mode-radio">
+                                        <input type="radio" name="modeDW" value="manual" disabled onchange="handleCardModeChange('DW', 'manual')">
+                                        <span>✏️ กำหนดเอง (Manual)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="row-field-col">
+                                <label class="field-label" for="docPrefixDW">อักษรนำหน้า</label>
+                                <input type="text" id="docPrefixDW" class="running-input code-input" placeholder="เช่น DW" disabled>
+                            </div>
+
+                            <div class="row-field-col">
+                                <label class="field-label" for="docRunNumberDW">เลขที่ Running ล่าสุด</label>
+                                <input type="text" id="docRunNumberDW" class="running-input code-input" placeholder="000000" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: บันทึกข้อมูลรายวัน -->
+                        <div class="running-row-item" id="cardTW">
+                            <div class="row-title-col">
+                                <h4><span>📅</span> บันทึกข้อมูลรายวัน</h4>
+                                <span class="mode-badge-card auto" id="badgeModeTW">AUTO</span>
+                            </div>
+
+                            <div class="row-mode-col">
+                                <span class="field-label">รูปแบบเลขที่:</span>
+                                <div class="mode-radios">
+                                    <label class="mode-radio">
+                                        <input type="radio" name="modeTW" value="auto" checked disabled onchange="handleCardModeChange('TW', 'auto')">
+                                        <span>⚡ อัตโนมัติ</span>
+                                    </label>
+                                    <label class="mode-radio">
+                                        <input type="radio" name="modeTW" value="manual" disabled onchange="handleCardModeChange('TW', 'manual')">
+                                        <span>✏️ กำหนดเอง (Manual)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="row-field-col">
+                                <label class="field-label" for="docPrefixTW">อักษรนำหน้า</label>
+                                <input type="text" id="docPrefixTW" class="running-input code-input" placeholder="เช่น TR" disabled>
+                            </div>
+
+                            <div class="row-field-col">
+                                <label class="field-label" for="docRunNumberTW">เลขที่ Running ล่าสุด</label>
+                                <input type="text" id="docRunNumberTW" class="running-input code-input" placeholder="000000" disabled>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Tab 2: ตั้งค่ายอดเงิน (เรียงยาวทีละ Row) -->
+                <div id="tabMoney" class="tab-content">
+                    <div class="money-list">
+                        
+                        <!-- Row 1: ค่าสมัครสมาชิก -->
+                        <div class="money-row-item">
+                            <div class="row-title-col">
+                                <h4><span>💳</span> ค่าสมัครสมาชิก</h4>
+                            </div>
+                            <div class="money-field-wrapper">
+                                <label class="field-label" for="registerAmount">จำนวนเงิน:</label>
+                                <div class="money-unit-addon" style="flex:1;">
+                                    <input type="number" id="registerAmount" class="running-input money-input" placeholder="0.00" step="0.01" disabled>
+                                    <span class="unit-text">บาท</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: เงินสงเคราะห์เสียชีวิต -->
+                        <div class="money-row-item">
+                            <div class="row-title-col">
+                                <h4><span>🤝</span> เงินสงเคราะห์เสียชีวิต</h4>
+                            </div>
+                            <div class="money-field-wrapper">
+                                <label class="field-label" for="yearAmount">จำนวนเงิน:</label>
+                                <div class="money-unit-addon" style="flex:1;">
+                                    <input type="number" id="yearAmount" class="running-input money-input" placeholder="0.00" step="0.01" disabled>
+                                    <span class="unit-text">บาท</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: ค่าธรรมเนียมรายปี -->
+                        <div class="money-row-item">
+                            <div class="row-title-col">
+                                <h4><span>📋</span> ค่าธรรมเนียมรายปี</h4>
+                            </div>
+                            <div class="money-field-wrapper">
+                                <label class="field-label" for="yearlyAmount">จำนวนเงิน:</label>
+                                <div class="money-unit-addon" style="flex:1;">
+                                    <input type="number" id="yearlyAmount" class="running-input money-input" placeholder="0.00" step="0.01" disabled>
+                                    <span class="unit-text">บาท</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+import { getRunningConfig, saveRunningConfig } from "/static/js/runningConfig.js";
+
+// Tab Switching
+window.openTab = function(evt, tabId) {
+    document.querySelectorAll('.tab-content')
+        .forEach(tab => tab.classList.remove('active'));
+
+    document.querySelectorAll('.tab-btn')
+        .forEach(btn => btn.classList.remove('active'));
+
+    const targetTab = document.getElementById(tabId);
+    if (targetTab) targetTab.classList.add('active');
+
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add('active');
+    }
+};
+
+// State Store
+let isEditMode = false;
+const originalValues = {};
+const originalModes = {};
+const inputIds = [
+    "docPrefixPC", "docRunNumberPC",
+    "docPrefixEY", "docRunNumberEY",
+    "docPrefixDW", "docRunNumberDW",
+    "docPrefixTW", "docRunNumberTW",
+    "registerAmount", "yearAmount", "yearlyAmount"
+];
+const modeKeys = ["PC", "EY", "DW", "TW"];
+
+// Update Card Mode Badge UI
+window.handleCardModeChange = function(cardType, mode) {
+    const badge = document.getElementById(`badgeMode${cardType}`);
+    if (badge) {
+        if (mode === 'manual') {
+            badge.className = 'mode-badge-card manual';
+            badge.textContent = 'MANUAL';
+        } else {
+            badge.className = 'mode-badge-card auto';
+            badge.textContent = 'AUTO';
+        }
+    }
+};
+
+// Snapshot current values into originalValues & originalModes
+function saveSnapshot() {
+    inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) originalValues[id] = el.value;
+    });
+    modeKeys.forEach(k => {
+        const checkedRadio = document.querySelector(`input[name="mode${k}"]:checked`);
+        if (checkedRadio) originalModes[k] = checkedRadio.value;
+    });
+}
+
+// Restore values from originalValues & originalModes
+function restoreSnapshot() {
+    inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && originalValues[id] !== undefined) {
+            el.value = originalValues[id];
+        }
+    });
+    modeKeys.forEach(k => {
+        const savedMode = originalModes[k] || 'auto';
+        const radio = document.querySelector(`input[name="mode${k}"][value="${savedMode}"]`);
+        if (radio) {
+            radio.checked = true;
+            window.handleCardModeChange(k, savedMode);
+        }
+    });
+}
+
+// Toggle Edit Mode
+window.toggleEditMode = function() {
+    isEditMode = true;
+    saveSnapshot();
+
+    // Enable inputs
+    inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.disabled = false;
+            el.classList.add('editable-active');
+        }
+    });
+
+    // Enable radio buttons
+    document.querySelectorAll('.mode-radios input[type="radio"]').forEach(r => {
+        r.disabled = false;
+    });
+
+    // Update buttons
+    const btnSave = document.getElementById('btnSave');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnEdit = document.getElementById('btnEdit');
+    if (btnSave) btnSave.disabled = false;
+    if (btnCancel) btnCancel.style.display = 'inline-flex';
+    if (btnEdit) btnEdit.style.display = 'none';
+
+    // Update status badge
+    const badge = document.getElementById('modeBadge');
+    const icon = document.getElementById('modeIcon');
+    const text = document.getElementById('modeText');
+    if (badge) {
+        badge.className = 'mode-badge edit-mode';
+        if (icon) icon.textContent = '✏️';
+        if (text) text.textContent = 'อยู่ในโหมดแก้ไข';
+    }
+
+    // Focus first active input
+    const firstInput = document.getElementById('docPrefixPC');
+    if (firstInput) firstInput.focus();
+};
+
+// Cancel Edit Mode
+window.cancelEdit = function() {
+    restoreSnapshot();
+    lockViewMode();
+};
+
+// Lock back to Read-Only View Mode
+function lockViewMode() {
+    isEditMode = false;
+
+    // Disable inputs
+    inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.disabled = true;
+            el.classList.remove('editable-active');
+        }
+    });
+
+    // Disable radio buttons
+    document.querySelectorAll('.mode-radios input[type="radio"]').forEach(r => {
+        r.disabled = true;
+    });
+
+    // Update buttons
+    const btnSave = document.getElementById('btnSave');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnEdit = document.getElementById('btnEdit');
+    if (btnSave) btnSave.disabled = true;
+    if (btnCancel) btnCancel.style.display = 'none';
+    if (btnEdit) btnEdit.style.display = 'inline-flex';
+
+    // Update status badge
+    const badge = document.getElementById('modeBadge');
+    const icon = document.getElementById('modeIcon');
+    const text = document.getElementById('modeText');
+    if (badge) {
+        badge.className = 'mode-badge view-mode';
+        if (icon) icon.textContent = '🔒';
+        if (text) text.textContent = 'ดูข้อมูลเท่านั้น';
+    }
+}
+
+// Handle Save
+window.handleSave = async function() {
+    if (!isEditMode) return;
+
+    // Validation
+    const regAmt = parseFloat(document.getElementById("registerAmount")?.value || 0);
+    const yrAmt = parseFloat(document.getElementById("yearAmount")?.value || 0);
+    const yearlyAmt = parseFloat(document.getElementById("yearlyAmount")?.value || 0);
+
+    if (isNaN(regAmt) || isNaN(yrAmt) || isNaN(yearlyAmt)) {
+        alert("⚠️ กรุณากรอกจำนวนเงินให้ถูกต้อง");
+        return;
+    }
+
+    const pcMode = document.querySelector('input[name="modePC"]:checked')?.value || 'auto';
+    const eyMode = document.querySelector('input[name="modeEY"]:checked')?.value || 'auto';
+    const dwMode = document.querySelector('input[name="modeDW"]:checked')?.value || 'auto';
+    const twMode = document.querySelector('input[name="modeTW"]:checked')?.value || 'auto';
+
+    // Save running modes config to backend and localStorage
+    await saveRunningConfig({
+        pc_mode: pcMode,
+        ey_mode: eyMode,
+        dw_mode: dwMode,
+        tw_mode: twMode
+    });
+
+    const payload = {
+        pc_prefix: document.getElementById("docPrefixPC")?.value || "",
+        pc_running: document.getElementById("docRunNumberPC")?.value || "",
+        ey_prefix: document.getElementById("docPrefixEY")?.value || "",
+        ey_running: document.getElementById("docRunNumberEY")?.value || "",
+        dw_prefix: document.getElementById("docPrefixDW")?.value || "",
+        dw_running: document.getElementById("docRunNumberDW")?.value || "",
+        tw_prefix: document.getElementById("docPrefixTW")?.value || "",
+        tw_running: document.getElementById("docRunNumberTW")?.value || "",
+        register_amount: regAmt,
+        year_amount: yrAmt,
+        yearly_amount: yearlyAmt
+    };
+
+    try {
+        try {
+            await fetch(`${API_BASE}/update-running`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } catch (apiErr) {
+            console.warn("Backend update API note:", apiErr);
+        }
+
+        saveSnapshot();
+        lockViewMode();
+        alert("✅ บันทึกข้อมูลและการตั้งค่าเลขที่เอกสารเรียบร้อยแล้ว");
+
+    } catch (err) {
+        console.error("Save Error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    }
+};
+
+// ======================
+// โหลดข้อมูลเริ่มต้นจาก API และ Config
+// ======================
+async function loadAllRunning() {
+    // 0. โหลดการตั้งค่าโหมด Auto/Manual
+    try {
+        const config = await getRunningConfig();
+        if (config) {
+            const pcRadio = document.querySelector(`input[name="modePC"][value="${config.pc_mode || 'auto'}"]`);
+            if (pcRadio) { pcRadio.checked = true; window.handleCardModeChange('PC', config.pc_mode || 'auto'); }
+
+            const eyRadio = document.querySelector(`input[name="modeEY"][value="${config.ey_mode || 'auto'}"]`);
+            if (eyRadio) { eyRadio.checked = true; window.handleCardModeChange('EY', config.ey_mode || 'auto'); }
+
+            const dwRadio = document.querySelector(`input[name="modeDW"][value="${config.dw_mode || 'auto'}"]`);
+            if (dwRadio) { dwRadio.checked = true; window.handleCardModeChange('DW', config.dw_mode || 'auto'); }
+
+            const twRadio = document.querySelector(`input[name="modeTW"][value="${config.tw_mode || 'auto'}"]`);
+            if (twRadio) { twRadio.checked = true; window.handleCardModeChange('TW', config.tw_mode || 'auto'); }
+        }
+    } catch (cfgErr) {
+        console.warn("Config load note:", cfgErr);
+    }
+
+    // 1. โหลด Running สมาชิก (id=1)
+    fetch(`${API_BASE}/get-running?id=1`)
+        .then(res => res.json())
+        .then(data => {
+            const elPrefix = document.getElementById("docPrefixPC");
+            const elRun = document.getElementById("docRunNumberPC");
+            if (elPrefix) elPrefix.value = data.docId || "";
+            if (elRun) elRun.value = data.IdRunning || "";
+            saveSnapshot();
+        })
+        .catch(err => console.error("PC Error:", err));
+
+    // 2. โหลด Running พนักงาน (id=2)
+    fetch(`${API_BASE}/get-running?id=2`)
+        .then(res => res.json())
+        .then(data => {
+            const elPrefix = document.getElementById("docPrefixEY");
+            const elRun = document.getElementById("docRunNumberEY");
+            if (elPrefix) elPrefix.value = data.docId || "";
+            if (elRun) elRun.value = data.IdRunning || "";
+            saveSnapshot();
+        })
+        .catch(err => console.error("EY Error:", err));
+
+    // 3. โหลด Running เสียชีวิต (id=3)
+    fetch(`${API_BASE}/get-running?id=3`)
+        .then(res => res.json())
+        .then(data => {
+            const elPrefix = document.getElementById("docPrefixDW");
+            const elRun = document.getElementById("docRunNumberDW");
+            if (elPrefix) elPrefix.value = data.docId || "";
+            if (elRun) elRun.value = data.IdRunning || "";
+            saveSnapshot();
+        })
+        .catch(err => console.error("DW Error:", err));
+
+    // 4. โหลด Running รายวัน (id=4)
+    fetch(`${API_BASE}/get-running?id=4`)
+        .then(res => res.json())
+        .then(data => {
+            const elPrefix = document.getElementById("docPrefixTW");
+            const elRun = document.getElementById("docRunNumberTW");
+            if (elPrefix) elPrefix.value = data.docId || "";
+            if (elRun) elRun.value = data.IdRunning || "";
+            saveSnapshot();
+        })
+        .catch(err => console.error("TW Error:", err));
+
+    // 5. โหลด ค่าธรรมเนียมสมัครสมาชิก (id=6)
+    fetch(`${API_BASE}/get-running?id=6`)
+        .then(res => res.json())
+        .then(data => {
+            const el = document.getElementById("registerAmount");
+            if (el) el.value = data.IdRunning || "";
+            saveSnapshot();
+        })
+        .catch(err => console.error("Register Amount Error:", err));
+
+    // 6. โหลด เงินสงเคราะห์เสียชีวิต (id=7)
+    fetch(`${API_BASE}/get-running?id=7`)
+        .then(res => res.json())
+        .then(data => {
+            const el = document.getElementById("yearAmount");
+            if (el) el.value = data.IdRunning || "";
+            saveSnapshot();
+        })
+        .catch(err => console.error("Year Amount Error:", err));
+
+    // 7. โหลด ค่าธรรมเนียมรายปี (id=8)
+    fetch(`${API_BASE}/get-running?id=8`)
+        .then(res => res.json())
+        .then(data => {
+            const el = document.getElementById("yearlyAmount");
+            if (el) el.value = data.IdRunning || "";
+            saveSnapshot();
+        })
+        .catch(err => console.error("Yearly Amount Error:", err));
+}
+
+// Initial Load
+loadAllRunning();
+</script>
+{% endblock %}

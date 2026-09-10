@@ -1,0 +1,1190 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}บันทึกรายการเก็บเงิน (ฌาปนกิจ){% endblock %}
+
+{% block content %}
+<!-- External CSS & Libraries -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='save.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='csstran.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup1.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Movement.css') }}">
+
+<div class="tran-page-wrapper">
+    <!-- Breadcrumb -->
+    <div class="tran-breadcrumb">
+        <a href="/DK_Home">HOME</a>
+        <span class="tran-breadcrumb-separator">/</span>
+        <a href="/DK_showMovement">แสดงบันทึกรายการเก็บเงิน</a>
+        <span class="tran-breadcrumb-separator">/</span>
+        <span>บันทึกรายการเก็บเงิน (ฌาปนกิจ)</span>
+    </div>
+
+    <!-- Top Header Bar -->
+    <div class="tran-header-bar-modern">
+        <div class="tran-header-title-group">
+            <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #1e3c72; display: flex; align-items: center; gap: 8px;">
+                <span>💵</span> บันทึกรายการเก็บเงิน (ฌาปนกิจ)
+            </h1>
+            <p style="margin: 4px 0 0 0; font-size: 13.5px; color: #64748b;">
+                เลือกสมาชิกเพื่อดึงรายการมรณะค้างชำระ และทำรายการชำระเงินที่แผงการเงินด้านขวา
+            </p>
+        </div>
+        <div class="tran-doc-meta-badge">
+            <div class="tran-doc-meta-item">
+                <span style="color: #64748b;">เลขที่เอกสาร:</span>
+                <input type="text" id="docidmove" readonly style="border: none; background: transparent; font-weight: 700; font-family: monospace; color: #1e3c72; font-size: 15px; width: 95px; outline: none;">
+            </div>
+            <div style="width: 1px; height: 18px; background: #cbd5e1;"></div>
+            <div class="tran-doc-meta-item">
+                <span style="color: #64748b;">วันที่รับเงิน:</span>
+                <input type="text" id="thai-date" name="thai-date" placeholder="วว/ดด/ปปปป" style="border: none; background: transparent; font-weight: 600; color: #0f172a; font-size: 14px; width: 105px; cursor: pointer; outline: none;">
+                <input type="hidden" id="ad-date" name="date">
+            </div>
+        </div>
+    </div>
+
+    <form id="registerForm">
+        <!-- Hidden Inputs for Form Data -->
+        <input type="hidden" id="Idcustomer" name="Idcustomer">
+        <input type="hidden" id="prefix" name="prefix">
+        <input type="hidden" id="name" name="name">
+        <input type="hidden" id="lastname" name="lastname">
+        <input type="hidden" id="Idcard" name="Idcard">
+        <input type="hidden" id="pay_type" name="pay_type" value="เงินสด">
+
+        <!-- WORKSPACE GRID (2 COLUMNS) -->
+        <div class="payment-workspace-grid">
+            
+            <!-- ============================================== -->
+            <!-- LEFT COLUMN: MEMBER PROFILE & PENDING DEBTS    -->
+            <!-- ============================================== -->
+            <div class="workspace-main-column">
+                
+                <!-- 1. Member Profile Card -->
+                <div class="member-chip-card">
+                    <div class="member-chip-header">
+                        <h2><span>👤</span> ข้อมูลสมาชิกผู้ชำระเงิน</h2>
+                        <button type="button" class="tran-btn tran-btn-primary" id="openMemberPopup" style="padding: 7px 16px; font-size: 13.5px; border-radius: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <span>+ ค้นหาสมาชิก</span>
+                        </button>
+                    </div>
+
+                    <!-- Display When Member NOT Selected -->
+                    <div id="memberNotSelectedBanner" class="empty-member-banner">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 24px;">👈</span>
+                            <div>
+                                <strong>ยังไม่ได้เลือกสมาชิกผู้ชำระเงิน</strong>
+                                <div style="font-size: 12.5px; color: #3b82f6;">กดปุ่ม "+ ค้นหาสมาชิก" เพื่อเลือกลูกค้าและดึงรายการหนี้มรณะ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Display When Member Selected -->
+                    <div id="memberSelectedDetails" style="display: none;">
+                        <div class="member-profile-grid">
+                            <div class="member-profile-item">
+                                <span class="label">รหัสสมาชิก</span>
+                                <span class="value" id="displayCustId" style="color: #1e3c72; font-family: monospace;">-</span>
+                            </div>
+                            <div class="member-profile-item">
+                                <span class="label">ชื่อ - นามสกุล</span>
+                                <span class="value" id="displayCustName">-</span>
+                            </div>
+                            <div class="member-profile-item">
+                                <span class="label">เลขประจำตัวประชาชน</span>
+                                <span class="value" id="displayCustIdcard" style="font-family: monospace;">-</span>
+                            </div>
+                            <div class="member-profile-item">
+                                <span class="label">เบอร์โทรศัพท์</span>
+                                <span class="value" id="displayCustTel">-</span>
+                            </div>
+                            <div class="member-profile-item">
+                                <span class="label">สถานะสมาชิก</span>
+                                <div>
+                                    <span class="badge-pill" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:12px; padding:2px 10px;">ปกติ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Pending Debts Table Card -->
+                <div class="tran-table-card">
+                    <div class="tran-table-toolbar">
+                        <div class="tran-table-title">
+                            <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #1e3c72; display: flex; align-items: center; gap: 10px;">
+                                <span>📊</span> รายการมรณะที่ค้างชำระ 
+                                <span class="badge-pill" style="font-size: 14.5px; padding: 3px 12px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 700;">
+                                    <span id="tableRowsCount">0</span> รายการ
+                                </span>
+                            </h3>
+                        </div>
+                        <div class="tran-table-actions">
+                            <button type="button" class="btn-table-action" id="btnSelectAll">
+                                ✅ เลือกทั้งหมด
+                            </button>
+                            <button type="button" class="btn-table-action" id="btnUnselectAll">
+                                ❌ ยกเลิกทั้งหมด
+                            </button>
+                            <div class="tran-table-search-wrapper">
+                                <span class="tran-table-search-icon">🔍</span>
+                                <input type="text" id="debtTableSearch" class="tran-table-search-input" placeholder="ค้นหาในรายการหนี้...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tran-table-container">
+                        <table id="debtTable">
+                            <thead>
+                                <tr>
+                                    <th class="col-check" style="text-align: center;">ชำระ</th>
+                                    <th class="col-seq" style="text-align: center;">ลำดับ</th>
+                                    <th class="col-docid">เลขที่เอกสาร</th>
+                                    <th class="col-deceased">ชื่อผู้เสียชีวิต</th>
+                                    <th class="col-date" style="text-align: center;">วันที่เสียชีวิต</th>
+                                    <th class="col-numend" style="text-align: center;">เลขที่มรณะ</th>
+                                    <th class="col-amt" style="text-align: right;">ยอดเรียกเก็บ</th>
+                                    <th class="col-remain" style="text-align: right;">ค้างชำระ</th>
+                                    <th class="col-pay" style="text-align: right;">ยอดชำระครั้งนี้</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="emptyRowPlaceholder">
+                                    <td colspan="9" style="text-align: center; padding: 55px 20px; color: #94a3b8;">
+                                        <div style="font-size: 48px; margin-bottom: 12px;">👤</div>
+                                        <div style="font-size: 17px; font-weight: 600; color: #475569; margin-bottom: 6px;">ยังไม่ได้เลือกสมาชิกผู้ชำระเงิน</div>
+                                        <div style="font-size: 14px; color: #94a3b8;">กรุณากดปุ่ม "+ ค้นหาสมาชิก" ด้านบนเพื่อเลือกสมาชิกและดึงรายการหนี้ค้างชำระ</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Pagination Footer -->
+                    <div class="tran-table-footer" id="debtTableFooter" style="display: none;">
+                        <span class="tran-page-info" id="tablePageInfo">แสดง 0 - 0 จากทั้งหมด 0 รายการ</span>
+                        <div class="tran-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ============================================== -->
+            <!-- RIGHT COLUMN: THE HERO PAYMENT CHECKOUT CONSOLE -->
+            <!-- ============================================== -->
+            <div class="checkout-panel-sticky">
+                <div class="checkout-box">
+                    
+                    <!-- Header -->
+                    <div class="checkout-box-header">
+                        <h2><span>💳</span> แผงรับชำระเงิน</h2>
+                        <span class="checkout-doc-pill" id="checkoutDocDisplay">TR......</span>
+                    </div>
+
+                    <!-- HERO PAYMENT DISPLAY -->
+                    <div class="hero-payment-display">
+                        <div class="hero-payment-label">ยอดรับชำระเงินสุทธิ</div>
+                        <div>
+                            <span id="statPayThisTime" class="hero-payment-amount">0.00</span>
+                            <span class="hero-payment-unit">บาท</span>
+                        </div>
+                        <div class="hero-payment-breakdown">
+                            <div>
+                                <span>หนี้ค้างรวม:</span>
+                                <strong id="statTotalPending">0.00</strong>
+                            </div>
+                            <div>
+                                <span>หนี้คงเหลือ:</span>
+                                <strong id="statRemainingDebt" style="color: #f87171;">0.00</strong>
+                            </div>
+                            <div>
+                                <span>เลือก:</span>
+                                <strong id="statSelectedCount">0</strong> รายการ
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Form Controls -->
+                    <div class="checkout-box-body">
+                        
+                        <!-- 1. Payment Method Selector -->
+                        <span class="checkout-field-label">ช่องทางการชำระเงิน</span>
+                        <div class="paytype-pills-grid">
+                            <button type="button" class="paytype-pill-btn active" data-type="เงินสด">
+                                💵 เงินสด
+                            </button>
+                            <button type="button" class="paytype-pill-btn" data-type="โอนเงินผ่านธนาคาร">
+                                📱 โอนเงิน
+                            </button>
+                            <!--<button type="button" class="paytype-pill-btn" data-type="หักเงินฝาก/เงินปันผล">
+                                🏛️ หักเงินฝาก
+                            </button>
+                            <button type="button" class="paytype-pill-btn" data-type="อื่นๆ">
+                                🔖 อื่นๆ
+                            </button>-->
+                        </div>
+
+                        <!-- 3. Bank Transfer Details (Shown when "โอนเงินผ่านธนาคาร") -->
+                        <div id="transferDetailsSection" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+                            <div style="margin-bottom: 10px;">
+                                <span class="checkout-field-label">ธนาคาร / บัญชี</span>
+                                <input type="text" id="bank_name" name="bank_name" class="checkout-input" placeholder="เช่น ธ.ก.ส. หรือ กสิกรไทย">
+                            </div>
+                            <div>
+                                <span class="checkout-field-label">เลขที่อ้างอิง / สลิปโอนเงิน</span>
+                                <input type="text" id="ref_no" name="ref_no" class="checkout-input" placeholder="ระบุเลขที่สลิป หรือเลขอ้างอิง">
+                            </div>
+                        </div>
+
+                        <!-- 4. Staff Name & Remark -->
+                        <div style="margin-bottom: 12px;">
+                            <span class="checkout-field-label">ผู้รับเงิน / เจ้าหน้าที่</span>
+                            <input type="text" id="staff_name" name="staff_name" class="checkout-input" value="เจ้าหน้าที่การเงิน" placeholder="ระบุชื่อเจ้าหน้าที่">
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <span class="checkout-field-label">หมายเหตุ (ถ้ามี)</span>
+                            <input type="text" id="remark" name="remark" class="checkout-input" placeholder="ระบุหมายเหตุเพิ่มเติม">
+                        </div>
+
+                        <!-- 5. MAIN CHECKOUT ACTION BUTTONS -->
+                        <button type="button" class="btn-checkout-primary" id="btnSubmitForm">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            <span>📄 บันทึกการรับเงิน</span>
+                        </button>
+
+                        <button type="button" class="btn-checkout-secondary" id="btnResetForm">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                <path d="M3 3v5h5"></path>
+                            </svg>
+                            <span>✏️ ล้างหน้าจอ</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- POPUP MODAL (ค้นหาสมาชิกผู้ชำระเงิน) -->
+        <div id="popupFormMember" class="popup-bg">
+            <div class="popup-box" style="width: 95%; max-width: 900px; height: 660px; max-height: 90vh; display: flex; flex-direction: column;">
+                <span class="close-btn" id="closePopupMember">&times;</span>
+                <h3>👤 เลือกสมาชิกผู้ชำระเงิน</h3>
+                <p style="color: #64748b; font-size: 14px; margin-top: -10px; margin-bottom: 12px;">
+                    ค้นหารายชื่อสมาชิกสถานะปกติเพื่อบันทึกการรับเงิน
+                </p>
+
+                <!-- SEARCH BAR -->
+                <div class="search-wrapper" style="width: 100%; margin-bottom: 12px;">
+                    <input type="text" id="popupSearchInput" class="search-input" placeholder="🔍 ค้นหารหัสสมาชิก, ชื่อ-นามสกุล, หรือเลขบัตรประชาชน...">
+                </div>
+
+                <!-- TABLE CONTAINER -->
+                <div class="popup-table-container">
+                    <table class="popup-table" id="popupMemberTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 55px; text-align: center;">ลำดับ</th>
+                                <th style="width: 130px;">รหัสสมาชิก</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th style="width: 140px;">เลขบัตรประชาชน</th>
+                                <th style="width: 120px;">เบอร์โทร</th>
+                                <th style="width: 100px; text-align: center;">สถานะ</th>
+                                <th style="width: 80px; text-align: center;">เลือก</th>
+                            </tr>
+                        </thead>
+                        <tbody id="popupMemberTableBody">
+                            <tr><td colspan="7" style="text-align:center; padding: 25px; color: #888;">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAGINATION -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+                    <span id="popupPageInfo" style="font-size: 13.5px; color: #64748b; font-weight: 500;"></span>
+                    <div id="popupPagination" class="pagination" style="margin-top: 0;"></div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+import { getRunningConfig } from "/static/js/runningConfig.js";
+
+// ==========================================
+// Formatting Helpers
+// ==========================================
+function formatCurrency(val) {
+    const num = Number(val) || 0;
+    return num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatThaiDate(date) {
+    if (!date || isNaN(date.getTime())) return "-";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+    }, 1);
+}
+
+function updateHiddenDate(date) {
+    if (!date || isNaN(date.getTime())) {
+        document.getElementById("ad-date").value = "";
+        return;
+    }
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    document.getElementById("ad-date").value = `${yyyy}-${mm}-${dd}`;
+}
+
+// Flatpickr setup
+const fpDate = flatpickr("#thai-date", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: "today",
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        const today = new Date();
+        instance.input.value = formatThaiDate(today);
+        updateHiddenDate(today);
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (!selectedDates.length) return;
+        const date = selectedDates[0];
+        instance.input.value = formatThaiDate(date);
+        updateHiddenDate(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    }
+});
+
+// ==========================================
+// Payment Method Pills Selection
+// ==========================================
+const payTypeButtons = document.querySelectorAll(".paytype-pill-btn");
+const hiddenPayType = document.getElementById("pay_type");
+const transferDetailsSection = document.getElementById("transferDetailsSection");
+
+payTypeButtons.forEach(btn => {
+    btn.addEventListener("click", function() {
+        payTypeButtons.forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+        const type = this.dataset.type;
+        hiddenPayType.value = type;
+
+        if (type === "โอนเงินผ่านธนาคาร") {
+            transferDetailsSection.style.display = "block";
+        } else {
+            transferDetailsSection.style.display = "none";
+        }
+    });
+});
+
+// ==========================================
+// RUNNING NUMBER & MODE (AUTO / MANUAL)
+// ==========================================
+let isManualDocMode = false;
+
+async function loadRunning() {
+    try {
+        const response = await fetch(`${API_BASE}/get-running?id=4`);
+        const data = await response.json();
+        const nextRun = String(parseInt(data.IdRunning || "0") + 1).padStart(6, "0");
+        return `${data.docId || 'TR'}${nextRun}`;
+    } catch (err) {
+        console.error("Running Error:", err);
+        return "";
+    }
+}
+
+async function initDocMode() {
+    const input = document.getElementById("docidmove");
+    const pill = document.getElementById("checkoutDocDisplay");
+
+    try {
+        const config = await getRunningConfig();
+        isManualDocMode = (config && config.tw_mode === "manual");
+
+        if (isManualDocMode) {
+            // โหมดกำหนดเอง (Manual) - สามารถพิมพ์เลขที่เอกสารเองได้
+            if (input) {
+                input.readOnly = false;
+                input.placeholder = "TR...";
+                input.style.border = "1px solid #cbd5e1";
+                input.style.background = "#ffffff";
+                input.style.borderRadius = "4px";
+                input.style.padding = "2px 6px";
+                input.style.width = "110px";
+                input.value = "";
+            }
+            if (pill) pill.innerText = "-";
+        } else {
+            // โหมดอัตโนมัติ (Auto) - อ่านเลขอัตโนมัติจากฐานข้อมูล
+            if (input) {
+                input.readOnly = true;
+                input.placeholder = "";
+                input.style.border = "none";
+                input.style.background = "transparent";
+                input.style.padding = "0";
+                input.style.width = "95px";
+            }
+            const docStr = await loadRunning();
+            if (input) input.value = docStr;
+            if (pill) pill.innerText = docStr;
+        }
+    } catch (e) {
+        console.error("Init doc mode error:", e);
+        const docStr = await loadRunning();
+        if (input) input.value = docStr;
+        if (pill) pill.innerText = docStr;
+    }
+}
+initDocMode();
+
+// Listen to typing in manual mode to sync with checkout pill
+document.getElementById("docidmove")?.addEventListener("input", (e) => {
+    const pill = document.getElementById("checkoutDocDisplay");
+    if (pill) pill.innerText = e.target.value;
+});
+
+// ==========================================
+// Pending Debts State & Pagination (10 per page)
+// ==========================================
+let allDebts = [];
+let tableFilteredDebts = [];
+let tableCurrentPage = 1;
+const tableRowsPerPage = 10;
+
+function updateKPIStats() {
+    let totalPending = 0;
+    let payThisTime = 0;
+    let selectedCount = 0;
+
+    allDebts.forEach(d => {
+        const remain = Number(d.remain) || 0;
+        totalPending += remain;
+        if (d.selected) {
+            payThisTime += Number(d.pay_amount) || 0;
+            selectedCount++;
+        }
+    });
+
+    const remainingDebt = Math.max(0, totalPending - payThisTime);
+
+    const elPending = document.getElementById("statTotalPending");
+    const elPay = document.getElementById("statPayThisTime");
+    const elRemain = document.getElementById("statRemainingDebt");
+    const elCount = document.getElementById("tableRowsCount");
+    const elSelectedCount = document.getElementById("statSelectedCount");
+
+    if (elPending) elPending.innerText = formatCurrency(totalPending);
+    if (elPay) elPay.innerText = formatCurrency(payThisTime);
+    if (elRemain) elRemain.innerText = formatCurrency(remainingDebt);
+    if (elCount) elCount.innerText = allDebts.length.toLocaleString('th-TH');
+    if (elSelectedCount) elSelectedCount.innerText = selectedCount;
+}
+
+function renderDebtTable() {
+    const tbody = document.querySelector("#debtTable tbody");
+    const footer = document.getElementById("debtTableFooter");
+    tbody.innerHTML = "";
+
+    const memberId = document.getElementById("Idcustomer").value;
+    if (!memberId) {
+        tbody.innerHTML = `
+            <tr id="emptyRowPlaceholder">
+                <td colspan="9" style="text-align: center; padding: 55px 20px; color: #94a3b8;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">👤</div>
+                    <div style="font-size: 17px; font-weight: 600; color: #475569; margin-bottom: 6px;">ยังไม่ได้เลือกสมาชิกผู้ชำระเงิน</div>
+                    <div style="font-size: 14px; color: #94a3b8;">กรุณากดปุ่ม "+ ค้นหาสมาชิก" ด้านบนเพื่อเลือกสมาชิกและดึงรายการหนี้ค้างชำระ</div>
+                </td>
+            </tr>
+        `;
+        if (footer) footer.style.display = "none";
+        return;
+    }
+
+    if (!allDebts || allDebts.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 55px 20px; color: #10b981;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+                    <div style="font-size: 17px; font-weight: 600; color: #059669; margin-bottom: 6px;">สมาชิกท่านนี้ไม่มีรายการหนี้มรณะค้างชำระ</div>
+                    <div style="font-size: 14px; color: #64748b;">สมาชิกได้ชำระเงินค่าสงเคราะห์ครบถ้วนทุกรายการแล้ว</div>
+                </td>
+            </tr>
+        `;
+        if (footer) footer.style.display = "none";
+        return;
+    }
+
+    if (!tableFilteredDebts || tableFilteredDebts.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 35px 20px; color: #94a3b8;">
+                    🔍 ไม่พบข้อมูลรายการที่ค้นหา
+                </td>
+            </tr>
+        `;
+        if (footer) footer.style.display = "none";
+        return;
+    }
+
+    if (footer) footer.style.display = "flex";
+
+    const totalPages = Math.ceil(tableFilteredDebts.length / tableRowsPerPage) || 1;
+    if (tableCurrentPage > totalPages) tableCurrentPage = totalPages;
+    if (tableCurrentPage < 1) tableCurrentPage = 1;
+
+    const start = (tableCurrentPage - 1) * tableRowsPerPage;
+    const end = start + tableRowsPerPage;
+    const pageData = tableFilteredDebts.slice(start, end);
+
+    pageData.forEach((row, index) => {
+        const actualIndex = allDebts.indexOf(row);
+        const rowNumber = start + index + 1;
+        const amt = Number(row.amount) || 0;
+        const remain = Number(row.remain) || 0;
+        const payAmount = Number(row.pay_amount) || 0;
+        const isChecked = row.selected ? "checked" : "";
+
+        const dateStr = row.dateend ? formatThaiDate(new Date(row.dateend)) : "-";
+
+        const tr = `
+            <tr data-index="${actualIndex}" class="${row.selected ? 'row-selected' : ''}">
+                <td class="col-check" style="text-align: center;">
+                    <input type="checkbox" ${isChecked} onchange="toggleDebtSelection(${actualIndex}, this.checked)">
+                </td>
+                <td class="col-seq" style="text-align: center;">${rowNumber}</td>
+                <td class="col-docid">${row.docid}</td>
+                <td class="col-deceased">
+                    <div style="font-weight: 600; color: #0f172a; font-size: 16px;">${row.deceased_name || "-"}</div>
+                </td>
+                <td class="col-date" style="text-align: center;">${dateStr}</td>
+                <td class="col-numend" style="text-align: center;">${row.numberend || "-"}</td>
+                <td class="col-amt" style="text-align: right;">${formatCurrency(amt)}</td>
+                <td class="col-remain" style="text-align: right;">${formatCurrency(remain)}</td>
+                <td class="col-pay" style="text-align: right;">
+                    <input type="number" step="0.01" max="${remain}" min="0" class="tran-table-input" value="${payAmount}"
+                           oninput="handleDebtPayInput(${actualIndex}, this)"
+                           onchange="validateDebtPayAmount(${actualIndex}, this)"
+                           title="ห้ามชำระเกินงวดที่ค้าง (${formatCurrency(remain)} บาท)"
+                           ${row.selected ? '' : 'disabled'}>
+                </td>
+            </tr>
+        `;
+        tbody.insertAdjacentHTML("beforeend", tr);
+    });
+
+    renderTablePagination(totalPages, start + 1, Math.min(end, tableFilteredDebts.length), tableFilteredDebts.length);
+}
+
+function renderTablePagination(totalPages, startItem, endItem, totalItems) {
+    const pageInfo = document.getElementById("tablePageInfo");
+    const pagination = document.getElementById("tablePagination");
+
+    if (pageInfo) {
+        pageInfo.innerText = `แสดง ${startItem} - ${endItem} จากทั้งหมด ${totalItems} รายการ (หน้า ${tableCurrentPage}/${totalPages})`;
+    }
+
+    if (!pagination) return;
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // Previous Button
+    const prevBtn = document.createElement("button");
+    prevBtn.type = "button";
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.title = "หน้าก่อนหน้า";
+    prevBtn.disabled = tableCurrentPage === 1;
+    prevBtn.onclick = () => {
+        if (tableCurrentPage > 1) {
+            tableCurrentPage--;
+            renderDebtTable();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerText = i;
+        if (i === tableCurrentPage) btn.classList.add("active");
+        btn.onclick = () => {
+            tableCurrentPage = i;
+            renderDebtTable();
+        };
+        pagination.appendChild(btn);
+    }
+
+    // Next Button
+    const nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.title = "หน้าถัดไป";
+    nextBtn.disabled = tableCurrentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (tableCurrentPage < totalPages) {
+            tableCurrentPage++;
+            renderDebtTable();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+// Global actions for inline debt table
+window.toggleDebtSelection = function(index, isChecked) {
+    if (index >= 0 && index < allDebts.length) {
+        allDebts[index].selected = isChecked;
+        if (isChecked && (!allDebts[index].pay_amount || allDebts[index].pay_amount <= 0)) {
+            allDebts[index].pay_amount = allDebts[index].remain;
+        } else if (!isChecked) {
+            allDebts[index].pay_amount = 0;
+        }
+        updateKPIStats();
+        renderDebtTable();
+    }
+};
+
+window.handleDebtPayInput = function(index, inputEl) {
+    if (index < 0 || index >= allDebts.length) return;
+    const maxRemain = Number(allDebts[index].remain) || 0;
+    let val = parseFloat(inputEl.value);
+
+    // ป้องกันการพิมพ์เกินยอดค้างชำระ: ปรับกลับมาเท่ากับยอดค้างชำระทันที
+    if (!isNaN(val) && val > maxRemain) {
+        inputEl.value = maxRemain;
+        val = maxRemain;
+        inputEl.style.borderColor = "#dc2626";
+        inputEl.style.backgroundColor = "#fef2f2";
+        setTimeout(() => {
+            inputEl.style.borderColor = "";
+            inputEl.style.backgroundColor = "";
+        }, 1200);
+    } else if (!isNaN(val) && val < 0) {
+        inputEl.value = 0;
+        val = 0;
+    }
+
+    allDebts[index].pay_amount = isNaN(val) ? 0 : val;
+    updateKPIStats();
+};
+
+window.validateDebtPayAmount = function(index, inputEl) {
+    if (index < 0 || index >= allDebts.length) return;
+    const maxRemain = Number(allDebts[index].remain) || 0;
+    let val = parseFloat(inputEl.value);
+
+    if (isNaN(val) || val < 0) {
+        val = 0;
+        inputEl.value = 0;
+    } else if (val > maxRemain) {
+        alert(`⚠️ ยอดชำระครั้งนี้ห้ามเกินงวดที่ค้างชำระ (${formatCurrency(maxRemain)} บาท)`);
+        val = maxRemain;
+        inputEl.value = maxRemain;
+    }
+
+    allDebts[index].pay_amount = val;
+    updateKPIStats();
+};
+
+// Select All / Unselect All
+const btnSelectAll = document.getElementById("btnSelectAll");
+if (btnSelectAll) {
+    btnSelectAll.addEventListener("click", () => {
+        allDebts.forEach(d => {
+            d.selected = true;
+            d.pay_amount = d.remain;
+        });
+        updateKPIStats();
+        renderDebtTable();
+    });
+}
+
+const btnUnselectAll = document.getElementById("btnUnselectAll");
+if (btnUnselectAll) {
+    btnUnselectAll.addEventListener("click", () => {
+        allDebts.forEach(d => {
+            d.selected = false;
+            d.pay_amount = 0;
+        });
+        updateKPIStats();
+        renderDebtTable();
+    });
+}
+
+// Search filter in debt table
+function applyDebtTableFilter() {
+    const query = (document.getElementById("debtTableSearch")?.value || "").toLowerCase().trim();
+    if (!query) {
+        tableFilteredDebts = [...allDebts];
+    } else {
+        tableFilteredDebts = allDebts.filter(d => {
+            const str = `${d.docid} ${d.deceased_name || ''} ${d.numberend || ''}`.toLowerCase();
+            return str.includes(query);
+        });
+    }
+    tableCurrentPage = 1;
+    renderDebtTable();
+}
+
+const debtTableSearch = document.getElementById("debtTableSearch");
+if (debtTableSearch) {
+    debtTableSearch.addEventListener("input", applyDebtTableFilter);
+}
+
+// ==========================================
+// POPUP MEMBER SELECTION (10 per page)
+// ==========================================
+const popupMemberModal = document.getElementById("popupFormMember");
+const openMemberBtn = document.getElementById("openMemberPopup");
+const closeMemberBtn = document.getElementById("closePopupMember");
+
+let popupAllCustomers = [];
+let popupFilteredCustomers = [];
+const popupRowsPerPage = 10;
+let popupCurrentPage = 1;
+
+function openPopup() {
+    popupMemberModal.style.display = "flex";
+    loadPopupMembers();
+}
+
+if (openMemberBtn) openMemberBtn.addEventListener("click", openPopup);
+if (closeMemberBtn) {
+    closeMemberBtn.addEventListener("click", () => {
+        popupMemberModal.style.display = "none";
+    });
+}
+popupMemberModal.addEventListener("click", (e) => {
+    if (e.target === popupMemberModal) {
+        popupMemberModal.style.display = "none";
+    }
+});
+
+function loadPopupMembers() {
+    const tbody = document.getElementById("popupMemberTableBody");
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color:#888;">กำลังโหลดข้อมูลสมาชิก...</td></tr>`;
+
+    fetch(`${API_BASE}/customer`)
+    .then(r => r.json())
+    .then(data => {
+        const activeMembers = (data.results || []).filter(c => c.status == 1 || c.status == "1").map(m => ({
+            ...m,
+            search_key: `${m.Idcustomer} ${m.prefix || ""} ${m.name || ""} ${m.lastname || ""} ${m.Idcard || ""} ${m.Tel || ""}`.toLowerCase()
+        }));
+
+        popupAllCustomers = activeMembers;
+        popupFilteredCustomers = activeMembers;
+        popupCurrentPage = 1;
+        renderPopupMemberTable();
+    })
+    .catch(err => {
+        console.error("Load popup members error:", err);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color:#ef4444;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+    });
+}
+
+function applyPopupMemberFilter() {
+    const keyword = (document.getElementById("popupSearchInput")?.value || "").toLowerCase().trim();
+    if (!keyword) {
+        popupFilteredCustomers = popupAllCustomers;
+    } else {
+        popupFilteredCustomers = popupAllCustomers.filter(c => c.search_key.includes(keyword));
+    }
+    popupCurrentPage = 1;
+    renderPopupMemberTable();
+}
+
+const popupSearchInput = document.getElementById("popupSearchInput");
+if (popupSearchInput) {
+    popupSearchInput.addEventListener("input", applyPopupMemberFilter);
+}
+
+function renderPopupMemberTable() {
+    const tbody = document.getElementById("popupMemberTableBody");
+    tbody.innerHTML = "";
+
+    if (!popupFilteredCustomers || popupFilteredCustomers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#888;">ไม่พบรายชื่อสมาชิกที่ค้นหา</td></tr>`;
+        const pageInfo = document.getElementById("popupPageInfo");
+        if (pageInfo) pageInfo.innerText = "ไม่พบรายการ";
+        const pagination = document.getElementById("popupPagination");
+        if (pagination) pagination.innerHTML = "";
+        return;
+    }
+
+    const start = (popupCurrentPage - 1) * popupRowsPerPage;
+    const end = start + popupRowsPerPage;
+    const pageData = popupFilteredCustomers.slice(start, end);
+
+    pageData.forEach((item, index) => {
+        const custJson = JSON.stringify(item).replace(/'/g, "&apos;");
+        const row = `
+            <tr>
+                <td style="text-align: center;">${start + index + 1}</td>
+                <td><strong>${item.Idcustomer}</strong></td>
+                <td><strong>${item.prefix || ""}${item.name || ""} ${item.lastname || ""}</strong></td>
+                <td>${item.Idcard || "-"}</td>
+                <td>${item.Tel || "-"}</td>
+                <td style="text-align: center;">
+                    <span class="badge-status badge-green" style="background:#dcfce7; color:#15803d; border:1px solid #86efac;">ปกติ</span>
+                </td>
+                <td style="text-align: center;">
+                    <button type="button" class="select-btn" onclick='selectMember(${custJson})'>
+                        เลือก
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+
+    createPopupMemberPagination();
+}
+
+function createPopupMemberPagination() {
+    const totalPages = Math.ceil(popupFilteredCustomers.length / popupRowsPerPage) || 1;
+    const pagination = document.getElementById("popupPagination");
+    const pageInfo = document.getElementById("popupPageInfo");
+
+    const start = (popupCurrentPage - 1) * popupRowsPerPage + 1;
+    const end = Math.min(popupCurrentPage * popupRowsPerPage, popupFilteredCustomers.length);
+    if (pageInfo) {
+        pageInfo.innerText = `แสดง ${start} - ${end} จากทั้งหมด ${popupFilteredCustomers.length} รายการ (หน้า ${popupCurrentPage}/${totalPages})`;
+    }
+
+    if (!pagination) return;
+    pagination.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement("button");
+    prevBtn.type = "button";
+    prevBtn.innerHTML = "&laquo;";
+    prevBtn.disabled = popupCurrentPage === 1;
+    prevBtn.onclick = () => {
+        if (popupCurrentPage > 1) {
+            popupCurrentPage--;
+            renderPopupMemberTable();
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerText = i;
+        if (i === popupCurrentPage) btn.classList.add("active");
+        btn.onclick = () => {
+            popupCurrentPage = i;
+            renderPopupMemberTable();
+        };
+        pagination.appendChild(btn);
+    }
+
+    const nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.innerHTML = "&raquo;";
+    nextBtn.disabled = popupCurrentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (popupCurrentPage < totalPages) {
+            popupCurrentPage++;
+            renderPopupMemberTable();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+// When member is selected
+window.selectMember = async function(cust) {
+    popupMemberModal.style.display = "none";
+
+    document.getElementById("Idcustomer").value = cust.Idcustomer || "";
+    document.getElementById("prefix").value = cust.prefix || "";
+    document.getElementById("name").value = cust.name || "";
+    document.getElementById("lastname").value = cust.lastname || "";
+    document.getElementById("Idcard").value = cust.Idcard || "";
+
+    // Update Display Card
+    document.getElementById("memberNotSelectedBanner").style.display = "none";
+    document.getElementById("memberSelectedDetails").style.display = "block";
+    document.getElementById("displayCustId").innerText = cust.Idcustomer || "-";
+    document.getElementById("displayCustName").innerText = `${cust.prefix || ""}${cust.name || ""} ${cust.lastname || ""}`;
+    document.getElementById("displayCustIdcard").innerText = cust.Idcard || "-";
+    document.getElementById("displayCustTel").innerText = cust.Tel || "-";
+
+    const tbody = document.querySelector("#debtTable tbody");
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="9" style="text-align: center; padding: 40px 20px; color: #64748b;">
+                <div style="font-size: 32px; margin-bottom: 8px;">⏳</div>
+                <div style="font-size: 15px; font-weight: 600;">กำลังตรวจสอบรายการหนี้ค้างชำระของ ${cust.prefix || ""}${cust.name || ""}...</div>
+            </td>
+        </tr>
+    `;
+
+    try {
+        const response = await fetch(`${API_BASE}/customer_pending_debts/${cust.Idcustomer}`);
+        const data = await response.json();
+
+        if (data.error === "0" && Array.isArray(data.results)) {
+            allDebts = data.results.map(d => ({
+                ...d,
+                selected: true,
+                pay_amount: Number(d.remain) || 0
+            }));
+        } else {
+            allDebts = [];
+        }
+
+        tableFilteredDebts = [...allDebts];
+        tableCurrentPage = 1;
+        updateKPIStats();
+        renderDebtTable();
+
+    } catch (err) {
+        console.error("Load pending debts error:", err);
+        alert("เกิดข้อผิดพลาดในการดึงข้อมูลหนี้ค้างชำระ");
+        allDebts = [];
+        tableFilteredDebts = [];
+        updateKPIStats();
+        renderDebtTable();
+    }
+};
+
+// ==========================================
+// Reset Form Button
+// ==========================================
+const btnResetForm = document.getElementById("btnResetForm");
+if (btnResetForm) {
+    btnResetForm.addEventListener("click", () => {
+        document.getElementById("registerForm").reset();
+        document.getElementById("Idcustomer").value = "";
+        document.getElementById("prefix").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("lastname").value = "";
+        document.getElementById("Idcard").value = "";
+        document.getElementById("remark").value = "";
+        document.getElementById("bank_name").value = "";
+        document.getElementById("ref_no").value = "";
+
+        // Reset display card
+        document.getElementById("memberNotSelectedBanner").style.display = "flex";
+        document.getElementById("memberSelectedDetails").style.display = "none";
+
+        // Reset Pay Type
+        payTypeButtons.forEach(b => b.classList.remove("active"));
+        document.querySelector(".paytype-pill-btn[data-type='เงินสด']")?.classList.add("active");
+        hiddenPayType.value = "เงินสด";
+        transferDetailsSection.style.display = "none";
+
+        const today = new Date();
+        fpDate.setDate(today);
+        document.getElementById("thai-date").value = formatThaiDate(today);
+        updateHiddenDate(today);
+
+        allDebts = [];
+        tableFilteredDebts = [];
+        tableCurrentPage = 1;
+        updateKPIStats();
+        renderDebtTable();
+
+        loadRunning();
+    });
+}
+
+// ==========================================
+// Block Enter Key on Form (Click Submit Only)
+// ==========================================
+const registerForm = document.getElementById("registerForm");
+if (registerForm) {
+    registerForm.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            const target = e.target;
+            if (target && target.id === "debtTableSearch") {
+                e.preventDefault();
+                applyDebtTableFilter();
+                return;
+            }
+            if (target && target.id === "popupSearchInput") {
+                e.preventDefault();
+                applyPopupMemberFilter();
+                return;
+            }
+            if (target && (target.tagName === "INPUT" || target.tagName === "SELECT")) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+
+    registerForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        return false;
+    });
+}
+
+// ==========================================
+// Submit Form: Save Movement (Click Only)
+// ==========================================
+const submitBtn = document.getElementById("btnSubmitForm");
+if (submitBtn) {
+    submitBtn.addEventListener("click", async function(e) {
+        e.preventDefault();
+
+        const docidmoveVal = document.getElementById("docidmove")?.value?.trim() || "";
+        if (!docidmoveVal) {
+            alert("⚠️ กรุณาระบุเลขที่เอกสารรับเงิน");
+            return;
+        }
+
+        const custId = document.getElementById("Idcustomer").value;
+        if (!custId) {
+            alert("⚠️ กรุณาเลือกสมาชิกผู้ชำระเงินก่อน");
+            openPopup();
+            return;
+        }
+
+        const selectedDebts = allDebts.filter(d => d.selected && Number(d.pay_amount) > 0);
+        if (selectedDebts.length === 0) {
+            alert("⚠️ กรุณาเลือกรายการมรณะที่ต้องการชำระเงินอย่างน้อย 1 รายการ และระบุยอดเงินชำระมากกว่า 0 บาท");
+            return;
+        }
+
+        // ตรวจสอบห้ามชำระเกินงวดที่ค้างชำระเด็ดขาด
+        for (const d of selectedDebts) {
+            const pay = Number(d.pay_amount) || 0;
+            const remain = Number(d.remain) || 0;
+            if (pay > remain) {
+                alert(`⚠️ รายการ ${d.docid} (${d.deceased_name || ''}):\nยอดชำระ ${formatCurrency(pay)} บาท เกินกว่างวดที่ค้างชำระ (${formatCurrency(remain)} บาท)\n\nระบบไม่อนุญาตให้ชำระเกินงวดที่ค้าง กรุณาแก้ไขยอดเงิน`);
+                return;
+            }
+        }
+
+        let totalPayAmount = 0;
+        let totalDebtPending = 0;
+        selectedDebts.forEach(d => {
+            totalPayAmount += Number(d.pay_amount) || 0;
+            totalDebtPending += Number(d.remain) || 0;
+        });
+
+        const remainTotal = Math.max(0, totalDebtPending - totalPayAmount);
+
+        if (!confirm(`ยืนยันการบันทึกรับเงินจำนวน ${formatCurrency(totalPayAmount)} บาท สำหรับ ${selectedDebts.length} รายการใช่หรือไม่?`)) {
+            return;
+        }
+
+        const origText = submitBtn.innerHTML;
+        submitBtn.innerHTML = `<span>⏳ กำลังบันทึก...</span>`;
+        submitBtn.disabled = true;
+
+        const detailsPayload = selectedDebts.map(d => ({
+            docid: d.docid,
+            deceased_id: d.deceased_id || "",
+            deceased_name: d.deceased_name || "",
+            dateend: d.dateend || null,
+            numberend: d.numberend || "",
+            amount: Number(d.amount) || 0,
+            paid_prev: Number(d.paid_prev) || 0,
+            payamount: Number(d.pay_amount) || 0,
+            remain: Math.max(0, (Number(d.remain) || 0) - (Number(d.pay_amount) || 0)),
+            status: 1
+        }));
+
+        const payload = {
+            docidmove: document.getElementById("docidmove").value,
+            date: document.getElementById("ad-date").value,
+            Idcustomer: custId,
+            prefix: document.getElementById("prefix").value || "",
+            name: document.getElementById("name").value || "",
+            lastname: document.getElementById("lastname").value || "",
+            Idcard: document.getElementById("Idcard").value || "",
+            total_amount: totalDebtPending,
+            payamount: totalPayAmount,
+            remain_amount: remainTotal,
+            pay_type: hiddenPayType.value,
+            bank_name: document.getElementById("bank_name").value || "",
+            ref_no: document.getElementById("ref_no").value || "",
+            remark: document.getElementById("remark").value || "",
+            staff_name: document.getElementById("staff_name").value || "เจ้าหน้าที่",
+            status: 1,
+            details: detailsPayload
+        };
+
+        console.log("Submitting movement payload:", payload);
+
+        try {
+            const response = await fetch(`${API_BASE}/savemovement`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            console.log("Save response:", result);
+
+            if (!response.ok || result.error !== "0") {
+                alert("❌ บันทึกไม่สำเร็จ: " + (result.message || ""));
+                return;
+            }
+
+            alert(`✅ บันทึกการรับชำระเงินเรียบร้อยแล้ว!\nเลขที่เอกสาร: ${result.docidmove || payload.docidmove}\nยอดรับชำระ: ${formatCurrency(totalPayAmount)} บาท`);
+            
+            window.location.reload();
+
+        } catch (err) {
+            console.error("Save movement error:", err);
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+        } finally {
+            submitBtn.innerHTML = origText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+</script>
+{% endblock %}

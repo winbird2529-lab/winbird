@@ -1,0 +1,59 @@
+.form-group1 {
+    margin-top: 20px;
+}
+
+.form-group1 p3 {
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+#moneyTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: #fff;
+}
+
+#moneyTable th {
+    background-color: #ff9800;
+    color: white;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+    position: sticky;
+    top: 0;
+}
+
+#moneyTable td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+}
+
+#moneyTable tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+#moneyTable tbody tr:hover {
+    background-color: #fff3cd;
+    cursor: pointer;
+}
+
+#moneyTable td:nth-child(1),
+#moneyTable td:nth-child(6) {
+    text-align: center;
+}
+
+#moneyTable td:nth-child(7),
+#moneyTable td:nth-child(8) {
+    text-align: right;
+    font-weight: bold;
+}
+
+.table-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}

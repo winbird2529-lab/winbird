@@ -1,0 +1,347 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}บันทึกทะเบียนพนักงาน{% endblock %}
+
+{% block content %}
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<!-- Page CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+
+<div class="customer-form-wrap">
+    <h3><a href="/DK_Home">HOME</a> \ <a href="/DK_Employee">ทะเบียนพนักงาน</a> \ บันทึกทะเบียนพนักงาน</h3>
+
+    <form id="employeeForm">
+        <div class="form-action-bar">
+            <h2>บันทึกทะเบียนพนักงาน</h2>
+            <div class="btn-group">
+                <button type="submit" class="btn-save-main">📄 บันทึกพนักงาน</button>
+                <button type="button" id="btnCancel" class="btn-cancel-main">🗑️ ยกเลิก</button>
+            </div>
+        </div>
+
+        <div class="form-grid-3">
+            <!-- Column 1: ข้อมูลส่วนตัว -->
+            <div class="form-section-card">
+                <h3>👤 ข้อมูลส่วนตัว</h3>
+                <div class="form-field">
+                    <label for="IdEmployee">รหัสพนักงาน <span class="req">*</span></label>
+                    <input type="text" id="IdEmployee" name="IdEmployee" readonly placeholder="ระบบออกรหัสอัตโนมัติ">
+                </div>
+                <div class="form-field">
+                    <label for="prefix">คำนำหน้า <span class="req">*</span></label>
+                    <select name="prefix" id="prefix" required>
+                        <option value="">-- กรุณาเลือก --</option>
+                        <option value="นาย">นาย</option>
+                        <option value="นาง">นาง</option>
+                        <option value="นางสาว">นางสาว</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="name">ชื่อ <span class="req">*</span></label>
+                    <input type="text" id="name" name="name" required placeholder="กรุณาระบุชื่อ">
+                </div>
+                <div class="form-field">
+                    <label for="lastname">นามสกุล <span class="req">*</span></label>
+                    <input type="text" id="lastname" name="lastname" required placeholder="กรุณาระบุนามสกุล">
+                </div>
+            </div>
+
+            <!-- Column 2: ข้อมูลการทำงานและการติดต่อ -->
+            <div class="form-section-card">
+                <h3>💼 ข้อมูลการทำงานและการติดต่อ</h3>
+                <div class="form-field">
+                    <label for="position">ตำแหน่ง <span class="req">*</span></label>
+                    <input type="text" id="position" name="position" placeholder="เช่น เจ้าหน้าที่ธุรการ, พนักงานบัญชี" required>
+                </div>
+                <div class="form-field">
+                    <label for="Idcard">เลขบัตรประชาชน</label>
+                    <input type="text" id="Idcard" name="Idcard" maxlength="13" placeholder="เลขประจำตัวประชาชน 13 หลัก" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+                <div class="form-field">
+                    <label for="Tel">เบอร์โทรศัพท์</label>
+                    <input type="text" id="Tel" name="Tel" maxlength="10" placeholder="เช่น 0812345678" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+            </div>
+
+            <!-- Column 3: ข้อมูลการจ้างงานและสถานะ -->
+            <div class="form-section-card">
+                <h3>📝 ข้อมูลการจ้างงานและสถานะ</h3>
+                <div class="form-field">
+                    <label for="thai-date">วันที่เริ่มงาน <span class="req">*</span></label>
+                    <input type="text" id="thai-date" name="thai-date" placeholder="เลือกวันที่เริ่มงาน" required>
+                    <input type="hidden" id="ad-date" name="date">
+                </div>
+                <div class="form-field">
+                    <label for="status">สถานะพนักงาน</label>
+                    <select id="status" disabled>
+                        <option value="1" selected>ปกติ</option>
+                        <option value="2">ลาออก</option>
+                    </select>
+                    <input type="hidden" name="status" value="1">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+import { getRunningConfig } from "/static/js/runningConfig.js";
+
+const thaiInput = document.getElementById("thai-date");
+const adInput = document.getElementById("ad-date");
+
+// ======================
+// FLATPICKR
+// ======================
+const fp = flatpickr("#thai-date", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: "today",
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        const today = new Date();
+        instance.input.value = formatThaiDate(today);
+        updateHiddenDate(today);
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        const date = selectedDates[0];
+        instance.input.value = formatThaiDate(date);
+        updateHiddenDate(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    }
+});
+
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+    }, 1);
+}
+
+function formatThaiDate(date) {
+    if (!date) return "";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+
+function updateHiddenDate(date) {
+    if (!date) {
+        adInput.value = "";
+        return;
+    }
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    adInput.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// ======================
+// RUNNING NUMBER & MODE (AUTO / MANUAL)
+// ======================
+let isManualDocMode = false;
+
+async function loadRunning() {
+    try {
+        const response = await fetch(`${API_BASE}/get-running?id=2`);
+        const data = await response.json();
+        const nextRun = String(parseInt(data.IdRunning) + 1).padStart(3, "0");
+        return `${data.docId}${nextRun}`;
+    } catch (err) {
+        console.error("Running Error:", err);
+        return "";
+    }
+}
+
+async function initDocMode() {
+    const input = document.getElementById("IdEmployee");
+    try {
+        const config = await getRunningConfig();
+        isManualDocMode = (config && config.ey_mode === "manual");
+
+        if (isManualDocMode) {
+            // โหมดกำหนดเอง (Manual) - สามารถพิมพ์รหัสพนักงานเองได้
+            input.readOnly = false;
+            input.placeholder = "กรุณากรอกรหัสพนักงาน";
+            input.style.background = "#ffffff";
+            input.style.cursor = "text";
+            input.value = "";
+        } else {
+            // โหมดอัตโนมัติ (Auto) - อ่านเลขอัตโนมัติจากฐานข้อมูล
+            input.readOnly = true;
+            input.placeholder = "ระบบออกรหัสอัตโนมัติ";
+            input.style.background = "#f1f5f9";
+            input.style.cursor = "not-allowed";
+            const nextId = await loadRunning();
+            input.value = nextId;
+        }
+    } catch (e) {
+        console.error("Init doc mode error:", e);
+        const nextId = await loadRunning();
+        input.value = nextId;
+    }
+}
+initDocMode();
+
+// ======================
+// CANCEL
+// ======================
+document.getElementById("btnCancel").addEventListener("click", () => {
+    window.location.href = "/DK_Employee";
+});
+
+// ======================
+// SUBMIT
+// ======================
+const form = document.getElementById("employeeForm");
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = "⏳ กำลังบันทึก...";
+    }
+
+    try {
+        const IdEmployee = document.getElementById("IdEmployee").value.trim();
+        if (!IdEmployee) {
+            alert("⚠️ กรุณาระบุรหัสพนักงาน");
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "📄 บันทึกพนักงาน";
+            }
+            return;
+        }
+
+        const Idcard = document.getElementById("Idcard").value.trim();
+        if (Idcard && Idcard.length !== 13) {
+            alert("⚠️ เลขประจำตัวประชาชนต้องมี 13 หลัก");
+            document.getElementById("Idcard").focus();
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "📄 บันทึกพนักงาน";
+            }
+            return;
+        }
+
+        const Tel = document.getElementById("Tel").value.trim();
+        if (Tel && (Tel.length < 9 || Tel.length > 10)) {
+            alert("⚠️ เบอร์โทรศัพท์ต้องเป็นตัวเลข 9-10 หลัก");
+            document.getElementById("Tel").focus();
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "📄 บันทึกพนักงาน";
+            }
+            return;
+        }
+
+        const dateVal = document.getElementById("ad-date").value;
+        if (!dateVal) {
+            alert("⚠️ กรุณาระบุวันที่เริ่มงาน");
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "📄 บันทึกพนักงาน";
+            }
+            return;
+        }
+
+        // ตรวจสอบรหัสซ้ำ
+        try {
+            const check = await fetch(`${API_BASE}/check_employee/${IdEmployee}`);
+            if (check.ok) {
+                const checkResult = await check.json();
+                if (checkResult.exists) {
+                    alert("❌ รหัสพนักงานซ้ำ กรุณาตรวจสอบ");
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = "📄 บันทึกพนักงาน";
+                    }
+                    return;
+                }
+            }
+        } catch (err) {
+            console.warn("Check employee warning:", err);
+        }
+
+        const data = {
+            IdEmployee: IdEmployee,
+            prefix: document.getElementById("prefix").value,
+            name: document.getElementById("name").value.trim(),
+            lastname: document.getElementById("lastname").value.trim(),
+            Idcard: Idcard,
+            Tel: Tel,
+            position: document.getElementById("position").value.trim(),
+            date: dateVal,
+            status: 1
+        };
+
+        const response = await fetch(`${API_BASE}/saveuseremployee`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.error === "0") {
+            alert("✅ บันทึกข้อมูลพนักงานเรียบร้อย");
+            // เคลียร์ฟอร์ม
+            document.getElementById("prefix").value = "";
+            document.getElementById("name").value = "";
+            document.getElementById("lastname").value = "";
+            document.getElementById("Idcard").value = "";
+            document.getElementById("Tel").value = "";
+            document.getElementById("position").value = "";
+
+            // รีเซ็ตวันที่กลับเป็นวันนี้
+            const today = new Date();
+            if (fp) fp.setDate(today);
+            thaiInput.value = formatThaiDate(today);
+            updateHiddenDate(today);
+
+            // โหลดรหัสพนักงานใหม่
+            if (!isManualDocMode) {
+                const nextId = await loadRunning();
+                document.getElementById("IdEmployee").value = nextId;
+            } else {
+                document.getElementById("IdEmployee").value = "";
+                document.getElementById("IdEmployee").focus();
+            }
+        } else {
+            alert("❌ " + (result.message || "บันทึกไม่สำเร็จ"));
+        }
+    } catch (err) {
+        console.error("Save error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "📄 บันทึกพนักงาน";
+        }
+    }
+});
+</script>
+
+{% endblock %}

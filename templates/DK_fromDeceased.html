@@ -1,0 +1,324 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Editcustomer{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Flatpickr Theme (เลือกได้) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<!-- Thai language -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+
+<!-- เริ่ม -->
+<h2>Welcome to DK_Editcustomer</h2>
+<p>Hello Flask layout!</p>
+
+
+<h3><a href="/DK_Home">HOME</a> \ แก้ไขทะเบียนสมาชิก</h3>
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Flatpickr Theme (เลือกได้) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Thai language -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<div class="main">
+
+    <form id="customerForm">
+    <p>แก้ไขทะเบียนสมาชิก</p>
+       <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 15px;">
+        <div class="button-group">
+          <button type="submit" class="submit-btnsave">📄 บันทึก</button>
+
+          <!-- ปุ่มยกเลิก -->
+          <button type="button" id="btnCancel">🗑️ ยกเลิก</button>
+          
+        </div>
+      </div>
+      <hr class="my-box">
+
+    <div class="row-container">
+        
+       
+       <div class="form-left">
+                     
+             <h3>ข้อมูลส่วนตัว</h3>
+              <label for="Idcustomer"> รหัสสมาชิก:</label><br>
+                <input type="text" id="Idcustomer" name="Idcustomer"><br>
+              <label for="prefix">คำนำหน้า :</label><br>
+                <select name="prefix" id="prefix" required>
+                  <option value="">-- กรุณาเลือก --</option>
+                  <option value="นาย">นาย</option>
+                  <option value="นาง">นาง</option>
+                  <option value="นางสาว">นางสาว</option>
+                </select><br>  
+             <label for="name">ชื่อ :</label><br>
+                  <input type="text" id="name"name="name"><br>
+             <label for="lastname">นามสกุล :</label><br>
+                  <input type="text" id="lastname"name="lastname"><br>
+             <label for="Idcard">เลขบัตรประชาชน :</label><br>
+                  <input type="text" id="Idcard"name="Idcard"><br>
+             <label for="Tel">เบอร์โทรศัพย์ :</label><br>
+                  <input type="text" id="Tel"name="Tel"><br>
+            
+       </div>
+     
+
+    
+    <div class="form-left">
+        <h3>ที่อยู่</h3>
+        <label for="addrNo">ที่อยู่ :</label><br>
+        <input type="text" id="addrNo" name="addrNo"><br>
+
+        <label for="moo">หมู่ :</label><br>
+        <input type="text" id="moo" name="moo"><br>
+
+        <label for="locality">ตำบล :</label><br>
+        <input type="text" id="locality" name="locality"><br>
+
+        <label for="district">อำเภอ :</label><br>
+        <input type="text" id="district" name="district"><br>
+
+        <label for="province">จังหวัด :</label><br>
+        <input type="text" id="province" name="province"><br>
+
+        <label for="zipCode">รหัสไปรษณีย์ :</label><br>
+        <input type="text" id="zipCode" name="zipCode"><br>
+    </div>    
+       
+    <div class="form-left">
+           <label for="date">วันที่ :</label><br>
+              <input type="date" id="thai-date" name="thai-date">
+              <input type="hidden" id="ad-date" name="date"> <!-- ค่านี้จะถูกส่งไป FastAPI -->
+          <br><br>
+            
+              <label for="free">ค่าธรรมเนียม :</label><br>
+              <input type="text" id="free" name="free"><br>
+            
+                     
+    </div>      
+  </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+
+import { API_BASE } from "/static/js/config.js";
+
+// =========================
+// ELEMENT
+// =========================
+const thaiInput = document.getElementById("thai-date");
+const adInput = document.getElementById("ad-date");
+
+// =========================
+// READONLY
+// =========================
+window.onload = function () {
+
+    document.getElementById("Idcustomer").readOnly = true;
+};
+
+// =========================
+// FLATPICKR
+// =========================
+const fp = flatpickr("#thai-date", {
+
+    locale: "th",
+
+    dateFormat: "Y-m-d",
+
+    allowInput: false,
+
+    onReady: function(selectedDates, dateStr, instance) {
+
+        changeToBuddhistYear(instance);
+
+        if (selectedDates.length > 0) {
+
+            const date = selectedDates[0];
+
+            thaiInput.value = formatThaiDate(date);
+
+            updateHiddenDate(date);
+        }
+    },
+
+    onChange: function(selectedDates, dateStr, instance) {
+
+        if (!selectedDates.length) return;
+
+        const date = selectedDates[0];
+
+        thaiInput.value = formatThaiDate(date);
+
+        updateHiddenDate(date);
+
+        changeToBuddhistYear(instance);
+    },
+
+    onMonthChange: function(selectedDates, dateStr, instance) {
+
+        changeToBuddhistYear(instance);
+    },
+
+    onYearChange: function(selectedDates, dateStr, instance) {
+
+        changeToBuddhistYear(instance);
+    }
+
+});
+
+// =========================
+// เปลี่ยน ค.ศ. → พ.ศ.
+// =========================
+function changeToBuddhistYear(instance) {
+
+    setTimeout(() => {
+
+        const yearElement = instance.currentYearElement;
+
+        if (yearElement) {
+
+            const christianYear = parseInt(yearElement.value);
+
+            if (!isNaN(christianYear)) {
+
+                yearElement.value = christianYear + 543;
+            }
+        }
+
+    }, 1);
+}
+
+// =========================
+// FORMAT THAI DATE
+// =========================
+function formatThaiDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+
+// =========================
+// UPDATE HIDDEN DATE
+// =========================
+function updateHiddenDate(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    adInput.value = `${yyyy}-${mm}-${dd}`;
+}
+
+
+
+// =========================
+// GET ID
+// =========================
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+if (!id) {
+    alert("❌ ไม่พบรหัสสมาชิก");
+}
+// =========================
+// LOAD DATA
+// =========================
+fetch(`${API_BASE}/customer1/${id}`)
+.then(res => res.json())
+.then(data => {
+    if (data.error !== "0") {
+        alert("❌ ไม่พบข้อมูลสมาชิก");
+        return;
+    }
+    const emp = data.results;
+
+    // =====================
+    // TEXT
+    // =====================
+    document.getElementById("Idcustomer").value = emp.Idcustomer || "";
+    document.getElementById("prefix").value = emp.prefix || "";
+    document.getElementById("name").value = emp.name || "";
+    document.getElementById("lastname").value = emp.lastname || "";
+    document.getElementById("Idcard").value = emp.Idcard || "";
+    document.getElementById("Tel").value = emp.Tel || "";
+    document.getElementById("addrNo").value = emp.addrNo || "";
+    document.getElementById("moo").value = emp.moo || "";
+    document.getElementById("locality").value = emp.locality || "";
+    document.getElementById("district").value = emp.district || "";
+    document.getElementById("province").value = emp.province || "";
+    document.getElementById("zipCode").value = emp.zipCode || "";
+    document.getElementById("free").value = emp.free || "";
+
+    // =====================
+    // DATE
+    // =====================
+    if (emp.date) {
+        // DB format = 2026-05-10
+        const dbDate = new Date(emp.date);
+        // set flatpickr
+        fp.setDate(dbDate);
+        // แสดง พ.ศ.
+        thaiInput.value = formatThaiDate(dbDate);
+        // hidden ค.ศ.
+        updateHiddenDate(dbDate);
+    }
+})
+.catch(err => {
+    console.error(err);
+    alert("❌ โหลดข้อมูลไม่สำเร็จ");
+});
+// =========================
+// CANCEL
+// =========================
+document.getElementById("btnCancel")
+.addEventListener("click", () => {
+    window.location.href = "/DK_customer";
+});
+
+// =========================
+// UPDATE
+// =========================
+document.getElementById("customerForm")
+.addEventListener("submit", function(e){
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch(`${API_BASE}/customer/update`, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error === "0") {
+            alert("✅ แก้ไขข้อมูลสำเร็จ");
+            window.location.href = "/DK_customer";
+        } else {
+           alert("❌ ไม่สามารถแก้ไขข้อมูลได้");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ เกิดข้อผิดพลาด");
+    });
+});
+
+</script>
+
+
+
+
+ 
+{% endblock %}

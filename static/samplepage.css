@@ -1,0 +1,566 @@
+ 
+ * {
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: sans-serif;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-areas:
+        "header header"
+        "sidebar main";
+      grid-template-columns: 250px 1fr;
+      grid-template-rows: 60px 1fr;
+      height: 100vh;
+    }
+
+    .header {
+      grid-area: header;
+      background: linear-gradient(to right,#273B4A);
+      background-color: #79797c;
+      color: rgb(248, 252, 252);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2 30px;
+    }
+
+
+    .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img {
+  height: 32px;
+  width: auto;
+}
+
+    .sidebar {
+      grid-area: sidebar;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #dde1e4);
+      border-right: 1px solid #eee;
+      padding: 25px;
+      overflow-y: auto;
+      color: rgb(71, 53, 53);
+      font-family: 'Sarabun', sans-serif;
+    }
+   
+    
+  /* เมนูรอง */
+  ul.navbar li a {
+    
+    text-align: left; /* กรณีมีข้อความเยอะ จะชิดซ้าย */
+    margin-left: 1;
+    display: block;
+    padding: 2px 1px;
+    text-decoration: none;
+    color: rgb(41, 36, 36);  /* สีดำ */
+    font-family: 'Kanit', sans-serif;
+    transition: 0.3s;
+  }
+  ul.navbar li a:hover {
+    background-color: #ee6f1a;
+    color: rgb(247, 242, 243);
+  }
+
+  ul.navbar li a:active {
+    background-color: #bbb;
+    color: white;
+  }
+
+  ul.navbar li a.active {
+    background-color: #333;
+    color: white;
+  }
+   /* ปิดเมนูรอง */
+
+
+
+      .sidebar1 {
+      grid-area: sidebar1;
+      border-right: 1px solid #eee;
+      padding: 20px;
+    }
+  
+
+    .main {
+      grid-area: main;
+      background-color: #f5f7fa;
+      padding: 20px;
+    
+    }
+
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+   
+ 
+
+    /* ปุ่มหลัก */
+.btn-primary {
+  background-color: #e4a84f; /* เขียว */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #afabec;
+}
+
+/* ปุ่มรอง */
+.btn-secondary {
+  background-color: #6ad3f3; /* ม่วง */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #afabec;
+}
+
+   #new-arrivals-list {
+      display: grid;
+      grid-template-columns: repeat(4,1fr)
+    
+    }
+
+
+/* กรุปกรอปรองจาก Main */
+.form-group {
+      max-width: 800px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.form-group1 {
+      max-width: 1800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}/* ปิดกรุปกรอปรองจาก Main */
+ .form-group2 {
+    max-width: 800px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+.form-group3 {
+      max-width: 1800px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}/* ปิดกรุปกรอปรองจาก Main สมัคสมาชิก*/
+
+
+ @media (min-width: 600px) {
+    .form-row {
+      flex-direction: row;
+      gap: 20px;
+    }
+  }
+
+  .form-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-field label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #555;
+  }
+
+  .form-field input {
+    padding: 12px 15px;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-field input:focus {
+    border-color: #dab438;
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+  }
+
+  .submit-btn {
+    
+    margin-top: 30px;
+    padding: 14px;
+    width: 8%;
+    background-color: #e4a84f;
+    border: none;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+.submit-btn1 {
+   
+    margin-top: 30px;
+    padding: 14px;
+    width: 8%;
+    background-color: #eb4605;
+    border: none;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .submit-btn:hover {
+    background-color: #afabec;
+  } 
+
+
+   /* ปุ่ม add save edit delete*/
+ button:disabled {
+  opacity: 0.4;         /* ซีดจาง */
+  cursor: not-allowed;  /* เมาส์เปลี่ยน */
+  pointer-events: none; /* ไม่ให้คลิกได้ */
+} 
+.btn-add {
+  background-color: #1ae4a7; /* เขียว */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btnsave:hover {
+  background-color: #afabec;
+}
+
+
+.submit-btnsave {
+  background-color: #1bb4f0; /* เขียว */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.submit-btnsave:hover {
+  background-color: #afabec;
+}
+
+.btn-add:hover {
+  background-color: #afabec;
+}
+
+.btn-edit {
+  background-color: #e4a84f; /* เขียว */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.btn-edit:hover {
+  background-color: #afabec;
+}
+
+.btn-delete {
+  background-color: #e4a84f; /* เขียว */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.btn-delete:hover {
+  background-color: #afabec;
+}
+
+  
+
+
+  
+
+
+
+
+
+
+  
+ 
+/* ปิดปุ่ม ser*/
+
+/* เส้น */ 
+.my-box {
+  margin-top: 20px; /* เว้นระยะห่างด้านบน 20 พิกเซล */
+  background-color: #f9f9f9;
+  
+}
+/* เส้น */ 
+
+/* เปิด บล็อค 2 */
+.row-container {
+  margin-top: 10px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1000px;
+  /*margin: 10px auto; ชิดขอบ 50 %*/
+  flex-wrap: wrap;
+}
+
+.form-left,
+.form-right {
+  flex: 1;
+  min-width: 300px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+
+.form-left p,
+.form-right p {
+  margin-top: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-left label,
+.form-right label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: 500;
+}
+
+.form-left input,
+.form-right input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .row-container {
+    flex-direction: column;
+  }
+
+  .form-left,
+  .form-right {
+    max-width: 100%;
+  }
+}
+/*ปิด สมาชิก*/
+
+
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;  /* ✅ ชิดซ้ายแน่นอน */
+}
+
+/*นาย นาง นางสาว*/
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+
+/* เลขรันนิ่ง*/
+
+.row-inline {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  justify-content: flex-start; /* ชิดซ้าย */
+  margin-top: 20px;
+}
+
+.row-inline label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+}
+
+.row-inline input {
+  flex: 1;
+  padding: 12px 15px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background-color: #fff;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.row-inline input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+/**/
+
+/*เปิด search-box*/
+.search-box {
+    display: flex;
+    max-width: 400px;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    max-width: 1800px;
+  }
+
+  .search-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    background-color: #6ad3f3;
+    color: white;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+  }
+
+  .search-button:hover {
+    background-color: #afabec;
+  }
+    /*ปิด search-box*/
+
+    /* เปิด script คลิกชื่อ*/
+  tr:hover {
+    
+    background-color: #6ba4d6;
+    color: white;
+    
+    
+    
+    
+  }
+
+    /* ปิด script คลิกชื่อ*/
+
+
+/* เปิดปุ่มหน้าถัดไป */
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.page-btn {
+  margin: 2px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  background: #f4f4f4;
+  cursor: pointer;
+}
+
+.page-btn.active {
+  background: #007bff;
+  color: white;
+  font-weight: bold;
+}
+.page-btn:hover {
+  background-color: #ddd;
+}
+
+.pagination .page-btn {
+  font-size: 14px;
+}
+
+/* เปิดปุ่ม popup */
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 300px;
+    padding: 20px 30px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+    z-index: 9999;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: none;
+  }
+  .popup.success {
+    background-color: #4CAF50; /* สีเขียว */
+  }
+  .popup.error {
+    background-color: #f44336; /* สีแดง */
+  }
+  .popup button {
+    margin-top: 15px;
+    background: rgba(255,255,255,0.8);
+    border: none;
+    padding: 8px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+  }
+
+  /* ปิดปุ่ม popup */

@@ -1,0 +1,385 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_customer{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to DK_customer</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+<p>Hello Flask layout!</p>
+<h3><a href="/DK_Home">HOME</a> \ ทะเบียนสมาชิก</h3>
+<div class="main">
+    <div class="form-group1">
+        <p>ทะเบียนสมาชิก</p>
+
+        <!-- TOP BAR: TABS, SEARCH & ACTION -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+            <!-- Status Filter Tabs -->
+            <div class="filter-tabs">
+                <button type="button" class="tab-filter-btn active" data-filter="all">
+                    📋 ทั้งหมด <span class="count-badge" id="countAll">0</span>
+                </button>
+                <button type="button" class="tab-filter-btn" data-filter="active">
+                    🟢 ปกติ <span class="count-badge" id="countActive">0</span>
+                </button>
+                <button type="button" class="tab-filter-btn" data-filter="deceased">
+                    🕊️ เสียชีวิต <span class="count-badge" id="countDeceased">0</span>
+                </button>
+            </div>
+
+            <!-- Search Box & Add Button -->
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <div class="search-box" style="margin-bottom: 0;">
+                    <div class="search-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" id="searchInput" placeholder="ค้นหาเลขที่สมาชิก, ชื่อ, นามสกุล...">
+                    </div>
+                    <button type="button" class="search-button" id="searchBtn">ค้นหา</button>
+                </div>
+
+                <a href="/DK_fromcustomer" class="btn-add-customer">
+                    <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>เพิ่มข้อมูลสมาชิก</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- PAGE SUMMARY -->
+        <div class="page-summary" id="pageSummary">กำลังโหลดข้อมูล...</div>
+
+        <table id="customerTable">
+            <thead>
+                <tr>
+                    <th>ลำดับ</th>
+                    <th>รหัสสมาชิก</th>
+                    <th>คำนำหน้า</th>
+                    <th>ชื่อ</th>
+                    <th>นามสกุล</th>
+                    <th>วันที่สมัครสมาชิก</th>
+                    <th>สถานะ</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody> </tbody>
+        </table>
+        <hr class="my-box">
+        <div id="pagination" class="pagination"></div>
+    </div>
+</div>  
+
+
+  <script type="module">
+   // DK_Employee.js หรือไฟล์หลัก
+   
+   import { API_BASE } from "/static/js/config.js"; // ปรับ path ให้ตรงกับ static folder
+   //*table
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    let allData = [];
+    let filteredData = [];
+    let currentFilter = "all"; // "all" | "active" | "deceased"
+
+    function formatThaiDate(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const thaiMonths = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม."
+        ];
+        const day = date.getDate();
+        const month = thaiMonths[date.getMonth()];
+        const year = date.getFullYear() + 543;
+        return `${day} ${month} ${year}`;
+    }
+
+    // =========================
+    // UPDATE COUNTS
+    // =========================
+    function updateCounts() {
+        const countAll = allData.length;
+        const countActive = allData.filter(c => c.status == 1 || !c.status).length;
+        const countDeceased = allData.filter(c => c.status == 3 || c.status == 4).length;
+
+        const elAll = document.getElementById("countAll");
+        const elActive = document.getElementById("countActive");
+        const elDeceased = document.getElementById("countDeceased");
+
+        if (elAll) elAll.innerText = countAll;
+        if (elActive) elActive.innerText = countActive;
+        if (elDeceased) elDeceased.innerText = countDeceased;
+    }
+
+    // =========================
+    // SEARCH & FILTER
+    // =========================
+    function applySearch() {
+        const searchInput = document.getElementById("searchInput") || document.querySelector(".search-input");
+        const rawKeyword = (searchInput ? searchInput.value : "").trim();
+        const keyword = rawKeyword.toLowerCase();
+
+        // 1. Status Filter
+        let baseData = allData.filter(item => {
+            const st = item.status;
+            if (currentFilter === "active" && (st == 3 || st == 4)) return false;
+            if (currentFilter === "deceased" && st != 3 && st != 4) return false;
+            return true;
+        });
+
+        if (!keyword) {
+            filteredData = baseData;
+        } else {
+            // แยกคำค้นหาตามช่องว่าง เผื่อผู้ใช้พิมพ์ชื่อ เว้นวรรค นามสกุล
+            const terms = keyword.split(/\s+/).filter(Boolean);
+
+            // ตรวจสอบกรณีพิมพ์ค้นหาเป็นตัวเลขรหัสสมาชิก เช่น "1", "34", "pc1", "pc 34"
+            let numberMatchStr = null;
+            const compact = keyword.replace(/\s+/g, '');
+            const pcMatch = compact.match(/^pc-?(\d+)$/i);
+            if (pcMatch) {
+                numberMatchStr = String(parseInt(pcMatch[1], 10));
+            } else if (/^\d+$/.test(compact)) {
+                numberMatchStr = String(parseInt(compact, 10));
+            }
+
+            filteredData = baseData.filter(emp => {
+                const id = (emp.Idcustomer || "").toLowerCase();
+                const prefix = (emp.prefix || "").toLowerCase();
+                const name = (emp.name || "").toLowerCase();
+                const lastname = (emp.lastname || "").toLowerCase();
+                const fullname = `${prefix}${name} ${lastname}`.toLowerCase();
+                const nameAndLast = `${name} ${lastname}`.toLowerCase();
+                const idcard = (emp.Idcard || "").toLowerCase();
+                const tel = (emp.Tel || "").toLowerCase();
+                const statusName = (emp.status_name || "").toLowerCase();
+
+                // 1. ตรวจสอบเลขรหัสสมาชิก เช่น PC000034 เทียบกับเลข 34
+                if (numberMatchStr !== null) {
+                    const empNum = id.replace(/\D/g, '');
+                    if (empNum && String(parseInt(empNum, 10)) === numberMatchStr) {
+                        return true;
+                    }
+                }
+
+                // 2. ตรวจสอบแบบคำต่อคำ (ทุกคำใน terms ต้องแมตช์ในข้อมูลอย่างน้อยหนึ่งช่อง)
+                return terms.every(t => 
+                    id.includes(t) ||
+                    name.includes(t) ||
+                    lastname.includes(t) ||
+                    fullname.includes(t) ||
+                    nameAndLast.includes(t) ||
+                    idcard.includes(t) ||
+                    tel.includes(t) ||
+                    statusName.includes(t)
+                );
+            });
+        }
+        currentPage = 1;
+        renderTable();
+        createPagination();
+    }
+
+    const searchInput = document.getElementById("searchInput") || document.querySelector(".search-input");
+    const searchBtn = document.getElementById("searchBtn") || document.querySelector(".search-button");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", applySearch);
+        searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                applySearch();
+            }
+        });
+    }
+
+    if (searchBtn) {
+        searchBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            applySearch();
+        });
+    }
+
+    // Filter Tabs Click Handlers
+    document.querySelectorAll(".tab-filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-filter-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentFilter = btn.dataset.filter;
+            applySearch();
+        });
+    });
+
+    // =========================
+    // LOAD DATA
+    // =========================
+    fetch(`${API_BASE}/customer`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.error !== "0") {
+                console.log("Error:", data.message);
+                return;
+            }
+            allData = data.results || [];
+            updateCounts();
+            applySearch();
+        })
+        .catch(err => console.log("Fetch error:", err));
+
+    // =========================
+    // TABLE
+    // =========================
+    function renderTable() {
+        const tbody = document.querySelector("#customerTable tbody");
+        const summary = document.getElementById("pageSummary");
+        tbody.innerHTML = "";
+
+        if (filteredData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 25px; color: #888;">ไม่พบข้อมูลสมาชิกที่ค้นหา</td></tr>`;
+            if (summary) summary.innerText = `แสดง 0 จากทั้งหมด ${allData.length} รายการ`;
+            return;
+        }
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, filteredData.length);
+        const pageData = filteredData.slice(start, end);
+
+        if (summary) {
+            summary.innerText = `แสดง ${start + 1} - ${end} จากที่ค้นหาพบ ${filteredData.length} รายการ (ทั้งหมด ${allData.length} รายการ)`;
+        }
+
+        pageData.forEach((emp, index) => {
+            const row = `
+                <tr class="${
+                    emp.status == 3
+                        ? 'row-dead'
+                        : emp.status == 2
+                        ? 'row-orange'
+                        : ''
+                }">
+                    <td>${start + index + 1}</td>
+                    <td>${emp.Idcustomer}</td>
+                    <td>${emp.prefix || ''}</td>
+                    <td>${emp.name || ''}</td>
+                    <td>${emp.lastname || ''}</td>
+                    <td>${formatThaiDate(emp.date)}</td>
+                    <td>${emp.status_name || ''}</td>
+                    <td class="action-col">
+                        <button class="btn-viwe" data-id="${emp.Idcustomer}">
+                            ดูข้อมูล
+                        </button>
+                        <button class="btn-edit" data-id="${emp.Idcustomer}">
+                            แก้ไข
+                        </button>
+                        <button class="btn-delete" data-id="${emp.Idcustomer}">
+                            ลบ
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // =========================
+    // PAGINATION
+    // =========================
+    function createPagination() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        // ปุ่มก่อนหน้า
+        const prevBtn = document.createElement("button");
+        prevBtn.innerHTML = "&laquo;";
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+                createPagination();
+            }
+        };
+        pagination.appendChild(prevBtn);
+
+        // เลขหน้า
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.innerText = i;
+            if (i === currentPage) {
+                btn.classList.add("active");
+            }
+            btn.onclick = () => {
+                currentPage = i;
+                renderTable();
+                createPagination();
+            };
+            pagination.appendChild(btn);
+        }
+
+        // ปุ่มถัดไป
+        const nextBtn = document.createElement("button");
+        nextBtn.innerHTML = "&raquo;";
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+                createPagination();
+            }
+        };
+        pagination.appendChild(nextBtn);
+    }
+
+// ปุ่มviwe
+// เมื่อกดปุ่มดูข้อมูล
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("btn-viwe")) {
+    const id = e.target.dataset.id;
+    window.location.href = `/DK_Viwecustomer?id=${id}`;
+  }
+});
+// ✅ ปุ่มแก้ไข
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("btn-edit")) {
+    const id = e.target.dataset.id;
+    // ส่ง id ไปหน้าแก้ไขแบบ query string
+    window.location.href = `/DK_Editcustomer?id=${id}`;
+  }
+});
+
+
+
+//ปุ่มลบ
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("btn-delete")) {
+    const id = e.target.dataset.id;
+
+    if (!confirm(`ต้องการลบพนักงาน ${id} ใช่หรือไม่?`)) return;
+
+    const res = await fetch(`${API_BASE}/delete_customer/${id}`, {
+      method: "DELETE",
+    });
+
+    const result = await res.json();
+    alert(result.message);
+
+    if (result.error === "0") {
+      location.reload();
+    }
+  }
+});
+
+</script>
+  
+
+ </body>
+</html>
+{% endblock %}
+
+

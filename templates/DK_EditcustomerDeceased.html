@@ -1,0 +1,424 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Editcustomer{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Flatpickr Theme (เลือกได้) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<!-- Thai language -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+
+<!-- เริ่ม -->
+<h2>Welcome to DK_Editcustomer</h2>
+<p>Hello Flask layout!</p>
+
+
+<h3><a href="/DK_Home">HOME</a> \ สมาชิกลาออก/เสียชีวิต</h3>
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Flatpickr Theme (เลือกได้) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Thai language -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<div class="main">
+
+    <form id="customerForm">
+    <p id="pageSubtitle">แก้ไขทะเบียนสมาชิก</p>
+       <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 15px;">
+        <div class="button-group">
+          <button type="submit" class="submit-btnsave">📄 บันทึกแก้ไข</button>
+
+          <!-- ปุ่มยกเลิก -->
+          <button type="button" id="btnCancel">🗑️ ยกเลิก</button>
+          
+        </div>
+      </div>
+      <hr class="my-box">
+
+      <div id="memberOwnerBox" style="display:none; margin-bottom: 15px; padding: 12px 16px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 10px; color: #0369a1; font-size: 14.5px;">
+          <strong>👤 สมาชิกเจ้าของ:</strong> <span id="ownerText" style="font-weight:600;"></span>
+      </div>
+
+    <div class="row-container">
+        
+       
+       <div class="form-left">
+                     
+             <h3 id="personalInfoTitle">ข้อมูลส่วนตัว</h3>
+              <label for="Idcustomer" id="lblIdcustomer"> รหัสสมาชิก:</label><br>
+                <input type="text" id="Idcustomer" name="Idcustomer" readonly><br>
+              <label for="prefix">คำนำหน้า :</label><br>
+                <select name="prefix" id="prefix" required disabled>
+                  <option value="">-- กรุณาเลือก --</option>
+                  <option value="นาย">นาย</option>
+                  <option value="นาง">นาง</option>
+                  <option value="นางสาว">นางสาว</option>
+                  <option value="เด็กชาย">เด็กชาย</option>
+                  <option value="เด็กหญิง">เด็กหญิง</option>
+                </select><br>  
+             <label for="name">ชื่อ :</label><br>
+                   <input type="text" id="name" name="name" disabled><br>
+             <label for="lastname">นามสกุล :</label><br>
+                   <input type="text" id="lastname" name="lastname" disabled><br>
+             <label for="Idcard">เลขบัตรประชาชน :</label><br>
+                   <input type="text" id="Idcard" name="Idcard" disabled><br>
+             
+            
+       </div>
+     
+             
+    <div class="form-left">
+           <label for="date" id="lblDate">วันที่สมัครสมาชิก :</label><br><br>
+              <input type="date" id="thai-date" name="thai-date" disabled>
+              <input type="hidden" id="ad-date" name="date"> <!-- ค่านี้จะถูกส่งไป FastAPI -->
+          <br><br>
+           <label for="status" id="lblStatus">สถานะ :</label><br>
+            <select id="status" name="status">
+                <option value="1" selected>
+                    ปกติ
+                </option>
+                <option value="2">
+                    ลาออก
+                </option>
+                <option value="3">
+                    เสียชีวิต
+                </option>
+                <option value="4">
+                    เสียชีวิต/ตั้งหนี้
+                </option>
+            </select>
+
+            <label for="dateend" id="lblDateend">วันที่ลาออก/เสียชีวิต :</label><br>
+                <input type="dateend" id="thai-dateend" name="thai-dateend">
+                <input type="hidden" id="ad-dateend" name="dateend">
+   </div>      
+  </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+
+import { API_BASE } from "/static/js/config.js";
+
+// =========================
+// ELEMENT
+// =========================
+const thaiInput = document.getElementById("thai-date");
+const adInput = document.getElementById("ad-date");
+
+// =========================
+// DATE Open วันที่ลาออก
+// =========================
+
+const thaiInputEnd =
+    document.getElementById("thai-dateend");
+const adInputEnd =
+    document.getElementById("ad-dateend");
+const fpEnd = flatpickr("#thai-dateend", {
+    locale: "th",
+    dateFormat: "Y-m-d",
+    allowInput: false,
+    defaultDate: "today",
+    onReady: function(
+        selectedDates,
+        dateStr,
+        instance
+    ){
+        changeToBuddhistYear(instance);
+        if (selectedDates.length > 0) {
+            const date = selectedDates[0];
+            thaiInputEnd.value =
+                formatThaiDate(date);
+            updateHiddenDateEnd(date);
+        }
+    },
+    onChange: function(
+        selectedDates,
+        dateStr,
+        instance
+    ){
+        if (!selectedDates.length) return;
+        const date = selectedDates[0];
+        thaiInputEnd.value =
+            formatThaiDate(date);
+        updateHiddenDateEnd(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(
+        selectedDates,
+        dateStr,
+        instance
+    ){
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(
+        selectedDates,
+        dateStr,
+        instance
+    ){
+        changeToBuddhistYear(instance);
+    }
+
+});
+
+
+
+// =========================
+// UPDATE DATE เริ่มวันที่จากฐานข้อมูล
+// =========================
+
+function updateHiddenDateEnd(date){
+    const yyyy =
+        date.getFullYear();
+    const mm =
+        String(date.getMonth() + 1)
+        .padStart(2, '0');
+    const dd =
+        String(date.getDate())
+        .padStart(2, '0');
+    adInputEnd.value =
+        `${yyyy}-${mm}-${dd}`;
+}
+
+// =========================
+// READONLY
+// =========================
+window.onload = function () {
+    document.getElementById("Idcustomer").readOnly = true;
+};
+
+// =========================
+// FLATPICKR
+// =========================
+const fp = flatpickr("#thai-date", {
+    locale: "th",
+    dateFormat: "Y-m-d",
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        if (selectedDates.length > 0) {
+            const date = selectedDates[0];
+            thaiInput.value = formatThaiDate(date);
+            updateHiddenDate(date);
+        }
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+
+        if (!selectedDates.length) return;
+
+        const date = selectedDates[0];
+
+        thaiInput.value = formatThaiDate(date);
+
+        updateHiddenDate(date);
+
+        changeToBuddhistYear(instance);
+    },
+
+    onMonthChange: function(selectedDates, dateStr, instance) {
+
+        changeToBuddhistYear(instance);
+    },
+
+    onYearChange: function(selectedDates, dateStr, instance) {
+
+        changeToBuddhistYear(instance);
+    }
+
+});
+
+// =========================
+// เปลี่ยน ค.ศ. → พ.ศ.
+// =========================
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+
+    }, 1);
+}
+
+// =========================
+// FORMAT THAI DATE
+// =========================
+function formatThaiDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+
+// =========================
+// UPDATE HIDDEN DATE
+// =========================
+function updateHiddenDate(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    adInput.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// =========================
+// GET PARAMETERS
+// =========================
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+const isBeneficiary = params.get("type") === "beneficiary";
+
+if (!id) {
+    alert(isBeneficiary ? "❌ ไม่พบรหัสผู้รับผลประโยชน์" : "❌ ไม่พบรหัสสมาชิก");
+}
+
+if (isBeneficiary) {
+    document.getElementById("pageSubtitle").innerText = "บันทึกผู้รับผลประโยชน์เสียชีวิต";
+    document.getElementById("personalInfoTitle").innerText = "ข้อมูลผู้รับผลประโยชน์";
+    document.getElementById("lblIdcustomer").innerText = " รหัสผู้รับผลประโยชน์ (Idbeneficiary):";
+    document.getElementById("lblDate").innerText = "วันที่บันทึกผู้รับผลประโยชน์ :";
+    document.getElementById("lblStatus").innerText = "สถานะผู้รับผลประโยชน์ :";
+    document.getElementById("lblDateend").innerText = "วันที่เสียชีวิต :";
+
+    // เปลี่ยนตัวเลือกสถานะเป็นของ bk_beneficiary (1=ปกติ, 2=ตาย)
+    const statusSelect = document.getElementById("status");
+    statusSelect.innerHTML = `
+        <option value="1">ปกติ</option>
+        <option value="3" selected>ตาย</option>
+        <option value="4" selected>เสียชีวิต/ตั้งหนี้</option>
+    `;
+}
+
+// =========================
+// LOAD DATA
+// =========================
+const loadUrl = isBeneficiary
+    ? `${API_BASE}/beneficiary/${encodeURIComponent(id)}`
+    : `${API_BASE}/customer1/${encodeURIComponent(id)}`;
+
+fetch(loadUrl)
+.then(res => res.json())
+.then(data => {
+    if (data.error !== "0" || !data.results) {
+        alert(isBeneficiary ? "❌ ไม่พบข้อมูลผู้รับผลประโยชน์" : "❌ ไม่พบข้อมูลสมาชิก");
+        return;
+    }
+    const item = data.results;
+
+    if (isBeneficiary) {
+        document.getElementById("Idcustomer").value = item.Idbeneficiary || "";
+        document.getElementById("prefix").value = item.prefix || "";
+        document.getElementById("name").value = item.name || "";
+        document.getElementById("lastname").value = item.lastname || "";
+        document.getElementById("Idcard").value = item.Idcard || "";
+        document.getElementById("status").value = item.status ? String(item.status) : "2";
+
+        const ownerBox = document.getElementById("memberOwnerBox");
+        const ownerText = document.getElementById("ownerText");
+        if (ownerBox && ownerText) {
+            ownerBox.style.display = "block";
+            ownerText.innerText = `${item.customer_fullname || "-"} (รหัสสมาชิก: ${item.Idcustomer})`;
+        }
+    } else {
+        document.getElementById("Idcustomer").value = item.Idcustomer || "";
+        document.getElementById("prefix").value = item.prefix || "";
+        document.getElementById("name").value = item.name || "";
+        document.getElementById("lastname").value = item.lastname || "";
+        document.getElementById("Idcard").value = item.Idcard || "";
+        document.getElementById("status").value = item.status ? String(item.status) : "1";
+    }
+
+    // =====================
+    // DATE
+    // =====================
+    if (item.date) {
+        const dbDate = new Date(item.date);
+        if (!isNaN(dbDate.getTime())) {
+            fp.setDate(dbDate);
+            thaiInput.value = formatThaiDate(dbDate);
+            updateHiddenDate(dbDate);
+        }
+    }
+    if (item.dateend) {
+        const deadDate = new Date(item.dateend);
+        if (!isNaN(deadDate.getTime())) {
+            document.getElementById("thai-dateend").value = formatThaiDate(deadDate);
+            document.getElementById("ad-dateend").value = item.dateend;
+        }
+    }
+})
+.catch(err => {
+    console.error(err);
+    alert("❌ โหลดข้อมูลไม่สำเร็จ");
+});
+
+// =========================
+// CANCEL
+// =========================
+document.getElementById("btnCancel").addEventListener("click", () => {
+    window.location.href = "/DK_customerDeceased";
+});
+
+// =========================
+// UPDATE
+// =========================
+document.getElementById("customerForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const updateUrl = isBeneficiary
+        ? `${API_BASE}/beneficiaryDeceased/update`
+        : `${API_BASE}/customerDeceased/update`;
+
+    const payload = new FormData();
+    if (isBeneficiary) {
+        payload.append("Idbeneficiary", id);
+        payload.append("status", document.getElementById("status").value);
+        payload.append("dateend", document.getElementById("ad-dateend").value || "");
+    } else {
+        payload.append("Idcustomer", id);
+        payload.append("status", document.getElementById("status").value);
+        payload.append("dateend", document.getElementById("ad-dateend").value || "");
+    }
+
+    fetch(updateUrl, {
+        method: "POST",
+        body: payload
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error === "0") {
+            alert(isBeneficiary ? "✅ บันทึกสถานะผู้รับผลประโยชน์เรียบร้อยแล้ว" : "✅ แก้ไขข้อมูลสมาชิกสำเร็จ");
+            window.location.href = "/DK_customerDeceased";
+        } else {
+            alert("❌ ไม่สามารถแก้ไขข้อมูลได้: " + (data.message || ""));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    });
+});
+</script>
+
+
+
+
+ 
+{% endblock %}

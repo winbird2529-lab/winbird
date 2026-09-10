@@ -1,0 +1,1744 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}รายงานรายชื่อสมาชิก{% endblock %}
+
+{% block content %}
+<!-- External Libraries & CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='csstran.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Viwecustomer.css') }}">
+
+
+
+<div class="tran-page-wrapper">
+    <!-- Breadcrumb -->
+    <div class="tran-breadcrumb">
+        <a href="/DK_Home">HOME</a>
+        <span class="tran-breadcrumb-separator">/</span>
+        <span>รายงาน</span>
+        <span class="tran-breadcrumb-separator">/</span>
+        <span>รายงานรายชื่อสมาชิก</span>
+    </div>
+
+    <!-- ===================================================
+         CRITERIA DIALOG CONTAINER (ตรงตามเงื่อนไขของผู้ใช้)
+         =================================================== -->
+    <div class="report-window-container">
+        <!-- Window Tab Bar -->
+        <div class="report-tab-bar">
+            <div class="report-tab-item active" id="tabItemGeneral" onclick="switchCustomerTab('general')">
+                <span>📋 รายงานรายชื่อสมาชิก/ทั่วไป</span>
+            </div>
+            <div class="report-tab-item" id="tabItemDeceased" onclick="switchCustomerTab('deceased')">
+                <span>⚰️ รายงานสมาชิกลาออก / เสียชีวิต</span>
+            </div>
+        </div>
+
+        <!-- Main Dialog Form Card -->
+        <div class="report-dialog-card">
+            <!-- TAB 1: รายงานรายชื่อสมาชิก/ทั่วไป -->
+            <div id="tabContentGeneral">
+                <!-- Conditions Form -->
+                <div class="report-criteria-grid">
+                    <!-- 1. ช่วงวันที่ (วันที่สมัคร) พร้อมปุ่มจุดเลือก -->
+                    <div class="report-criteria-label">
+                        <label class="report-radio-label" style="cursor: pointer; display: inline-flex; align-items: center; gap: 7px; justify-content: flex-end; width: 100%;">
+                            <input type="radio" name="dateFilterType" id="radioDateRange" value="range" checked onchange="selectDateFilterMode('range')">
+                            <span style="font-weight: 600;">ช่วงวันที่ (วันที่สมัคร)</span>
+                        </label>
+                    </div>
+                    <div class="report-criteria-field">
+                        <input type="text" id="critFromDate" class="crit-input" style="width: 135px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                        <span style="font-size: 13.5px; color: #64748b; font-weight: 500;">ถึง วันที่</span>
+                        <input type="text" id="critToDate" class="crit-input" style="width: 135px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                        <button type="button" class="crit-btn-clear" id="btnClearDateRange" title="ล้างวันที่">ล้างวันที่</button>
+                    </div>
+
+                    <!-- 2. ณ วันที่ พร้อมปุ่มจุดเลือก -->
+                    <div class="report-criteria-label">
+                        <label class="report-radio-label" style="cursor: pointer; display: inline-flex; align-items: center; gap: 7px; justify-content: flex-end; width: 100%;">
+                            <input type="radio" name="dateFilterType" id="radioDateAsOf" value="asof" onchange="selectDateFilterMode('asof')">
+                            <span style="font-weight: 600;">ณ วันที่</span>
+                        </label>
+                    </div>
+                    <div class="report-criteria-field">
+                        <input type="text" id="critAsOfDate" class="crit-input" style="width: 140px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                        <span style="font-size: 12.5px; color: #64748b;">(ตัดยอดข้อมูล ณ วันที่กำหนด)</span>
+                    </div>
+
+                    <!-- จาก รหัสสมาชิก/ทั่วไป -->
+                    <div class="report-criteria-label">จาก รหัสสมาชิก/ทั่วไป</div>
+                    <div class="report-criteria-field">
+                        <input type="text" id="critFromId" class="crit-input" style="width: 150px;" placeholder="รหัสเริ่มต้น">
+                        <button type="button" class="crit-btn-search" id="btnPickFromId" title="ค้นหารหัสสมาชิกเริ่มต้น">
+                            🔍
+                        </button>
+                        <input type="text" id="critFromName" class="crit-input crit-input-readonly" style="width: 290px;" readonly placeholder="ชื่อ - นามสกุล">
+                    </div>
+
+                    <!-- ถึง รหัสสมาชิก/ทั่วไป -->
+                    <div class="report-criteria-label">ถึง รหัสสมาชิก/ทั่วไป</div>
+                    <div class="report-criteria-field">
+                        <input type="text" id="critToId" class="crit-input" style="width: 150px;" placeholder="รหัสสิ้นสุด">
+                        <button type="button" class="crit-btn-search" id="btnPickToId" title="ค้นหารหัสสมาชิกสิ้นสุด">
+                            🔍
+                        </button>
+                        <input type="text" id="critToName" class="crit-input crit-input-readonly" style="width: 290px;" readonly placeholder="ชื่อ - นามสกุล">
+                    </div>
+
+                    <!-- ช่วงอายุ -->
+                    <div class="report-criteria-label">ช่วงอายุ</div>
+                    <div class="report-criteria-field">
+                        <input type="number" id="critAgeFrom" class="crit-input" style="width: 80px; text-align: center;" placeholder="จาก" min="0" max="150">
+                        <span style="font-size: 13.5px; color: #64748b;">ถึง</span>
+                        <input type="number" id="critAgeTo" class="crit-input" style="width: 80px; text-align: center;" placeholder="ถึง" min="0" max="150">
+                        <span style="font-size: 13px; color: #64748b;">ปี</span>
+                    </div>
+                </div>
+
+                <!-- Fieldset: เงื่อนไขรายงาน (เอาแค่ ปกติ, ลาออก, ตาย, ตั้งหนี้) -->
+                <fieldset class="report-fieldset">
+                    <legend class="report-legend">เงื่อนไขรายงาน (สถานะสมาชิก)</legend>
+                    <div class="report-checkbox-grid">
+                        <label class="report-chk-label">
+                            <input type="checkbox" id="chkActive" name="reportCond" value="1" checked>
+                            <span style="font-weight: 600;">ปกติ</span>
+                        </label>
+                        <label class="report-chk-label">
+                            <input type="checkbox" id="chkResigned" name="reportCond" value="2" checked>
+                            <span style="font-weight: 600;">ลาออก</span>
+                        </label>
+                        <!-- <label class="report-chk-label">
+                            <input type="checkbox" id="chkDeceased" name="reportCond" value="3" checked>
+                            <span style="font-weight: 600;">ตาย</span>
+                        </label>
+                        <label class="report-chk-label">
+                            <input type="checkbox" id="chkBilled" name="reportCond" value="4" checked>
+                            <span style="font-weight: 600;">ตั้งหนี้</span>
+                        </label>-->
+                    </div>
+                </fieldset>
+
+                <!-- Action Buttons Row -->
+                <div class="report-actions-row">
+                    <button type="button" class="btn-print-official" id="btnPrintReport">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        <span>พิมพ์</span>
+                    </button>
+
+                    <button type="button" class="btn-preview-official" id="btnPreviewReport">
+                        <span>📊 แสดงตัวอย่างรายงาน</span>
+                    </button>
+
+                    <button type="button" class="btn-preview-official" id="btnExportExcel" style="color: #059669; border-color: #86efac;">
+                        <span>📥 ส่งออก Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: รายงานสมาชิกลาออก / เสียชีวิต -->
+            <div id="tabContentDeceased" style="display: none;">
+                <!-- Conditions Form for Deceased / Resigned -->
+                <div class="report-criteria-grid">
+                    <!-- 1. ช่วงวันที่ (วันที่ลาออก/เสียชีวิต) พร้อมปุ่มจุดเลือก -->
+                    <div class="report-criteria-label">
+                        <label class="report-radio-label" style="cursor: pointer; display: inline-flex; align-items: center; gap: 7px; justify-content: flex-end; width: 100%;">
+                            <input type="radio" name="deceasedDateFilterType" id="radioDeceasedDateRange" value="range" checked onchange="selectDeceasedDateFilterMode('range')">
+                            <span style="font-weight: 600;">ช่วงวันที่ (ลาออก/เสียชีวิต)</span>
+                        </label>
+                    </div>
+                    <div class="report-criteria-field">
+                        <input type="text" id="critDeceasedFromDate" class="crit-input" style="width: 135px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                        <span style="font-size: 13.5px; color: #64748b; font-weight: 500;">ถึง วันที่</span>
+                        <input type="text" id="critDeceasedToDate" class="crit-input" style="width: 135px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                        <button type="button" class="crit-btn-clear" id="btnClearDeceasedDateRange" title="ล้างวันที่">ล้างวันที่</button>
+                    </div>
+
+                    <!-- 2. ณ วันที่ พร้อมปุ่มจุดเลือก -->
+                    <div class="report-criteria-label">
+                        <label class="report-radio-label" style="cursor: pointer; display: inline-flex; align-items: center; gap: 7px; justify-content: flex-end; width: 100%;">
+                            <input type="radio" name="deceasedDateFilterType" id="radioDeceasedDateAsOf" value="asof" onchange="selectDeceasedDateFilterMode('asof')">
+                            <span style="font-weight: 600;">ณ วันที่</span>
+                        </label>
+                    </div>
+                    <div class="report-criteria-field">
+                        <input type="text" id="critDeceasedAsOfDate" class="crit-input" style="width: 140px; text-align: center;" placeholder="วว/ดด/ปปปป">
+                        <span style="font-size: 12.5px; color: #64748b;">(ตัดยอดข้อมูล ณ วันที่กำหนด)</span>
+                    </div>
+
+                    <!-- จาก รหัสสมาชิก/ผู้รับผลประโยชน์ -->
+                    <div class="report-criteria-label">จาก รหัส</div>
+                    <div class="report-criteria-field">
+                        <input type="text" id="critDeceasedFromId" class="crit-input" style="width: 150px;" placeholder="รหัสเริ่มต้น">
+                        <button type="button" class="crit-btn-search" id="btnPickDeceasedFromId" title="ค้นหารหัสเริ่มต้น">
+                            🔍
+                        </button>
+                        <input type="text" id="critDeceasedFromName" class="crit-input crit-input-readonly" style="width: 290px;" readonly placeholder="ชื่อ - นามสกุล">
+                    </div>
+
+                    <!-- ถึง รหัสสมาชิก/ผู้รับผลประโยชน์ -->
+                    <div class="report-criteria-label">ถึง รหัส</div>
+                    <div class="report-criteria-field">
+                        <input type="text" id="critDeceasedToId" class="crit-input" style="width: 150px;" placeholder="รหัสสิ้นสุด">
+                        <button type="button" class="crit-btn-search" id="btnPickDeceasedToId" title="ค้นหารหัสสิ้นสุด">
+                            🔍
+                        </button>
+                        <input type="text" id="critDeceasedToName" class="crit-input crit-input-readonly" style="width: 290px;" readonly placeholder="ชื่อ - นามสกุล">
+                    </div>
+
+                    <!-- ประเภทข้อมูล -->
+                    <div class="report-criteria-label">ประเภทข้อมูล</div>
+                    <div class="report-criteria-field">
+                        <select id="critDeceasedType" class="crit-input" style="width: 280px;">
+                            <option value="all" selected>ทั้งหมด (สมาชิก และ ผู้รับผลประโยชน์)</option>
+                            <option value="member">เฉพาะสมาชิก</option>
+                            <option value="beneficiary">เฉพาะผู้รับผลประโยชน์</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Fieldset: เงื่อนไขสถานะ (ลาออก, เสียชีวิต, เสียชีวิต/ตั้งหนี้) -->
+                <fieldset class="report-fieldset">
+                    <legend class="report-legend">เงื่อนไขสถานะ</legend>
+                    <div class="report-checkbox-grid">
+                        <label class="report-chk-label">
+                            <input type="checkbox" id="chkDeceasedResigned" name="deceasedCond" value="2" checked>
+                            <span style="font-weight: 600; color: #d97706;">🟠 ลาออก</span>
+                        </label>
+                        <label class="report-chk-label">
+                            <input type="checkbox" id="chkDeceasedDied" name="deceasedCond" value="3" checked>
+                            <span style="font-weight: 600; color: #dc2626;">🔴 เสียชีวิต</span>
+                        </label>
+                        <label class="report-chk-label">
+                            <input type="checkbox" id="chkDeceasedBilled" name="deceasedCond" value="4" checked>
+                            <span style="font-weight: 600; color: #7c3aed;">🟣 เสียชีวิต/ตั้งหนี้</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <!-- Action Buttons Row -->
+                <div class="report-actions-row">
+                    <button type="button" class="btn-print-official" id="btnPrintDeceasedReport">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        <span>พิมพ์</span>
+                    </button>
+
+                    <button type="button" class="btn-preview-official" id="btnPreviewDeceasedReport">
+                        <span>📊 แสดงตัวอย่างรายงาน</span>
+                    </button>
+
+                    <button type="button" class="btn-preview-official" id="btnExportDeceasedExcel" style="color: #059669; border-color: #86efac;">
+                        <span>📥 ส่งออก Excel</span>
+                    </button>
+
+                    <button type="button" class="btn-preview-official" id="btnResetDeceasedCriteria" style="color: #64748b; border-color: #cbd5e1;">
+                        <span>🔄 ล้างเงื่อนไขทั้งหมด</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================
+     MODAL PICK MEMBER POPUP (เลือกสมาชิก จาก / ถึง)
+     =================================================== -->
+<div id="modalPickMember" class="popup-bg">
+    <div class="popup-box" style="width: 90%; max-width: 720px; max-height: 85vh; padding: 20px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+            <h3 style="margin: 0; color: #1e3c72; font-size: 17px;" id="modalPickTitle">🔍 เลือกรหัสสมาชิก</h3>
+            <span class="close-btn" id="closeModalPick" style="position: static; font-size: 24px; cursor: pointer;">&times;</span>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <input type="text" id="modalPickSearch" class="tran-input" placeholder="พิมพ์ค้นหารหัส, ชื่อ-สกุล, หรือเลขบัตรประชาชน..." style="width: 100%;">
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13.5px;">
+                <thead style="background: #f8fafc; position: sticky; top: 0; border-bottom: 1px solid #cbd5e1;">
+                    <tr>
+                        <th style="padding: 8px 12px; text-align: center; width: 50px;">ลำดับ</th>
+                        <th style="padding: 8px 12px; text-align: left; width: 120px;">รหัสสมาชิก</th>
+                        <th style="padding: 8px 12px; text-align: left;">ชื่อ - นามสกุล</th>
+                        <th style="padding: 8px 12px; text-align: left; width: 140px;">เลขบัตรประชาชน</th>
+                        <th style="padding: 8px 12px; text-align: center; width: 80px;">เลือก</th>
+                    </tr>
+                </thead>
+                <tbody id="modalPickBody">
+                    <tr><td colspan="5" style="text-align: center; padding: 25px; color: #94a3b8;">กำลังค้นหาข้อมูล...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="modalPickPageInfo" style="font-size: 13px; color: #64748b;">แสดง 0 - 0 รายการ</span>
+            <div id="modalPickPagination" class="tran-pagination"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+// ==========================================
+// Date Helpers
+// ==========================================
+function formatThaiDate(dateStr) {
+    if (!dateStr || dateStr.startsWith("0000")) return "-";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear() + 543;
+    return `${d}/${m}/${y}`;
+}
+
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+    }, 1);
+}
+
+// ==========================================
+// Tab Switching (ทั่วไป vs ลาออก/เสียชีวิต)
+// ==========================================
+window.switchCustomerTab = function(tabName) {
+    const tabGeneral = document.getElementById("tabItemGeneral");
+    const tabDeceased = document.getElementById("tabItemDeceased");
+    const contentGeneral = document.getElementById("tabContentGeneral");
+    const contentDeceased = document.getElementById("tabContentDeceased");
+
+    if (tabName === "deceased") {
+        tabGeneral?.classList.remove("active");
+        tabDeceased?.classList.add("active");
+        if (contentGeneral) contentGeneral.style.display = "none";
+        if (contentDeceased) contentDeceased.style.display = "block";
+    } else {
+        tabDeceased?.classList.remove("active");
+        tabGeneral?.classList.add("active");
+        if (contentDeceased) contentDeceased.style.display = "none";
+        if (contentGeneral) contentGeneral.style.display = "block";
+    }
+};
+
+// ==========================================
+// State Variables
+// ==========================================
+let allCustomers = [];
+let allDeceasedRecords = [];
+let allDeceasedMembers = [];
+let allDeceasedBeneficiaries = [];
+let targetPickField = null; // 'from', 'to', 'deceasedFrom', 'deceasedTo'
+let modalPickFiltered = [];
+let modalPickPage = 1;
+const modalPickPerPage = 8;
+
+// ==========================================
+// Date Helpers
+// ==========================================
+function formatDateToYMD(dateObj) {
+    if (!dateObj || isNaN(dateObj.getTime())) return "";
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function parseDateToYMD(val) {
+    if (!val || String(val).startsWith("0000")) return null;
+    if (typeof val === "string") {
+        const clean = val.trim();
+        if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
+            return clean.slice(0, 10);
+        }
+    }
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return null;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+// ==========================================
+// Date States: Tab 1 (General Members)
+// ==========================================
+let fromDateYMD = formatDateToYMD(new Date());
+let toDateYMD = formatDateToYMD(new Date());
+let asOfDateYMD = formatDateToYMD(new Date());
+
+// Flatpickr for "จาก วันที่"
+const fpFrom = flatpickr("#critFromDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        fromDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            fromDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+            if (fpTo) fpTo.set('minDate', selectedDates[0]);
+        } else {
+            fromDateYMD = "";
+            instance.input.value = "";
+            if (fpTo) fpTo.set('minDate', null);
+        }
+        selectDateFilterMode('range');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+// Flatpickr for "ถึง วันที่"
+const fpTo = flatpickr("#critToDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        toDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            toDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+            if (fpFrom) fpFrom.set('maxDate', selectedDates[0]);
+        } else {
+            toDateYMD = "";
+            instance.input.value = "";
+            if (fpFrom) fpFrom.set('maxDate', null);
+        }
+        selectDateFilterMode('range');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+// Flatpickr for "ณ วันที่"
+const fpAsOf = flatpickr("#critAsOfDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        asOfDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            asOfDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+        } else {
+            asOfDateYMD = "";
+            instance.input.value = "";
+        }
+        selectDateFilterMode('asof');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+// สลับโหมดเงื่อนไขวันที่ Tab 1 (ปุ่มจุด ช่วงวันที่ vs ณ วันที่)
+function selectDateFilterMode(mode) {
+    const radioRange = document.getElementById("radioDateRange");
+    const radioAsOf = document.getElementById("radioDateAsOf");
+    const elFrom = document.getElementById("critFromDate");
+    const elTo = document.getElementById("critToDate");
+    const elAsOf = document.getElementById("critAsOfDate");
+    const btnClear = document.getElementById("btnClearDateRange");
+
+    if (mode === 'asof') {
+        if (radioAsOf) radioAsOf.checked = true;
+        if (elAsOf) {
+            elAsOf.style.opacity = "1";
+            elAsOf.style.pointerEvents = "auto";
+            elAsOf.style.background = "#ffffff";
+        }
+        if (elFrom) {
+            elFrom.style.opacity = "0.4";
+            elFrom.style.pointerEvents = "none";
+            elFrom.style.background = "#f1f5f9";
+        }
+        if (elTo) {
+            elTo.style.opacity = "0.4";
+            elTo.style.pointerEvents = "none";
+            elTo.style.background = "#f1f5f9";
+        }
+        if (btnClear) btnClear.style.opacity = "0.4";
+    } else {
+        if (radioRange) radioRange.checked = true;
+        if (elFrom) {
+            elFrom.style.opacity = "1";
+            elFrom.style.pointerEvents = "auto";
+            elFrom.style.background = "#ffffff";
+        }
+        if (elTo) {
+            elTo.style.opacity = "1";
+            elTo.style.pointerEvents = "auto";
+            elTo.style.background = "#ffffff";
+        }
+        if (btnClear) btnClear.style.opacity = "1";
+        if (elAsOf) {
+            elAsOf.style.opacity = "0.4";
+            elAsOf.style.pointerEvents = "none";
+            elAsOf.style.background = "#f1f5f9";
+        }
+    }
+}
+window.selectDateFilterMode = selectDateFilterMode;
+
+document.getElementById("critFromDate")?.addEventListener("click", () => selectDateFilterMode('range'));
+document.getElementById("critToDate")?.addEventListener("click", () => selectDateFilterMode('range'));
+document.getElementById("critAsOfDate")?.addEventListener("click", () => selectDateFilterMode('asof'));
+
+document.getElementById("btnClearDateRange")?.addEventListener("click", () => {
+    selectDateFilterMode('range');
+    fpFrom.clear();
+    fpTo.clear();
+    fromDateYMD = "";
+    toDateYMD = "";
+    document.getElementById("critFromDate").value = "";
+    document.getElementById("critToDate").value = "";
+    if (fpFrom) fpFrom.set('maxDate', null);
+    if (fpTo) fpTo.set('minDate', null);
+});
+
+// Initialize default date filter visual state to 'range'
+selectDateFilterMode('range');
+
+// ==========================================
+// Date States: Tab 2 (Deceased / Resigned)
+// ==========================================
+let deceasedFromDateYMD = formatDateToYMD(new Date());
+let deceasedToDateYMD = formatDateToYMD(new Date());
+let deceasedAsOfDateYMD = formatDateToYMD(new Date());
+
+// Flatpickr for Deceased "จาก วันที่"
+const fpDeceasedFrom = flatpickr("#critDeceasedFromDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        deceasedFromDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            deceasedFromDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+            if (fpDeceasedTo) fpDeceasedTo.set('minDate', selectedDates[0]);
+        } else {
+            deceasedFromDateYMD = "";
+            instance.input.value = "";
+            if (fpDeceasedTo) fpDeceasedTo.set('minDate', null);
+        }
+        selectDeceasedDateFilterMode('range');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+// Flatpickr for Deceased "ถึง วันที่"
+const fpDeceasedTo = flatpickr("#critDeceasedToDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        deceasedToDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            deceasedToDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+            if (fpDeceasedFrom) fpDeceasedFrom.set('maxDate', selectedDates[0]);
+        } else {
+            deceasedToDateYMD = "";
+            instance.input.value = "";
+            if (fpDeceasedFrom) fpDeceasedFrom.set('maxDate', null);
+        }
+        selectDeceasedDateFilterMode('range');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+// Flatpickr for Deceased "ณ วันที่"
+const fpDeceasedAsOf = flatpickr("#critDeceasedAsOfDate", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    defaultDate: new Date(),
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        instance.input.value = formatThaiDate(new Date().toISOString());
+        deceasedAsOfDateYMD = formatDateToYMD(new Date());
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length) {
+            deceasedAsOfDateYMD = formatDateToYMD(selectedDates[0]);
+            instance.input.value = formatThaiDate(selectedDates[0].toISOString());
+            changeToBuddhistYear(instance);
+        } else {
+            deceasedAsOfDateYMD = "";
+            instance.input.value = "";
+        }
+        selectDeceasedDateFilterMode('asof');
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
+    onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+});
+
+// สลับโหมดเงื่อนไขวันที่ Tab 2 (ปุ่มจุด ช่วงวันที่ vs ณ วันที่)
+function selectDeceasedDateFilterMode(mode) {
+    const radioRange = document.getElementById("radioDeceasedDateRange");
+    const radioAsOf = document.getElementById("radioDeceasedDateAsOf");
+    const elFrom = document.getElementById("critDeceasedFromDate");
+    const elTo = document.getElementById("critDeceasedToDate");
+    const elAsOf = document.getElementById("critDeceasedAsOfDate");
+    const btnClear = document.getElementById("btnClearDeceasedDateRange");
+
+    if (mode === 'asof') {
+        if (radioAsOf) radioAsOf.checked = true;
+        if (elAsOf) {
+            elAsOf.style.opacity = "1";
+            elAsOf.style.pointerEvents = "auto";
+            elAsOf.style.background = "#ffffff";
+        }
+        if (elFrom) {
+            elFrom.style.opacity = "0.4";
+            elFrom.style.pointerEvents = "none";
+            elFrom.style.background = "#f1f5f9";
+        }
+        if (elTo) {
+            elTo.style.opacity = "0.4";
+            elTo.style.pointerEvents = "none";
+            elTo.style.background = "#f1f5f9";
+        }
+        if (btnClear) btnClear.style.opacity = "0.4";
+    } else {
+        if (radioRange) radioRange.checked = true;
+        if (elFrom) {
+            elFrom.style.opacity = "1";
+            elFrom.style.pointerEvents = "auto";
+            elFrom.style.background = "#ffffff";
+        }
+        if (elTo) {
+            elTo.style.opacity = "1";
+            elTo.style.pointerEvents = "auto";
+            elTo.style.background = "#ffffff";
+        }
+        if (btnClear) btnClear.style.opacity = "1";
+        if (elAsOf) {
+            elAsOf.style.opacity = "0.4";
+            elAsOf.style.pointerEvents = "none";
+            elAsOf.style.background = "#f1f5f9";
+        }
+    }
+}
+window.selectDeceasedDateFilterMode = selectDeceasedDateFilterMode;
+
+document.getElementById("critDeceasedFromDate")?.addEventListener("click", () => selectDeceasedDateFilterMode('range'));
+document.getElementById("critDeceasedToDate")?.addEventListener("click", () => selectDeceasedDateFilterMode('range'));
+document.getElementById("critDeceasedAsOfDate")?.addEventListener("click", () => selectDeceasedDateFilterMode('asof'));
+
+document.getElementById("btnClearDeceasedDateRange")?.addEventListener("click", () => {
+    selectDeceasedDateFilterMode('range');
+    fpDeceasedFrom.clear();
+    fpDeceasedTo.clear();
+    deceasedFromDateYMD = "";
+    deceasedToDateYMD = "";
+    document.getElementById("critDeceasedFromDate").value = "";
+    document.getElementById("critDeceasedToDate").value = "";
+    if (fpDeceasedFrom) fpDeceasedFrom.set('maxDate', null);
+    if (fpDeceasedTo) fpDeceasedTo.set('minDate', null);
+});
+
+// Initialize default date filter visual state for Deceased to 'range'
+selectDeceasedDateFilterMode('range');
+
+// ==========================================
+// ==========================================
+// Load Initial Data (Members & Beneficiaries)
+// ==========================================
+async function loadCustomerData() {
+    try {
+        const [resCust, resBen] = await Promise.all([
+            fetch(`${API_BASE}/customer`).then(r => r.json()),
+            fetch(`${API_BASE}/beneficiary_deceased`).then(r => r.json()).catch(() => ({ results: [] }))
+        ]);
+
+        if (resCust.error === "0" && Array.isArray(resCust.results)) {
+            allCustomers = resCust.results.map(item => {
+                const fullName = `${item.prefix || ''}${item.name || ''} ${item.lastname || ''}`.trim();
+                const provinceName = (item.province || '-').trim();
+
+                return {
+                    ...item,
+                    fullName: fullName,
+                    province: provinceName,
+                    searchStr: `${item.Idcustomer || ''} ${fullName} ${item.Idcard || ''} ${item.Tel || ''} ${provinceName}`.toLowerCase()
+                };
+            });
+
+            // Filter deceased and resigned members (status 2, 3, 4)
+            allDeceasedMembers = allCustomers.filter(c => 
+                String(c.status) === "2" || String(c.status) === "3" || String(c.status) === "4"
+            ).map(c => ({
+                ...c,
+                record_type: "member",
+                code: c.Idcustomer || "",
+                dateEndStr: c.dateend || c.date_deceased || c.date || "",
+                typeLabel: "สมาชิก",
+                linkedInfo: c.beneficiary || c.beneficiary_name || "-",
+                searchStr: `${c.Idcustomer || ''} ${c.fullName || ''} ${c.Idcard || ''}`.toLowerCase()
+            }));
+        }
+
+        if (resBen && Array.isArray(resBen.results)) {
+            allDeceasedBeneficiaries = resBen.results.map(b => {
+                const prefix = b.prefix || "";
+                const name = b.name || "";
+                const lastname = b.lastname || "";
+                const fullName = b.fullname || `${prefix}${name} ${lastname}`.trim();
+
+                return {
+                    ...b,
+                    record_type: "beneficiary",
+                    code: b.Idbeneficiary || "",
+                    fullName: fullName,
+                    dateEndStr: b.dateend || b.date_deceased || b.date || "",
+                    typeLabel: "ผู้รับผลประโยชน์",
+                    status: 3, // เสียชีวิต
+                    linkedInfo: `${b.customer_fullname || "-"} (${b.Idcustomer || "-"})`,
+                    searchStr: `${b.Idbeneficiary || ''} ${fullName} ${b.Idcard || ''} ${b.Idcustomer || ''}`.toLowerCase()
+                };
+            });
+        }
+
+        allDeceasedRecords = [...allDeceasedMembers, ...allDeceasedBeneficiaries];
+
+    } catch (err) {
+        console.error("Load customer error:", err);
+    }
+}
+
+// ==========================================
+// Lookup Member / Deceased Name by Code
+// ==========================================
+function lookupMemberName(id) {
+    if (!id) return "";
+    const cleanId = id.trim().toLowerCase();
+    const found = allCustomers.find(c => (c.Idcustomer || "").toLowerCase() === cleanId);
+    return found ? found.fullName : "";
+}
+
+function lookupDeceasedName(id) {
+    if (!id) return "";
+    const cleanId = id.trim().toLowerCase();
+    const found = allDeceasedRecords.find(c => (c.code || "").toLowerCase() === cleanId);
+    if (found) return found.fullName;
+    const foundCust = allCustomers.find(c => (c.Idcustomer || "").toLowerCase() === cleanId);
+    return foundCust ? foundCust.fullName : "";
+}
+
+document.getElementById("critFromId")?.addEventListener("input", function() {
+    document.getElementById("critFromName").value = lookupMemberName(this.value);
+});
+document.getElementById("critToId")?.addEventListener("input", function() {
+    document.getElementById("critToName").value = lookupMemberName(this.value);
+});
+
+document.getElementById("critDeceasedFromId")?.addEventListener("input", function() {
+    document.getElementById("critDeceasedFromName").value = lookupDeceasedName(this.value);
+});
+document.getElementById("critDeceasedToId")?.addEventListener("input", function() {
+    document.getElementById("critDeceasedToName").value = lookupDeceasedName(this.value);
+});
+
+// ==========================================
+// Member & Deceased Selector Modal (จาก / ถึง)
+// ==========================================
+const modalPick = document.getElementById("modalPickMember");
+const closeModalPick = document.getElementById("closeModalPick");
+
+closeModalPick?.addEventListener("click", () => { modalPick.style.display = "none"; });
+modalPick?.addEventListener("click", (e) => {
+    if (e.target === modalPick) modalPick.style.display = "none";
+});
+
+document.getElementById("btnPickFromId")?.addEventListener("click", () => {
+    openMemberPicker("from");
+});
+document.getElementById("btnPickToId")?.addEventListener("click", () => {
+    openMemberPicker("to");
+});
+document.getElementById("btnPickDeceasedFromId")?.addEventListener("click", () => {
+    openMemberPicker("deceasedFrom");
+});
+document.getElementById("btnPickDeceasedToId")?.addEventListener("click", () => {
+    openMemberPicker("deceasedTo");
+});
+
+function openMemberPicker(type) {
+    targetPickField = type;
+    const titleEl = document.getElementById("modalPickTitle");
+    if (type === "from") {
+        titleEl.innerText = "🔍 เลือกรหัสสมาชิกเริ่มต้น (จาก รหัสสมาชิก)";
+    } else if (type === "to") {
+        titleEl.innerText = "🔍 เลือกรหัสสมาชิกสิ้นสุด (ถึง รหัสสมาชิก)";
+    } else if (type === "deceasedFrom") {
+        titleEl.innerText = "🔍 เลือกรหัสเริ่มต้น (สมาชิกลาออก / เสียชีวิต)";
+    } else if (type === "deceasedTo") {
+        titleEl.innerText = "🔍 เลือกรหัสสิ้นสุด (สมาชิกลาออก / เสียชีวิต)";
+    }
+
+    document.getElementById("modalPickSearch").value = "";
+    modalPickPage = 1;
+    filterAndRenderPickModal();
+    modalPick.style.display = "flex";
+}
+
+document.getElementById("modalPickSearch")?.addEventListener("input", () => {
+    modalPickPage = 1;
+    filterAndRenderPickModal();
+});
+
+function filterAndRenderPickModal() {
+    const q = (document.getElementById("modalPickSearch")?.value || "").toLowerCase().trim();
+    const isDeceased = (targetPickField === "deceasedFrom" || targetPickField === "deceasedTo");
+    const dataSource = isDeceased ? (allDeceasedRecords.length ? allDeceasedRecords : allCustomers) : allCustomers;
+
+    modalPickFiltered = dataSource.filter(c => {
+        if (!q) return true;
+        if (c.searchStr && c.searchStr.includes(q)) return true;
+        if (c.fullName && c.fullName.toLowerCase().includes(q)) return true;
+        if (c.code && c.code.toLowerCase().includes(q)) return true;
+        if (c.Idcustomer && c.Idcustomer.toLowerCase().includes(q)) return true;
+        return false;
+    });
+
+    const total = modalPickFiltered.length;
+    const totalPages = Math.ceil(total / modalPickPerPage) || 1;
+    if (modalPickPage > totalPages) modalPickPage = totalPages;
+    if (modalPickPage < 1) modalPickPage = 1;
+
+    const start = (modalPickPage - 1) * modalPickPerPage;
+    const pageData = modalPickFiltered.slice(start, start + modalPickPerPage);
+
+    const tbody = document.getElementById("modalPickBody");
+    tbody.innerHTML = "";
+
+    if (pageData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 25px; color: #94a3b8;">ไม่พบข้อมูล</td></tr>`;
+    } else {
+        pageData.forEach((item, idx) => {
+            const code = item.code || item.Idcustomer || item.Idbeneficiary || '-';
+            const badgeType = item.record_type === "beneficiary" 
+                ? `<span style="font-size: 11px; background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">ผู้รับผลประโยชน์</span>` 
+                : (isDeceased ? `<span style="font-size: 11px; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">สมาชิก</span>` : '');
+
+            const tr = `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 8px 12px; text-align: center;">${start + idx + 1}</td>
+                    <td style="padding: 8px 12px; font-weight: 600; color: #1e3c72; font-family: monospace;">${code}</td>
+                    <td style="padding: 8px 12px; font-weight: 500;">${item.fullName || '-'} ${badgeType}</td>
+                    <td style="padding: 8px 12px; color: #64748b;">${item.Idcard || '-'}</td>
+                    <td style="padding: 8px 12px; text-align: center;">
+                        <button type="button" class="btn-preview-official" style="padding: 3px 10px; font-size: 12px; background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;" onclick="selectPickMember('${code}', '${(item.fullName || '').replace(/'/g, "\\'")}')">
+                            เลือก
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML("beforeend", tr);
+        });
+    }
+
+    // Modal Pagination
+    const pageInfo = document.getElementById("modalPickPageInfo");
+    if (pageInfo) {
+        pageInfo.innerText = `แสดง ${total ? start + 1 : 0} - ${Math.min(start + modalPickPerPage, total)} จากทั้งหมด ${total} รายการ`;
+    }
+
+    const pagEl = document.getElementById("modalPickPagination");
+    pagEl.innerHTML = "";
+    if (totalPages > 1) {
+        const prev = document.createElement("button");
+        prev.type = "button";
+        prev.innerHTML = "&laquo;";
+        prev.disabled = modalPickPage === 1;
+        prev.onclick = () => { modalPickPage--; filterAndRenderPickModal(); };
+        pagEl.appendChild(prev);
+
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= modalPickPage - 1 && i <= modalPickPage + 1)) {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.innerText = i;
+                if (i === modalPickPage) b.classList.add("active");
+                b.onclick = () => { modalPickPage = i; filterAndRenderPickModal(); };
+                pagEl.appendChild(b);
+            }
+        }
+
+        const next = document.createElement("button");
+        next.type = "button";
+        next.innerHTML = "&raquo;";
+        next.disabled = modalPickPage === totalPages;
+        next.onclick = () => { modalPickPage++; filterAndRenderPickModal(); };
+        pagEl.appendChild(next);
+    }
+}
+
+window.selectPickMember = function(id, name) {
+    if (targetPickField === "from") {
+        document.getElementById("critFromId").value = id;
+        document.getElementById("critFromName").value = name;
+    } else if (targetPickField === "to") {
+        document.getElementById("critToId").value = id;
+        document.getElementById("critToName").value = name;
+    } else if (targetPickField === "deceasedFrom") {
+        document.getElementById("critDeceasedFromId").value = id;
+        document.getElementById("critDeceasedFromName").value = name;
+    } else if (targetPickField === "deceasedTo") {
+        document.getElementById("critDeceasedToId").value = id;
+        document.getElementById("critDeceasedToName").value = name;
+    }
+    modalPick.style.display = "none";
+};
+
+// ==========================================
+// Filter Data according to Criteria
+// ==========================================
+function getFilteredCustomers() {
+    const fromId = (document.getElementById("critFromId")?.value || "").trim().toLowerCase();
+    const toId = (document.getElementById("critToId")?.value || "").trim().toLowerCase();
+
+    // Condition Checkboxes (1 = ปกติ, 2 = ลาออก, 3 = ตาย, 4 = ตั้งหนี้)
+    const allowActive = document.getElementById("chkActive")?.checked;
+    const allowResigned = document.getElementById("chkResigned")?.checked;
+    const allowDeceased = document.getElementById("chkDeceased")?.checked;
+    const allowBilled = document.getElementById("chkBilled")?.checked;
+
+    // Age filter
+    const ageFrom = parseInt(document.getElementById("critAgeFrom")?.value, 10);
+    const ageTo = parseInt(document.getElementById("critAgeTo")?.value, 10);
+
+    return allCustomers.filter(item => {
+        // Status filter
+        const st = String(item.status);
+        if (st === "1" && !allowActive) return false;
+        if (st === "2" && !allowResigned) return false;
+        if (st === "3" && !allowDeceased) return false;
+        if (st === "4" && !allowBilled) return false;
+
+        // Code range filter
+        const itemId = (item.Idcustomer || "").toLowerCase();
+        if (fromId && itemId < fromId) return false;
+        if (toId && itemId > toId) return false;
+
+        // Date Filter (ตามโหมดปุ่มจุด: ช่วงวันที่ หรือ ณ วันที่)
+        const dateFilterType = document.querySelector('input[name="dateFilterType"]:checked')?.value || 'range';
+        if (dateFilterType === 'range') {
+            if (fromDateYMD || toDateYMD) {
+                const itemDateStr = parseDateToYMD(item.date);
+                if (!itemDateStr) return false;
+                if (fromDateYMD && itemDateStr < fromDateYMD) return false;
+                if (toDateYMD && itemDateStr > toDateYMD) return false;
+            }
+        } else if (dateFilterType === 'asof') {
+            if (asOfDateYMD) {
+                const itemDateStr = parseDateToYMD(item.date);
+                if (!itemDateStr) return false;
+                if (itemDateStr > asOfDateYMD) return false;
+            }
+        }
+
+        // Age filter if provided
+        if (!isNaN(ageFrom) || !isNaN(ageTo)) {
+            const age = parseInt(item.age, 10);
+            if (!isNaN(age)) {
+                if (!isNaN(ageFrom) && age < ageFrom) return false;
+                if (!isNaN(ageTo) && age > ageTo) return false;
+            }
+        }
+
+        return true;
+    });
+}
+
+
+
+// ==========================================
+// Generate Official Report HTML for Print & Preview
+// ==========================================
+function buildOfficialReportDocument(filteredList, autoPrint = false) {
+    const asOf = document.getElementById("critAsOfDate")?.value || formatThaiDate(new Date().toISOString());
+    const fromId = document.getElementById("critFromId")?.value || "เริ่มต้น";
+    const toId = document.getElementById("critToId")?.value || "สิ้นสุด";
+    const dateFilterType = document.querySelector('input[name="dateFilterType"]:checked')?.value || 'range';
+
+    let dateRangeDisplay = "ทั้งหมด";
+    const fromVal = document.getElementById("critFromDate")?.value;
+    const toVal = document.getElementById("critToDate")?.value;
+    if (fromVal && toVal) {
+        dateRangeDisplay = `${fromVal} ถึง ${toVal}`;
+    } else if (fromVal) {
+        dateRangeDisplay = `ตั้งแต่ ${fromVal}`;
+    } else if (toVal) {
+        dateRangeDisplay = `ถึง ${toVal}`;
+    }
+
+    const dateFilterHeaderText = dateFilterType === 'asof'
+        ? `ข้อมูล ณ วันที่: <strong>${asOf}</strong>`
+        : `ช่วงวันที่สมัคร: <strong>${dateRangeDisplay}</strong>`;
+
+    // Count by status
+    let countActive = 0, countResigned = 0, countDeceased = 0, countBilled = 0;
+    filteredList.forEach(c => {
+        const s = String(c.status);
+        if (s === "1") countActive++;
+        else if (s === "2") countResigned++;
+        else if (s === "3") countDeceased++;
+        else if (s === "4") countBilled++;
+    });
+
+    let rowsHtml = "";
+    filteredList.forEach((c, idx) => {
+        const s = String(c.status);
+        let stText = "ปกติ";
+        if (s === "2") stText = "ลาออก";
+        else if (s === "3") stText = "ตาย";
+        else if (s === "4") stText = "ตั้งหนี้";
+
+        rowsHtml += `
+            <tr>
+                <td style="text-align: center;">${idx + 1}</td>
+                <td style="text-align: center; font-family: monospace; font-weight: 600;">${c.Idcustomer || '-'}</td>
+                <td>${c.fullName || '-'}</td>
+                <td style="text-align: center;">${c.Idcard || '-'}</td>
+                <td style="text-align: center;">${c.Tel || '-'}</td>
+                <td>${c.province || '-'}</td>
+                <td style="text-align: center;">${formatThaiDate(c.date)}</td>
+                <td style="text-align: center;">${stText}</td>
+                <td>${c.beneficiary || c.beneficiary_name || '-'}</td>
+            </tr>
+        `;
+    });
+
+    if (!rowsHtml) {
+        rowsHtml = `<tr><td colspan="9" style="text-align: center; padding: 20px;">ไม่พบข้อมูลสมาชิกตามเงื่อนไขที่ระบุ</td></tr>`;
+    }
+
+    const printScript = autoPrint ? `
+        <script>
+            function triggerPrint() {
+                setTimeout(function() {
+                    window.focus();
+                    window.print();
+                }, 300);
+            }
+            if (document.readyState === 'complete') {
+                triggerPrint();
+            } else {
+                window.addEventListener('load', triggerPrint);
+            }
+        <\/script>
+    ` : "";
+
+    return `
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <title>รายงานรายชื่อสมาชิก - สมาคมฌาปนกิจสงเคราะห์</title>
+            <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                @page {
+                    size: A4 landscape;
+                    margin: 10mm;
+                }
+                body {
+                    font-family: 'Sarabun', 'Prompt', sans-serif;
+                    color: #000;
+                    margin: 0;
+                    padding: 15px;
+                    font-size: 13px;
+                }
+                .report-header {
+                    text-align: center;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 8px;
+                    margin-bottom: 12px;
+                }
+                .report-header h2 {
+                    margin: 0 0 4px 0;
+                    font-size: 19px;
+                    font-weight: 700;
+                }
+                .report-header h3 {
+                    margin: 0 0 4px 0;
+                    font-size: 15px;
+                    font-weight: 600;
+                }
+                .report-header p {
+                    margin: 0;
+                    font-size: 12.5px;
+                    color: #333;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                    margin-bottom: 14px;
+                }
+                th {
+                    background: #f1f5f9;
+                    border: 1px solid #000;
+                    padding: 6px 8px;
+                    text-align: center;
+                    font-weight: 600;
+                }
+                td {
+                    border: 1px solid #000;
+                    padding: 5px 8px;
+                }
+                .summary-box {
+                    font-size: 12.5px;
+                    font-weight: 600;
+                    margin-bottom: 24px;
+                    padding: 8px 14px;
+                    border: 1px dashed #000;
+                    display: flex;
+                    justify-content: space-around;
+                    background: #fafafa;
+                }
+                .signatures-grid {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 36px;
+                    page-break-inside: avoid;
+                }
+                .sign-box {
+                    text-align: center;
+                    width: 240px;
+                    font-size: 12.5px;
+                }
+                @media print {
+                    .no-print { display: none !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <!-- Toolbar for Preview Mode -->
+            <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Prompt', sans-serif; margin: -15px -15px 15px -15px;">
+                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">📋 รายงานรายชื่อสมาชิก (${filteredList.length} รายการ)</div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="window.print()" style="padding: 7px 18px; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">🖨️ สั่งพิมพ์เอกสาร</button>
+                    <button onclick="window.close()" style="padding: 7px 18px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">❌ ปิดหน้าต่าง</button>
+                </div>
+            </div>
+
+            <div class="report-header">
+                <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
+                <h3>รายงานรายชื่อสมาชิก</h3>
+                <p>${dateFilterHeaderText} | ช่วงรหัส: ${fromId} ถึง ${toId}</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 45px;">ลำดับ</th>
+                        <th style="width: 100px;">รหัสสมาชิก</th>
+                        <th style="text-align: left;">คำนำหน้า - ชื่อ - นามสกุล</th>
+                        <th style="width: 130px;">เลขบัตรประชาชน</th>
+                        <th style="width: 105px;">เบอร์โทรศัพท์</th>
+                        <th style="width: 110px;">จังหวัด/พื้นที่</th>
+                        <th style="width: 95px;">วันที่สมัคร</th>
+                        <th style="width: 80px;">สถานะ</th>
+                        <th style="text-align: left; width: 140px;">ผู้รับผลประโยชน์</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+
+            <div class="summary-box">
+                <span>สรุปยอด: ปกติ ${countActive.toLocaleString()} ราย</span>
+                <span>ลาออก ${countResigned.toLocaleString()} ราย</span>
+                <span>ตาย ${countDeceased.toLocaleString()} ราย</span>
+                <span>ตั้งหนี้ ${countBilled.toLocaleString()} ราย</span>
+                <span><strong>รวมทั้งสิ้น ${filteredList.length.toLocaleString()} ราย</strong></span>
+            </div>
+
+            <div class="signatures-grid">
+                <div class="sign-box">
+                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>เจ้าหน้าที่ผู้จัดทำรายงาน</p>
+                    <p>(.......................................................)</p>
+                </div>
+                <div class="sign-box">
+                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>นายทะเบียน / ผู้ตรวจสอบ</p>
+                    <p>(.......................................................)</p>
+                </div>
+            </div>
+
+            ${printScript}
+        </body>
+        </html>
+    `;
+}
+
+// ==========================================
+// Action Buttons: Print, Preview, Export
+// ==========================================
+
+// Function for direct printing via hidden iframe
+function printReportViaIframe(htmlContent) {
+    let printFrame = document.getElementById("reportPrintIframe");
+    if (printFrame) {
+        printFrame.remove();
+    }
+    printFrame = document.createElement("iframe");
+    printFrame.id = "reportPrintIframe";
+    printFrame.style.position = "fixed";
+    printFrame.style.top = "-9999px";
+    printFrame.style.left = "-9999px";
+    printFrame.style.width = "1px";
+    printFrame.style.height = "1px";
+    printFrame.style.border = "none";
+    document.body.appendChild(printFrame);
+
+    const frameDoc = printFrame.contentWindow.document;
+    frameDoc.open();
+    frameDoc.write(htmlContent);
+    frameDoc.close();
+
+    setTimeout(() => {
+        try {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+        } catch (e) {
+            console.error("Iframe print fallback to window:", e);
+            openReportInNewWindow(htmlContent, true);
+        }
+    }, 350);
+}
+
+// Function for opening report in clean new window via Blob
+function openReportInNewWindow(htmlContent, autoPrint = false) {
+    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(blob);
+    const win = window.open(blobUrl, "_blank");
+    if (win) {
+        win.opener = null;
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 120000);
+    } else {
+        alert("กรุณาอนุญาตให้เปิดหน้าต่าง Pop-up บนเบราว์เซอร์เพื่อดูรายงาน");
+    }
+}
+
+// 1. พิมพ์ (Print) - เปิดในแท็บใหม่ (New Tab) และสั่งพิมพ์อัตโนมัติ โดยแยกกระบวนการผ่าน Blob URL ไม่ล็อกหน้าหลัก
+document.getElementById("btnPrintReport").addEventListener("click", () => {
+    const filtered = getFilteredCustomers();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลสมาชิกตามเงื่อนไขที่ระบุ");
+        return;
+    }
+
+    const htmlContent = buildOfficialReportDocument(filtered, true);
+    openReportInNewWindow(htmlContent, true);
+});
+
+// 2. แสดงตัวอย่างรายงาน (Preview)
+document.getElementById("btnPreviewReport").addEventListener("click", () => {
+    const filtered = getFilteredCustomers();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลสมาชิกตามเงื่อนไขที่ระบุ");
+        return;
+    }
+
+    const htmlContent = buildOfficialReportDocument(filtered, false);
+    openReportInNewWindow(htmlContent, false);
+});
+
+// 3. ส่งออก Excel (CSV UTF-8 BOM)
+document.getElementById("btnExportExcel").addEventListener("click", () => {
+    const filtered = getFilteredCustomers();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลสมาชิกที่จะส่งออก");
+        return;
+    }
+
+    const headers = ["ลำดับ", "รหัสสมาชิก", "คำนำหน้า", "ชื่อ", "นามสกุล", "เลขบัตรประชาชน", "เบอร์โทร", "จังหวัด", "วันที่สมัคร", "สถานะ", "ผู้รับผลประโยชน์"];
+    const rows = filtered.map((c, idx) => {
+        let stName = "ปกติ";
+        if (c.status == 2) stName = "ลาออก";
+        else if (c.status == 3) stName = "ตาย";
+        else if (c.status == 4) stName = "ตั้งหนี้";
+        return [
+            idx + 1,
+            `"${c.Idcustomer || ''}"`,
+            `"${c.prefix || ''}"`,
+            `"${c.name || ''}"`,
+            `"${c.lastname || ''}"`,
+            `"${c.Idcard || ''}"`,
+            `"${c.Tel || ''}"`,
+            `"${c.province || ''}"`,
+            `"${formatThaiDate(c.date)}"`,
+            `"${stName}"`,
+            `"${c.beneficiary || c.beneficiary_name || ''}"`
+        ];
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateRangeSuffix = fromDateYMD || toDateYMD ? `_${fromDateYMD || ''}_ถึง_${toDateYMD || ''}` : '';
+    link.setAttribute("href", url);
+    link.setAttribute("download", `รายงานรายชื่อสมาชิก${dateRangeSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+// ==========================================
+// Filter Deceased / Resigned Data according to Criteria
+// ==========================================
+function getFilteredDeceased() {
+    const fromId = (document.getElementById("critDeceasedFromId")?.value || "").trim().toLowerCase();
+    const toId = (document.getElementById("critDeceasedToId")?.value || "").trim().toLowerCase();
+    const typeFilter = document.getElementById("critDeceasedType")?.value || "all";
+
+    const allowResigned = document.getElementById("chkDeceasedResigned")?.checked;
+    const allowDied = document.getElementById("chkDeceasedDied")?.checked;
+    const allowBilled = document.getElementById("chkDeceasedBilled")?.checked;
+
+    const dateFilterType = document.querySelector('input[name="deceasedDateFilterType"]:checked')?.value || 'range';
+
+    return allDeceasedRecords.filter(item => {
+        // 1. Record type filter
+        if (typeFilter === "member" && item.record_type !== "member") return false;
+        if (typeFilter === "beneficiary" && item.record_type !== "beneficiary") return false;
+
+        // 2. Status filter
+        const s = String(item.status);
+        if (s === "2" && !allowResigned) return false;
+        if (s === "3" && !allowDied) return false;
+        if (s === "4" && !allowBilled) return false;
+
+        // 3. Code range filter
+        const code = (item.code || item.Idcustomer || item.Idbeneficiary || "").toLowerCase();
+        if (fromId && code < fromId) return false;
+        if (toId && code > toId) return false;
+
+        // 4. Date filter
+        const rawDate = item.dateEndStr || item.dateend || item.date_deceased || item.date;
+        const itemDateStr = parseDateToYMD(rawDate);
+
+        if (dateFilterType === 'range') {
+            if (deceasedFromDateYMD || deceasedToDateYMD) {
+                if (!itemDateStr) return false;
+                if (deceasedFromDateYMD && itemDateStr < deceasedFromDateYMD) return false;
+                if (deceasedToDateYMD && itemDateStr > deceasedToDateYMD) return false;
+            }
+        } else if (dateFilterType === 'asof') {
+            if (deceasedAsOfDateYMD) {
+                if (!itemDateStr) return false;
+                if (itemDateStr > deceasedAsOfDateYMD) return false;
+            }
+        }
+
+        return true;
+    });
+}
+
+// ==========================================
+// Generate Official Deceased Report HTML for Print & Preview
+// ==========================================
+function buildDeceasedReportDocument(filteredList, autoPrint = false) {
+    const asOf = document.getElementById("critDeceasedAsOfDate")?.value || formatThaiDate(new Date().toISOString());
+    const fromId = document.getElementById("critDeceasedFromId")?.value || "เริ่มต้น";
+    const toId = document.getElementById("critDeceasedToId")?.value || "สิ้นสุด";
+    const dateFilterType = document.querySelector('input[name="deceasedDateFilterType"]:checked')?.value || 'range';
+    const typeFilter = document.getElementById("critDeceasedType")?.value || "all";
+
+    let typeText = "ทั้งหมด (สมาชิกและผู้รับผลประโยชน์)";
+    if (typeFilter === "member") typeText = "เฉพาะสมาชิก";
+    else if (typeFilter === "beneficiary") typeText = "เฉพาะผู้รับผลประโยชน์";
+
+    let dateRangeDisplay = "ทั้งหมด";
+    const fromVal = document.getElementById("critDeceasedFromDate")?.value;
+    const toVal = document.getElementById("critDeceasedToDate")?.value;
+    if (fromVal && toVal) {
+        dateRangeDisplay = `${fromVal} ถึง ${toVal}`;
+    } else if (fromVal) {
+        dateRangeDisplay = `ตั้งแต่ ${fromVal}`;
+    } else if (toVal) {
+        dateRangeDisplay = `ถึง ${toVal}`;
+    }
+
+    const dateFilterHeaderText = dateFilterType === 'asof'
+        ? `ข้อมูล ณ วันที่: <strong>${asOf}</strong>`
+        : `ช่วงวันที่ลาออก/เสียชีวิต: <strong>${dateRangeDisplay}</strong>`;
+
+    let countResigned = 0, countDied = 0, countBilled = 0;
+    let countMembers = 0, countBeneficiaries = 0;
+
+    filteredList.forEach(c => {
+        const s = String(c.status);
+        if (s === "2") countResigned++;
+        else if (s === "3") countDied++;
+        else if (s === "4") countBilled++;
+
+        if (c.record_type === "beneficiary") countBeneficiaries++;
+        else countMembers++;
+    });
+
+    let rowsHtml = "";
+    filteredList.forEach((c, idx) => {
+        const s = String(c.status);
+        let stText = "ปกติ";
+        let stColor = "#334155";
+        if (s === "2") { stText = "ลาออก"; stColor = "#d97706"; }
+        else if (s === "3") { stText = "เสียชีวิต"; stColor = "#dc2626"; }
+        else if (s === "4") { stText = "เสียชีวิต/ตั้งหนี้"; stColor = "#7c3aed"; }
+
+        const rawDate = c.dateEndStr || c.dateend || c.date_deceased || c.date;
+        const code = c.code || c.Idcustomer || c.Idbeneficiary || "-";
+        const typeLabel = c.record_type === "beneficiary" ? "ผู้รับผลประโยชน์" : "สมาชิก";
+        const reasonText = c.cause || c.reason || c.remark || "-";
+        const linkedText = c.linkedInfo || c.beneficiary || c.customer_fullname || "-";
+
+        rowsHtml += `
+            <tr>
+                <td style="text-align: center;">${idx + 1}</td>
+                <td style="text-align: center; font-family: monospace; font-weight: 600;">${code}</td>
+                <td style="text-align: center;">${typeLabel}</td>
+                <td>${c.fullName || '-'}</td>
+                <td style="text-align: center;">${c.Idcard || '-'}</td>
+                <td style="text-align: center;">${formatThaiDate(rawDate)}</td>
+                <td style="text-align: center; font-weight: 600; color: ${stColor};">${stText}</td>
+                <td>${reasonText}</td>
+                <td>${linkedText}</td>
+            </tr>
+        `;
+    });
+
+    if (!rowsHtml) {
+        rowsHtml = `<tr><td colspan="9" style="text-align: center; padding: 25px; color: #888;">ไม่พบข้อมูลสมาชิกลาออก/เสียชีวิตตามเงื่อนไขที่ระบุ</td></tr>`;
+    }
+
+    const printScript = autoPrint ? `
+        <script>
+            function triggerPrint() {
+                setTimeout(function() {
+                    window.focus();
+                    window.print();
+                }, 300);
+            }
+            if (document.readyState === 'complete') {
+                triggerPrint();
+            } else {
+                window.addEventListener('load', triggerPrint);
+            }
+        <\/script>
+    ` : "";
+
+    return `
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <title>รายงานสมาชิกลาออก / เสียชีวิต - สมาคมฌาปนกิจสงเคราะห์</title>
+            <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                @page {
+                    size: A4 landscape;
+                    margin: 10mm;
+                }
+                body {
+                    font-family: 'Sarabun', 'Prompt', sans-serif;
+                    color: #000;
+                    margin: 0;
+                    padding: 15px;
+                    font-size: 13px;
+                }
+                .report-header {
+                    text-align: center;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 8px;
+                    margin-bottom: 12px;
+                }
+                .report-header h2 {
+                    margin: 0 0 4px 0;
+                    font-size: 19px;
+                    font-weight: 700;
+                }
+                .report-header h3 {
+                    margin: 0 0 4px 0;
+                    font-size: 15px;
+                    font-weight: 600;
+                }
+                .report-header p {
+                    margin: 0;
+                    font-size: 12.5px;
+                    color: #333;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                    margin-bottom: 14px;
+                }
+                th {
+                    background: #f1f5f9;
+                    border: 1px solid #000;
+                    padding: 6px 8px;
+                    text-align: center;
+                    font-weight: 600;
+                }
+                td {
+                    border: 1px solid #000;
+                    padding: 5px 8px;
+                }
+                .summary-box {
+                    font-size: 12.5px;
+                    font-weight: 600;
+                    margin-bottom: 24px;
+                    padding: 8px 14px;
+                    border: 1px dashed #000;
+                    display: flex;
+                    justify-content: space-around;
+                    background: #fafafa;
+                }
+                .signatures-grid {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 36px;
+                    page-break-inside: avoid;
+                }
+                .sign-box {
+                    text-align: center;
+                    width: 240px;
+                    font-size: 12.5px;
+                }
+                @media print {
+                    .no-print { display: none !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <!-- Toolbar for Preview Mode -->
+            <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Prompt', sans-serif; margin: -15px -15px 15px -15px;">
+                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">⚰️ รายงานสมาชิกลาออก / เสียชีวิต (${filteredList.length} รายการ)</div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="window.print()" style="padding: 7px 18px; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">🖨️ สั่งพิมพ์เอกสาร</button>
+                    <button onclick="window.close()" style="padding: 7px 18px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">❌ ปิดหน้าต่าง</button>
+                </div>
+            </div>
+
+            <div class="report-header">
+                <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
+                <h3>รายงานสมาชิกลาออก / เสียชีวิต</h3>
+                <p>${dateFilterHeaderText} | ประเภทข้อมูล: ${typeText} | ช่วงรหัส: ${fromId} ถึง ${toId}</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 45px;">ลำดับ</th>
+                        <th style="width: 95px;">รหัส</th>
+                        <th style="width: 90px;">ประเภท</th>
+                        <th style="text-align: left;">คำนำหน้า - ชื่อ - นามสกุล</th>
+                        <th style="width: 125px;">เลขบัตรประชาชน</th>
+                        <th style="width: 105px;">วันที่ออก/เสียชีวิต</th>
+                        <th style="width: 95px;">สถานะ</th>
+                        <th style="text-align: left; width: 120px;">สาเหตุ / หมายเหตุ</th>
+                        <th style="text-align: left; width: 140px;">ผู้รับผลประโยชน์/สมาชิก</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+
+            <div class="summary-box">
+                <span>ลาออก: ${countResigned.toLocaleString()} ราย</span>
+                <span>เสียชีวิต: ${countDied.toLocaleString()} ราย</span>
+                <span>เสียชีวิต/ตั้งหนี้: ${countBilled.toLocaleString()} ราย</span>
+                <span>(สมาชิก ${countMembers.toLocaleString()} ราย, ผู้รับผลประโยชน์ ${countBeneficiaries.toLocaleString()} ราย)</span>
+                <span><strong>รวมทั้งสิ้น ${filteredList.length.toLocaleString()} ราย</strong></span>
+            </div>
+
+            <div class="signatures-grid">
+                <div class="sign-box">
+                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>เจ้าหน้าที่ผู้จัดทำรายงาน</p>
+                    <p>(.......................................................)</p>
+                </div>
+                <div class="sign-box">
+                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>นายทะเบียน / ผู้ตรวจสอบ</p>
+                    <p>(.......................................................)</p>
+                </div>
+            </div>
+
+            ${printScript}
+        </body>
+        </html>
+    `;
+}
+
+// 4. พิมพ์ รายงานสมาชิกลาออก / เสียชีวิต
+document.getElementById("btnPrintDeceasedReport")?.addEventListener("click", () => {
+    const filtered = getFilteredDeceased();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลสมาชิกลาออก/เสียชีวิตตามเงื่อนไขที่ระบุ");
+        return;
+    }
+    const htmlContent = buildDeceasedReportDocument(filtered, true);
+    openReportInNewWindow(htmlContent, true);
+});
+
+// 5. แสดงตัวอย่าง รายงานสมาชิกลาออก / เสียชีวิต
+document.getElementById("btnPreviewDeceasedReport")?.addEventListener("click", () => {
+    const filtered = getFilteredDeceased();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลสมาชิกลาออก/เสียชีวิตตามเงื่อนไขที่ระบุ");
+        return;
+    }
+    const htmlContent = buildDeceasedReportDocument(filtered, false);
+    openReportInNewWindow(htmlContent, false);
+});
+
+// 6. ส่งออก Excel รายงานสมาชิกลาออก / เสียชีวิต
+document.getElementById("btnExportDeceasedExcel")?.addEventListener("click", () => {
+    const filtered = getFilteredDeceased();
+    if (!filtered || filtered.length === 0) {
+        alert("ไม่พบข้อมูลสมาชิกลาออก/เสียชีวิตที่จะส่งออก");
+        return;
+    }
+
+    const headers = ["ลำดับ", "รหัส", "ประเภท", "ชื่อ-นามสกุล", "เลขบัตรประชาชน", "วันที่ลาออก/เสียชีวิต", "สถานะ", "สาเหตุ", "ข้อมูลเชื่อมโยง"];
+    const rows = filtered.map((c, idx) => {
+        const s = String(c.status);
+        let stName = "ปกติ";
+        if (s === "2") stName = "ลาออก";
+        else if (s === "3") stName = "เสียชีวิต";
+        else if (s === "4") stName = "เสียชีวิต/ตั้งหนี้";
+
+        const rawDate = c.dateEndStr || c.dateend || c.date_deceased || c.date;
+        const code = c.code || c.Idcustomer || c.Idbeneficiary || "";
+        const typeLabel = c.record_type === "beneficiary" ? "ผู้รับผลประโยชน์" : "สมาชิก";
+        const reasonText = c.cause || c.reason || c.remark || "";
+        const linkedText = c.linkedInfo || c.beneficiary || c.customer_fullname || "";
+
+        return [
+            idx + 1,
+            `"${code}"`,
+            `"${typeLabel}"`,
+            `"${c.fullName || ''}"`,
+            `"${c.Idcard || ''}"`,
+            `"${formatThaiDate(rawDate)}"`,
+            `"${stName}"`,
+            `"${reasonText}"`,
+            `"${linkedText}"`
+        ];
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateRangeSuffix = deceasedFromDateYMD || deceasedToDateYMD ? `_${deceasedFromDateYMD || ''}_ถึง_${deceasedToDateYMD || ''}` : '';
+    link.setAttribute("href", url);
+    link.setAttribute("download", `รายงานสมาชิกลาออก_เสียชีวิต${dateRangeSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+// 7. ล้างเงื่อนไขทั้งหมดในแท็บสมาชิกลาออก / เสียชีวิต
+document.getElementById("btnResetDeceasedCriteria")?.addEventListener("click", () => {
+    selectDeceasedDateFilterMode('range');
+    const today = new Date();
+    fpDeceasedFrom.setDate(today, false);
+    fpDeceasedTo.setDate(today, false);
+    fpDeceasedAsOf.setDate(today, false);
+    deceasedFromDateYMD = formatDateToYMD(today);
+    deceasedToDateYMD = formatDateToYMD(today);
+    deceasedAsOfDateYMD = formatDateToYMD(today);
+    document.getElementById("critDeceasedFromDate").value = formatThaiDate(today.toISOString());
+    document.getElementById("critDeceasedToDate").value = formatThaiDate(today.toISOString());
+    document.getElementById("critDeceasedAsOfDate").value = formatThaiDate(today.toISOString());
+
+    document.getElementById("critDeceasedFromId").value = "";
+    document.getElementById("critDeceasedFromName").value = "";
+    document.getElementById("critDeceasedToId").value = "";
+    document.getElementById("critDeceasedToName").value = "";
+
+    document.getElementById("critDeceasedType").value = "all";
+    document.getElementById("chkDeceasedResigned").checked = true;
+    document.getElementById("chkDeceasedDied").checked = true;
+    document.getElementById("chkDeceasedBilled").checked = true;
+
+    if (fpDeceasedFrom) fpDeceasedFrom.set('maxDate', null);
+    if (fpDeceasedTo) fpDeceasedTo.set('minDate', null);
+});
+
+// ปลดล็อก Focus ทันทีเมื่อสลับกลับมาที่หน้าต่างหลัก
+window.addEventListener("focus", () => {
+    const inputs = document.querySelectorAll("input, select, button");
+    inputs.forEach(el => {
+        if (!el.hasAttribute("data-permanent-disabled")) {
+            el.disabled = false;
+        }
+    });
+});
+
+// Load on start
+selectDateFilterMode('range');
+loadCustomerData();
+
+</script>
+{% endblock %}

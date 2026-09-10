@@ -1,0 +1,295 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %} แก้ไขทะเบียนพนักงาน {% endblock %}
+
+{% block content %}
+
+<h3><a href="/DK_Home">HOME</a> <a href="DK_Employee">\ ทะเบียนพนักงาน</a> \ แก้ไขทะเบียนพนักงาน</h3>
+<link rel="stylesheet" href="{{ url_for('static', filename='employee.css') }}">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Flatpickr Theme (เลือกได้) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Thai language -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<div class="main">
+
+  
+    <!--<form action="{{ API_BASE }}/saveuseremployee" method="POST" enctype="multipart/form-data">-->
+    <form id="employeeForm">
+     <p>แก้ไขทะเบียนพนักงาน</p>
+       <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 15px;">
+        <div class="button-group">
+          
+         <button type="submit" class="submit-btnsave">📄 บันทึก</button>
+         
+          <!-- ปุ่มยกเลิก -->
+          <button type="button" id="btnCancel">🗑️ ยกเลิก</button>
+        </div>
+      </div>
+      <hr class="my-box">
+
+    <div class="row-container">
+       
+       <div class="form-left">
+            
+           <div class="employee-detail">
+             <h3>ข้อมูลส่วนตัว</h3>
+              <div class="detail-grid">
+                  <div><strong>ชื่อ :</strong> </div>
+                  <div><strong>นามสกุล:</strong> </div>
+                  <div><strong>แผนก:</strong> </div>
+                  <div><strong>เบอร์โทร:</strong> </div>
+                  <div><strong>วันที่เริ่มงาน:</strong> </div>
+              </div>
+            </div>
+       </div>
+      <div class="form-left">
+           <label for="IdEmployee">รหัสพนักงาน :</label><br>
+              <input type="text" id="IdEmployee" name="IdEmployee"><br>
+           <label for="prefix">คำนำหน้า :</label><br>
+                <select name="prefix" id="prefix" required>
+                  <option value="">-- กรุณาเลือก --</option>
+                  <option value="นาย">นาย</option>
+                  <option value="นาง">นาง</option>
+                  <option value="นางสาว">นางสาว</option>
+                </select><br>  
+           <label for="name">ชื่อ :</label><br>
+              <input type="text" id="name" name="name"><br>
+           <label for="Lname">นามสกุล :</label><br>
+              <input type="text" id="lastname" name="lastname"><br>
+           <label for="idcard">เลขบัตรประชาชน :</label><br>
+              <input type="text" id="Idcard" name="Idcard"><br>
+           <label for="Tel">เบอร์โทรศัพย์ :</label><br>
+              <input type="text" id="Tel" name="Tel"><br>
+           <label for="Position">ตำแหน่ง :</label><br>
+              <input type="text" id="position" name="position"><br><br>
+      </div>
+    
+       <div class="form-left">
+           
+            <label for="date">วันที่เริ่มงาน :</label><br>
+              <input type="date" id="thai-date" name="thai-date">
+              <input type="hidden" id="ad-date" name="date"> <!-- ค่านี้จะถูกส่งไป FastAPI -->
+           
+                     
+            <br><br>
+             <label for="status">สถานะ :</label><br>
+            <select id="status" name="status">
+                <option value="1" selected>
+                    ปกติ
+                </option>
+                <option value="2">
+                    ลาออก
+                </option>
+            </select>
+          
+             
+        </div>
+    </div>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+
+import { API_BASE } from "/static/js/config.js";
+
+// =========================
+// ELEMENT
+// =========================
+const thaiInput = document.getElementById("thai-date");
+const adInput = document.getElementById("ad-date");
+
+// =========================
+// READONLY
+// =========================
+window.onload = function () {
+    document.getElementById("IdEmployee").readOnly = true;
+};
+
+// =========================
+// FLATPICKR
+// =========================
+const fp = flatpickr("#thai-date", {
+    locale: "th",
+    dateFormat: "Y-m-d",
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        if (selectedDates.length > 0) {
+            const date = selectedDates[0];
+            thaiInput.value = formatThaiDate(date);
+            updateHiddenDate(date);
+        }
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+
+        if (!selectedDates.length) return;
+        const date = selectedDates[0];
+        thaiInput.value = formatThaiDate(date);
+        updateHiddenDate(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    }
+});
+
+// =========================
+// เปลี่ยน ค.ศ. → พ.ศ.
+// =========================
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+
+    }, 1);
+}
+
+// =========================
+// FORMAT THAI DATE
+// =========================
+function formatThaiDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+
+// =========================
+// UPDATE HIDDEN DATE
+// =========================
+function updateHiddenDate(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    adInput.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// =========================
+// GET ID
+// =========================
+const params = new URLSearchParams(window.location.search);
+
+const id = params.get("id");
+
+if (!id) {
+
+    alert("❌ ไม่พบรหัสสมาชิก");
+}
+
+// =========================
+// LOAD DATA
+// =========================
+
+
+
+fetch(`${API_BASE}/employee1/${id}`)
+
+.then(res => res.json())
+
+.then(data => {
+
+    if (data.error !== "0") {
+
+        alert("❌ ไม่พบข้อมูลสมาชิก");
+
+        return;
+    }
+
+    const emp = data.results;
+
+    // =====================
+    // TEXT
+    // =====================
+    document.getElementById("IdEmployee").value = emp.IdEmployee || "";
+    document.getElementById("prefix").value = emp.prefix || "";
+    document.getElementById("name").value = emp.name || "";
+    document.getElementById("lastname").value = emp.lastname || "";
+    document.getElementById("Idcard").value = emp.Idcard || "";
+    document.getElementById("Tel").value = emp.Tel || "";
+    document.getElementById("position").value = emp.position || "";
+    document.getElementById("status").value =  emp.status ? String(emp.status) : "1";
+    // =====================
+    // DATE
+    // =====================
+    if (emp.date) {
+
+        // DB format = 2026-05-10
+        const dbDate = new Date(emp.date);
+
+        // set flatpickr
+        fp.setDate(dbDate);
+
+        // แสดง พ.ศ.
+        thaiInput.value = formatThaiDate(dbDate);
+
+        // hidden ค.ศ.
+        updateHiddenDate(dbDate);
+    }
+
+})
+
+.catch(err => {
+
+    console.error(err);
+
+    alert("❌ โหลดข้อมูลไม่สำเร็จ");
+});
+
+// =========================
+// CANCEL
+// =========================
+document.getElementById("btnCancel")
+
+.addEventListener("click", () => {
+
+    window.location.href = "/DK_Employee";
+});
+
+// =========================
+// UPDATE
+// =========================
+document.getElementById("employeeForm")
+.addEventListener("submit", function(e){
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch(`${API_BASE}/employee/update`, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error === "0") {
+            alert("✅ แก้ไขข้อมูลสำเร็จ");
+            window.location.href = "/DK_Employee";
+        } else {
+            alert("❌ ไม่สามารถแก้ไขข้อมูลได้");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ เกิดข้อผิดพลาด");
+    });
+});
+</script>
+
+
+  
+
+{% endblock %}

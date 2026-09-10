@@ -1,0 +1,542 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}แก้ไขทะเบียนสมาชิก{% endblock %}
+
+{% block content %}
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<!-- Page CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+
+<div class="customer-form-wrap">
+    <h3><a href="/DK_Home">HOME</a> \ <a href="/DK_customer">ทะเบียนสมาชิก</a> \ แก้ไขทะเบียนสมาชิก</h3>
+
+    <form id="customerForm">
+        <div class="form-action-bar">
+            <h2>แก้ไขทะเบียนสมาชิก</h2>
+            <div class="btn-group">
+                <button type="submit" class="btn-save-main">📄 บันทึกการแก้ไข</button>
+                <button type="button" id="btnCancel" class="btn-cancel-main">🗑️ ยกเลิก</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-styled">
+            <button type="button" class="tab-btn active" data-tab="personal">📋 ข้อมูลส่วนตัว</button>
+            <button type="button" class="tab-btn" data-tab="beneficiary">👥 ผู้รับผลประโยชน์ (<span id="benCount">0</span>)</button>
+        </div>
+
+        <!-- Tab 1: ข้อมูลส่วนตัว -->
+        <div id="tab-personal" class="tab-panel" style="display:block;">
+            <div class="form-grid-3">
+                <!-- Column 1: ข้อมูลส่วนตัว -->
+                <div class="form-section-card">
+                    <h3>👤 ข้อมูลส่วนตัว</h3>
+                    <div class="form-field">
+                        <label for="Idcustomer">รหัสสมาชิก</label>
+                        <input type="text" id="Idcustomer" name="Idcustomer" readonly>
+                    </div>
+                    <div class="form-field">
+                        <label for="prefix">คำนำหน้า <span class="req">*</span></label>
+                        <select name="prefix" id="prefix" required>
+                            <option value="">-- กรุณาเลือก --</option>
+                            <option value="นาย">นาย</option>
+                            <option value="นาง">นาง</option>
+                            <option value="นางสาว">นางสาว</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="name">ชื่อ <span class="req">*</span></label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="lastname">นามสกุล <span class="req">*</span></label>
+                        <input type="text" id="lastname" name="lastname" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="Idcard">เลขบัตรประชาชน</label>
+                        <input type="text" id="Idcard" name="Idcard" maxlength="13">
+                    </div>
+                    <div class="form-field">
+                        <label for="Tel">เบอร์โทรศัพท์</label>
+                        <input type="text" id="Tel" name="Tel">
+                    </div>
+                </div>
+
+                <!-- Column 2: ที่อยู่ -->
+                <div class="form-section-card">
+                    <h3>🏠 ข้อมูลที่อยู่</h3>
+                    <div class="form-field">
+                        <label for="addrNo">ที่อยู่ / บ้านเลขที่</label>
+                        <input type="text" id="addrNo" name="addrNo">
+                    </div>
+                    <div class="form-field">
+                        <label for="moo">หมู่</label>
+                        <input type="text" id="moo" name="moo">
+                    </div>
+                    <div class="form-field">
+                        <label for="locality">ตำบล / แขวง</label>
+                        <input type="text" id="locality" name="locality">
+                    </div>
+                    <div class="form-field">
+                        <label for="district">อำเภอ / เขต</label>
+                        <input type="text" id="district" name="district">
+                    </div>
+                    <div class="form-field">
+                        <label for="province">จังหวัด</label>
+                        <input type="text" id="province" name="province">
+                    </div>
+                    <div class="form-field">
+                        <label for="zipCode">รหัสไปรษณีย์</label>
+                        <input type="text" id="zipCode" name="zipCode">
+                    </div>
+                </div>
+
+                <!-- Column 3: ข้อมูลการสมัครและสถานะ -->
+                <div class="form-section-card">
+                    <h3>📝 ข้อมูลการสมัครและสถานะ</h3>
+                    <div class="form-field">
+                        <label for="thai-date">วันที่สมัคร</label>
+                        <input type="text" id="thai-date" name="thai-date" placeholder="เลือกวันที่">
+                        <input type="hidden" id="ad-date" name="date">
+                    </div>
+                    <div class="form-field">
+                        <label for="free">ค่าธรรมเนียม (บาท)</label>
+                        <input type="text" id="free" name="free">
+                    </div>
+                    <div class="form-field">
+                        <label for="status">สถานะสมาชิก</label>
+                        <select id="status" disabled>
+                            <option value="1">ปกติ</option>
+                            <option value="2">ลาออก</option>
+                            <option value="3">เสียชีวิต</option>
+                            <option value="4">เสียชีวิต/ตั้งหนี้</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: ผู้รับผลประโยชน์ -->
+        <div id="tab-beneficiary" class="tab-panel" style="display:none;">
+            <div class="ben-container">
+                <div class="ben-header">
+                    <h3>👥 รายการผู้รับผลประโยชน์</h3>
+                    <button type="button" id="add-beneficiary" class="btn-add-ben">➕ เพิ่มผู้รับผลประโยชน์</button>
+                </div>
+                <div id="beneficiary-list">
+                    <!-- Beneficiary cards will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+const thaiInput = document.getElementById("thai-date");
+const adInput = document.getElementById("ad-date");
+
+// =========================
+// FLATPICKR
+// =========================
+const fp = flatpickr("#thai-date", {
+    locale: "th",
+    dateFormat: "Y-m-d",
+    allowInput: false,
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+        if (selectedDates.length > 0) {
+            const date = selectedDates[0];
+            thaiInput.value = formatThaiDate(date);
+            updateHiddenDate(date);
+        }
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (!selectedDates.length) return;
+        const date = selectedDates[0];
+        thaiInput.value = formatThaiDate(date);
+        updateHiddenDate(date);
+        changeToBuddhistYear(instance);
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    }
+});
+
+function changeToBuddhistYear(instance) {
+    setTimeout(() => {
+        const yearElement = instance.currentYearElement;
+        if (yearElement) {
+            const christianYear = parseInt(yearElement.value);
+            if (!isNaN(christianYear)) {
+                yearElement.value = christianYear + 543;
+            }
+        }
+    }, 1);
+}
+
+function formatThaiDate(date) {
+    if (!date) return "";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear() + 543;
+    return `${day}/${month}/${year}`;
+}
+
+function updateHiddenDate(date) {
+    if (!date) {
+        adInput.value = "";
+        return;
+    }
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    adInput.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// =========================
+// TABS
+// =========================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+        const panel = document.getElementById('tab-' + tab);
+        if (panel) panel.style.display = 'block';
+    });
+});
+
+// =========================
+// BENEFICIARIES
+// =========================
+const beneficiaryListEl = document.getElementById('beneficiary-list');
+let beneficiaryIdSeq = 0;
+
+function createBeneficiaryRow(b = {}, index = null) {
+    const id = ++beneficiaryIdSeq;
+    const row = document.createElement('div');
+    row.className = 'ben-card';
+    row.dataset.id = id;
+
+    const rowSeq = index !== null ? index : document.querySelectorAll('.ben-card').length + 1;
+
+    row.innerHTML = `
+        <div class="ben-card-top">
+            <span>ผู้รับผลประโยชน์ ลำดับที่ <span class="ben-seq-num">${rowSeq}</span></span>
+            <button type="button" class="btn-remove-ben ben-remove">🗑️ ลบ</button>
+        </div>
+        <div class="ben-grid">
+            <div class="form-field">
+                <label>คำนำหน้า</label>
+                <select class="ben-prefix">
+                    <option value="">-- เลือก --</option>
+                    <option value="นาย">นาย</option>
+                    <option value="นาง">นาง</option>
+                    <option value="นางสาว">นางสาว</option>
+                    <option value="เด็กชาย">เด็กชาย</option>
+                    <option value="เด็กหญิง">เด็กหญิง</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label>ชื่อ</label>
+                <input type="text" class="ben-name" placeholder="ชื่อ" value="${b.name || ''}">
+            </div>
+            <div class="form-field">
+                <label>นามสกุล</label>
+                <input type="text" class="ben-lastname" placeholder="นามสกุล" value="${b.lastname || ''}">
+            </div>
+            <div class="form-field">
+                <label>ความเกี่ยวข้อง</label>
+                <select class="ben-relation">
+                    <option value="">-- เลือกความเกี่ยวข้อง --</option>
+                    <option value="บิดา">บิดา</option>
+                    <option value="มารดา">มารดา</option>
+                    <option value="สามี">สามี</option>
+                    <option value="ภรรยา">ภรรยา</option>
+                    <option value="บุตร">บุตร</option>
+                    <option value="พี่">พี่</option>
+                    <option value="น้อง">น้อง</option>
+                    <option value="พี่ชาย">พี่ชาย</option>
+                    <option value="พี่สาว">พี่สาว</option>
+                    <option value="น้องชาย">น้องชาย</option>
+                    <option value="น้องสาว">น้องสาว</option>
+                    <option value="ปู่">ปู่</option>
+                    <option value="ย่า">ย่า</option>
+                    <option value="ตา">ตา</option>
+                    <option value="ยาย">ยาย</option>
+                    <option value="หลาน">หลาน</option>
+                    <option value="ญาติ">ญาติ</option>
+                    <option value="อื่นๆ">อื่นๆ</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label>เลขบัตรประชาชน</label>
+                <input type="text" class="ben-idcard" placeholder="13 หลัก" maxlength="13" value="${b.Idcard || b.idcard || ''}">
+            </div>
+            <div class="form-field">
+                <label>สถานะ</label>
+                <select class="ben-status"disabled>
+                    <option value="1">ปกติ</option>
+                    <option value="2">ตาย</option>
+                </select>
+            </div>
+        </div>
+    `;
+
+    if (b.prefix) {
+        const prefixSelect = row.querySelector('.ben-prefix');
+        prefixSelect.value = b.prefix;
+        if (!prefixSelect.value) {
+            prefixSelect.add(new Option(b.prefix, b.prefix, true, true));
+        }
+    }
+    if (b.relation) {
+        const relationSelect = row.querySelector('.ben-relation');
+        relationSelect.value = b.relation;
+        if (!relationSelect.value) {
+            relationSelect.add(new Option(b.relation, b.relation, true, true));
+        }
+    }
+    const statusSelect = row.querySelector('.ben-status');
+    if (statusSelect) {
+        statusSelect.value = String(b.status === 2 || b.status === "2" ? "2" : "1");
+    }
+
+    row.querySelector('.ben-remove').addEventListener('click', () => {
+        row.remove();
+        updateBeneficiaryNumbers();
+    });
+
+    return row;
+}
+
+function updateBeneficiaryNumbers() {
+    const cards = document.querySelectorAll('.ben-card');
+    cards.forEach((card, idx) => {
+        const numEl = card.querySelector('.ben-seq-num');
+        if (numEl) numEl.textContent = idx + 1;
+    });
+    const benCountEl = document.getElementById('benCount');
+    if (benCountEl) benCountEl.textContent = cards.length;
+}
+
+document.getElementById('add-beneficiary').addEventListener('click', () => {
+    const row = createBeneficiaryRow({}, null);
+    beneficiaryListEl.appendChild(row);
+    updateBeneficiaryNumbers();
+});
+
+function collectBeneficiaries() {
+    const items = [];
+    document.querySelectorAll('.ben-card').forEach(r => {
+        const prefix = r.querySelector('.ben-prefix').value.trim();
+        const name = r.querySelector('.ben-name').value.trim();
+        const lastname = r.querySelector('.ben-lastname').value.trim();
+        const relation = r.querySelector('.ben-relation').value.trim();
+        const Idcard = r.querySelector('.ben-idcard').value.trim();
+        const statusEl = r.querySelector('.ben-status');
+        const status = statusEl ? parseInt(statusEl.value, 10) || 1 : 1;
+        if (name || lastname || Idcard) {
+            items.push({ prefix, name, lastname, relation, Idcard, status });
+        }
+    });
+    return items;
+}
+
+// =========================
+// LOAD DATA FUNCTION
+// =========================
+async function loadCustomer(query) {
+    if (!query) return;
+    try {
+        let custId = query.trim();
+
+        // 1) ลองโหลดตรงจากรหัสสมาชิก
+        let res = await fetch(`${API_BASE}/customer1/${encodeURIComponent(custId)}`);
+        let data = await res.json();
+
+        // 2) ถ้าไม่พบโดยตรง ลองค้นหาจากชื่อ/นามสกุล ในรายการลูกค้าทั้งหมด
+        if (data.error !== "0") {
+            const allRes = await fetch(`${API_BASE}/customer`);
+            const allData = await allRes.json();
+            if (allData.error === "0" && allData.results) {
+                const qLower = custId.toLowerCase();
+                const matched = allData.results.find(c =>
+                    (c.Idcustomer && c.Idcustomer.toLowerCase() === qLower) ||
+                    (c.name && c.name.toLowerCase().includes(qLower)) ||
+                    (c.lastname && c.lastname.toLowerCase().includes(qLower)) ||
+                    (`${c.prefix || ''}${c.name || ''} ${c.lastname || ''}`.toLowerCase().includes(qLower))
+                );
+                if (matched) {
+                    custId = matched.Idcustomer;
+                    res = await fetch(`${API_BASE}/customer1/${encodeURIComponent(custId)}`);
+                    data = await res.json();
+                }
+            }
+        }
+
+        if (data.error !== "0" || !data.results) {
+            alert("❌ ไม่พบข้อมูลสมาชิก: " + query);
+            return;
+        }
+
+        const emp = data.results;
+
+        document.getElementById("Idcustomer").value = emp.Idcustomer || "";
+        document.getElementById("prefix").value = emp.prefix || "";
+        document.getElementById("name").value = emp.name || "";
+        document.getElementById("lastname").value = emp.lastname || "";
+        document.getElementById("Idcard").value = emp.Idcard || "";
+        document.getElementById("Tel").value = emp.Tel || "";
+        document.getElementById("addrNo").value = emp.addrNo || "";
+        document.getElementById("moo").value = emp.moo || "";
+        document.getElementById("locality").value = emp.locality || "";
+        document.getElementById("district").value = emp.district || "";
+        document.getElementById("province").value = emp.province || "";
+        document.getElementById("zipCode").value = emp.zipCode || "";
+        document.getElementById("free").value = emp.free || "";
+        document.getElementById("status").value = emp.status ? String(emp.status) : "1";
+
+        // DATE
+        if (emp.date) {
+            const dbDate = new Date(emp.date);
+            if (!isNaN(dbDate.getTime())) {
+                fp.setDate(dbDate);
+                thaiInput.value = formatThaiDate(dbDate);
+                updateHiddenDate(dbDate);
+            }
+        }
+
+        // BENEFICIARIES
+        beneficiaryListEl.innerHTML = "";
+        if (emp.beneficiaries && Array.isArray(emp.beneficiaries) && emp.beneficiaries.length > 0) {
+            emp.beneficiaries.forEach((b, idx) => {
+                const row = createBeneficiaryRow(b, idx + 1);
+                beneficiaryListEl.appendChild(row);
+            });
+        } else {
+            // ให้แถวว่าง 1 แถวเริ่มต้น
+            const row = createBeneficiaryRow({}, 1);
+            beneficiaryListEl.appendChild(row);
+        }
+        updateBeneficiaryNumbers();
+    } catch (err) {
+        console.error("Fetch error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการโหลดข้อมูลสมาชิก");
+    }
+}
+
+// ตรวจสอบ id จาก Query string เริ่มต้น
+const params = new URLSearchParams(window.location.search);
+const initialId = params.get("id");
+if (initialId) {
+    loadCustomer(initialId);
+} else {
+    beneficiaryListEl.innerHTML = "";
+    beneficiaryListEl.appendChild(createBeneficiaryRow({}, 1));
+    updateBeneficiaryNumbers();
+}
+
+// =========================
+// CANCEL
+// =========================
+document.getElementById("btnCancel").addEventListener("click", () => {
+    window.location.href = "/DK_customer";
+});
+
+// =========================
+// UPDATE
+// =========================
+document.getElementById("customerForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = "⏳ กำลังบันทึกการแก้ไข...";
+    }
+
+    try {
+        const Idcustomer = document.getElementById("Idcustomer").value;
+        if (!Idcustomer) {
+            alert("⚠️ กรุณาระบุรหัสสมาชิก");
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "📄 บันทึกการแก้ไข";
+            }
+            return;
+        }
+
+        const beneficiaries = collectBeneficiaries();
+        const payload = {
+            Idcustomer: Idcustomer,
+            prefix: document.getElementById("prefix").value,
+            name: document.getElementById("name").value.trim(),
+            lastname: document.getElementById("lastname").value.trim(),
+            Idcard: document.getElementById("Idcard").value.trim(),
+            Tel: document.getElementById("Tel").value.trim(),
+            addrNo: document.getElementById("addrNo").value.trim(),
+            moo: document.getElementById("moo").value.trim(),
+            locality: document.getElementById("locality").value.trim(),
+            district: document.getElementById("district").value.trim(),
+            province: document.getElementById("province").value.trim(),
+            zipCode: document.getElementById("zipCode").value.trim(),
+            date: document.getElementById("ad-date").value,
+            free: document.getElementById("free").value.trim(),
+            status: document.getElementById("status").value,
+            beneficiaries: beneficiaries
+        };
+
+        const res = await fetch(`${API_BASE}/customer/update`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            let msg = errorText;
+            try {
+                const errObj = JSON.parse(errorText);
+                msg = errObj.message || errObj.detail || errorText;
+            } catch (_) {}
+            alert("❌ ไม่สามารถบันทึกข้อมูลได้: " + msg);
+            return;
+        }
+
+        const data = await res.json();
+        if (data.error === "0") {
+            alert("✅ บันทึกการแก้ไขข้อมูลสำเร็จ");
+            window.location.href = "/DK_customer";
+        } else {
+            alert("❌ ไม่สามารถบันทึกข้อมูลได้: " + (data.message || ""));
+        }
+    } catch (err) {
+        console.error("Update error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "📄 บันทึกการแก้ไข";
+        }
+    }
+});
+</script>
+
+
+
+
+ 
+{% endblock %}

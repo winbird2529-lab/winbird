@@ -1,0 +1,112 @@
+
+/* Status Badges */
+.badge-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+}
+.badge-green {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+.badge-orange {
+    background: #ffedd5;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+.badge-red {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+.badge-purple {
+    background: #f3e8ff;
+    color: #7e22ce;
+    border: 1px solid #e9d5ff;
+}
+
+/* Beneficiary text */
+.ben-text {
+    font-weight: 500;
+    color: #1e3c72;
+}
+.ben-empty {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 13px;
+}
+
+/* Beneficiary ID badge */
+.badge-ben-id {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    margin: 2px;
+    font-family: monospace;
+}
+
+/* Modal tweaks */
+.popup-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+.popup-box {
+    max-width: 980px;
+    width: 95%;
+    height: 680px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.popup-table-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 380px;
+    border: 1px solid #edf2f7;
+    border-radius: 8px;
+}
+.popup-table th {
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.tab-pills {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.tab-pill {
+    padding: 7px 16px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+    border-radius: 20px;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: 'Prompt', sans-serif;
+}
+.tab-pill.active {
+    background: #273B4A;
+    color: white;
+    border-color: #273B4A;
+    box-shadow: 0 2px 8px rgba(39, 59, 74, 0.25);
+}
