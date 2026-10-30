@@ -1,0 +1,43 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Home Page{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to DK_home</h2>
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<form id="Formdate">
+
+    <p>บันทึกทดสอบวันที่</p>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-bottom:15px;">
+
+        <button type="submit" class="submit-btnsave">
+            📄 บันทึก
+        </button>
+
+        <button type="button" id="btnCancel">
+            🗑️ ยกเลิก
+        </button>
+
+    </div>
+
+    <hr class="my-box">
+
+     <div class="row-container">
+
+       
+
+    </div>
+
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+
+
+{% endblock %}

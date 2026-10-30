@@ -1,0 +1,375 @@
+/* ===================================================
+   constant.css - Styles for DK_Constant (ชื่อที่อยู่สำนักงาน & Cusid Constant)
+   =================================================== */
+
+.constant-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    font-family: 'Sarabun', 'Kanit', sans-serif;
+    color: #1e293b;
+    padding-bottom: 40px;
+}
+
+/* Breadcrumbs */
+.breadcrumb-nav {
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.breadcrumb-nav a {
+    color: #0284c7;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb-nav a:hover {
+    text-decoration: underline;
+}
+
+/* Action Bar */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+    background: #ffffff;
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.action-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.action-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Mode Badge */
+.mode-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.mode-badge.view-mode {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.mode-badge.edit-mode {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
+}
+
+/* Buttons */
+.btn-save {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    padding: 9px 22px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+.btn-save:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35);
+}
+
+.btn-save:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.btn-edit {
+    background: #fef3c7;
+    color: #b45309;
+    padding: 9px 20px;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(180, 83, 9, 0.08);
+}
+
+.btn-edit:hover {
+    background: #fde68a;
+    color: #92400e;
+    border-color: #fcd34d;
+    transform: translateY(-1px);
+}
+
+.btn-cancel {
+    background: #64748b;
+    color: #ffffff;
+    padding: 9px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #475569;
+}
+
+/* Audit Information Bar */
+.audit-bar {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #64748b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.audit-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.audit-item strong {
+    color: #334155;
+}
+
+.audit-val {
+    font-weight: 600;
+}
+
+/* Card Sections */
+.constant-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.card-header {
+    background: #f8fafc;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e3c72;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Form Grids */
+.grid-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 860px) {
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Form Fields */
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.req {
+    color: #ef4444;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1e293b;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.form-field input:disabled,
+.form-field select:disabled,
+.form-field textarea:disabled {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+    cursor: default;
+}
+
+.form-field input.editable-active,
+.form-field select.editable-active,
+.form-field textarea.editable-active {
+    background-color: #ffffff !important;
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+    color: #1e293b !important;
+    cursor: text !important;
+}
+
+/* Cusid Live Preview Box */
+.cusid-preview-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+    border: 1.5px dashed #0284c7;
+    border-radius: 12px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.preview-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    color: #0369a1;
+}
+
+.preview-info p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.preview-badge-display {
+    background: #0284c7;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 8px 22px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(2, 132, 199, 0.3);
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+/* Financial Input Addon */
+.input-addon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-addon-wrap input {
+    padding-right: 48px;
+    text-align: right;
+    font-weight: 600;
+}
+
+.input-addon-wrap .addon-text {
+    position: absolute;
+    right: 14px;
+    font-size: 13.5px;
+    color: #64748b;
+    pointer-events: none;
+}

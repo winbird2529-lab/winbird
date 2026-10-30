@@ -173,17 +173,28 @@ function renderMainTable() {
         let statusBadge = "";
         let editBtn = "";
 
+        const isLocked = (item.status == 4 || String(item.status) === "4");
+
         if (item.record_type === "beneficiary") {
             idHtml = `<span class="badge-ben-id">${item.Idbeneficiary}</span>`;
             nameDetail = `
                 ${item.lastname || ""}
             `;
-            statusBadge = `<span class="badge-status badge-red" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;">ตาย (ผู้รับผลประโยชน์)</span>`;
-            editBtn = `
-                <button type="button" class="btn-edit" data-id="${item.Idbeneficiary}" data-type="beneficiary">
-                    แก้ไข
-                </button>
-            `;
+            if (isLocked) {
+                statusBadge = `<span class="badge-status badge-purple">เสียชีวิต/ตั้งหนี้ (ผู้รับผลประโยชน์)</span>`;
+                editBtn = `
+                    <button type="button" class="btn-edit btn-edit-locked" data-id="${item.Idbeneficiary}" data-type="beneficiary" data-status="4" title="อยู่ในสถานะ เสียชีวิต/ตั้งหนี้ ไม่สามารถแก้ไขข้อมูลได้ ต้องมีการยกเลิกรายการก่อน" style="background:#94a3b8; cursor:not-allowed; opacity:0.75;">
+                        🔒 แก้ไข
+                    </button>
+                `;
+            } else {
+                statusBadge = `<span class="badge-status badge-red" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;">เสียชีวิต (ผู้รับผลประโยชน์)</span>`;
+                editBtn = `
+                    <button type="button" class="btn-edit" data-id="${item.Idbeneficiary}" data-type="beneficiary">
+                        แก้ไข
+                    </button>
+                `;
+            }
         } else {
             idHtml = `<strong>${item.Idcustomer}</strong>`;
             nameDetail = `${item.lastname || ""}`;
@@ -196,11 +207,20 @@ function renderMainTable() {
             } else {
                 statusBadge = `<span class="badge-status">${item.status_name || '-'}</span>`;
             }
-            editBtn = `
-                <button type="button" class="btn-edit" data-id="${item.Idcustomer}" data-type="member">
-                    แก้ไข
-                </button>
-            `;
+
+            if (isLocked) {
+                editBtn = `
+                    <button type="button" class="btn-edit btn-edit-locked" data-id="${item.Idcustomer}" data-type="member" data-status="4" title="อยู่ในสถานะ เสียชีวิต/ตั้งหนี้ ไม่สามารถแก้ไขข้อมูลได้ ต้องมีการยกเลิกรายการก่อน" style="background:#94a3b8; cursor:not-allowed; opacity:0.75;">
+                        🔒 แก้ไข
+                    </button>
+                `;
+            } else {
+                editBtn = `
+                    <button type="button" class="btn-edit" data-id="${item.Idcustomer}" data-type="member">
+                        แก้ไข
+                    </button>
+                `;
+            }
         }
 
         const row = `
@@ -662,6 +682,13 @@ document.addEventListener("click", function(e) {
     if (btn) {
         const id = btn.dataset.id;
         const type = btn.dataset.type;
+        const status = btn.dataset.status;
+
+        if (status === "4" || btn.classList.contains("btn-edit-locked")) {
+            alert("⚠️ อยู่ในสถานะ 'เสียชีวิต/ตั้งหนี้' ไม่สามารถแก้ไขข้อมูลได้\nต้องมีการยกเลิกรายการตั้งหนี้ก่อน");
+            return;
+        }
+
         if (type === "beneficiary") {
             window.location.href = `/DK_EditcustomerDeceased?type=beneficiary&id=${encodeURIComponent(id)}`;
         } else {

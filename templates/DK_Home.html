@@ -1,9 +1,1538 @@
 {% extends "BaseLayout.html" %}
 
-{% block title %}DK_Home Page{% endblock %}
+{% block title %}แดชบอร์ดภาพรวมระบบ | DK_Home{% endblock %}
 
 {% block content %}
+<!-- External Chart.js Library for Doughnut Chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
 
-<h2>Welcome to DK_home</h2>
-<p>Hello Flask layout!</p>
+<style>
+/* ========================================================
+   EXECUTIVE MODERN DASHBOARD STYLES (DK_Home)
+   ======================================================== */
+:root {
+    --dash-primary: #273B4A;
+    --dash-primary-dark: #1b2b37;
+    --dash-primary-light: #f0f4f8;
+    --dash-emerald: #10b981;
+    --dash-emerald-dark: #059669;
+    --dash-emerald-light: #ecfdf5;
+    --dash-blue: #0284c7;
+    --dash-blue-light: #eff6ff;
+    --dash-amber: #f59e0b;
+    --dash-amber-dark: #d97706;
+    --dash-amber-light: #fffbeb;
+    --dash-rose: #f43f5e;
+    --dash-rose-light: #fff1f2;
+    --dash-slate: #64748b;
+    --dash-slate-light: #f8fafc;
+    --dash-border: #e2e8f0;
+}
+
+.dashboard-container {
+    font-family: 'Prompt', 'Sarabun', sans-serif;
+    padding: 12px 18px 36px 18px;
+    max-width: 1720px;
+    margin: 0 auto;
+    color: #1e293b;
+}
+
+/* ==========================================
+   1. HERO WELCOME BANNER (Glassmorphic & Gradient)
+   ========================================== */
+.dash-hero-banner {
+    background: linear-gradient(135deg, #1e293b 0%, #273B4A 55%, #1e3a5f 100%);
+    border-radius: 12px;
+    padding: 12px 18px;
+    color: #ffffff;
+    box-shadow: 0 6px 18px -4px rgba(39, 59, 74, 0.2), 0 4px 6px -4px rgba(39, 59, 74, 0.15);
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.dash-hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.dash-hero-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: 20%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-left-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-pill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    padding: 2px 10px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #e2e8f0;
+    margin-bottom: 4px;
+}
+
+.hero-status-pulse {
+    width: 6px;
+    height: 6px;
+    background-color: #34d399;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.35);
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6); }
+    70% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+.hero-title-main {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hero-subtitle-desc {
+    margin: 2px 0 0 0;
+    font-size: 11.5px;
+    color: #cbd5e1;
+    font-weight: 400;
+}
+
+.hero-right-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.hero-clock-box {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 4px 10px;
+    text-align: right;
+    min-width: 120px;
+}
+
+.hero-clock-time {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Prompt', monospace, sans-serif;
+    color: #38bdf8;
+    line-height: 1.2;
+}
+
+.hero-clock-date {
+    font-size: 10.5px;
+    color: #cbd5e1;
+    margin-top: 1px;
+}
+
+.btn-hero-refresh {
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+.btn-hero-refresh:hover {
+    background: #ffffff;
+    color: #0284c7;
+    border-color: #ffffff;
+}
+.btn-hero-refresh:active {
+    transform: translateY(0);
+}
+
+/* ==========================================
+   QUICK ACTION LAUNCHPAD (ปุ่มเมนูด่วน - เรียบหรู)
+   ========================================== */
+.dash-quick-actions-bar {
+    background: #ffffff;
+    border: 1px solid var(--dash-border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.qa-bar-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.qa-buttons-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.btn-dash-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.btn-dash-action:hover {
+    background: #f97316;
+    border-color: #f97316;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.28);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.btn-dash-action:active {
+    background: #ea580c;
+    border-color: #ea580c;
+    color: #ffffff;
+    transform: translateY(0);
+}
+
+.qa-btn-icon {
+    font-size: 13px;
+    line-height: 1;
+}
+
+/* ==========================================
+   2. FOUR LUXURY KPI STAT CARDS
+   ========================================== */
+.stat-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+}
+@media (max-width: 1200px) {
+    .stat-kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 640px) {
+    .stat-kpi-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stat-kpi-card {
+    background: #ffffff;
+    border: 1px solid var(--dash-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.stat-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px -3px rgba(39, 59, 74, 0.08);
+    border-color: #cbd5e1;
+}
+
+.kpi-accent-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3.5px;
+}
+.card-revenue .kpi-accent-bar { background: linear-gradient(90deg, #10b981, #059669); }
+.card-monthly .kpi-accent-bar { background: linear-gradient(90deg, #0284c7, #0369a1); }
+.card-members .kpi-accent-bar { background: linear-gradient(90deg, #273B4A, #1e293b); }
+.card-claims .kpi-accent-bar  { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+.kpi-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.kpi-title-text {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.kpi-icon-bubble {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: transform 0.2s ease;
+}
+.stat-kpi-card:hover .kpi-icon-bubble {
+    transform: scale(1.08);
+}
+.card-revenue .kpi-icon-bubble { background: var(--dash-emerald-light); color: var(--dash-emerald-dark); }
+.card-monthly .kpi-icon-bubble { background: var(--dash-blue-light); color: var(--dash-blue); }
+.card-members .kpi-icon-bubble { background: var(--dash-primary-light); color: var(--dash-primary); }
+.card-claims .kpi-icon-bubble  { background: var(--dash-amber-light); color: var(--dash-amber-dark); }
+
+.kpi-card-value {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    font-family: 'Prompt', monospace, sans-serif;
+    letter-spacing: -0.3px;
+}
+.card-revenue .kpi-card-value { color: #059669; }
+.card-monthly .kpi-card-value { color: #0284c7; }
+.card-members .kpi-card-value { color: #273B4A; }
+.card-claims .kpi-card-value  { color: #d97706; }
+
+.kpi-card-value .curr-symbol {
+    font-size: 13px;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-right: 3px;
+}
+.kpi-card-value .curr-unit {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-left: 4px;
+}
+
+.kpi-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 11px;
+}
+
+.kpi-pill-badge {
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 5px;
+    padding: 2px 6px;
+    color: #475569;
+    font-weight: 500;
+    font-size: 10.5px;
+}
+
+.kpi-action-link {
+    color: #0284c7;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    transition: color 0.15s ease;
+}
+.kpi-action-link:hover {
+    color: #0369a1;
+    text-decoration: underline;
+}
+
+/* ==========================================
+   3. DEBT OVERVIEW & PROGRESS SECTION
+   ========================================== */
+.dash-card-panel {
+    background: #ffffff;
+    border: 1px solid var(--dash-border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    margin-bottom: 14px;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.panel-head h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #273B4A;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.panel-head-link {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #0284c7;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.panel-head-link:hover {
+    text-decoration: underline;
+}
+
+.debt-status-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    align-items: center;
+    padding-bottom: 10px;
+}
+@media (max-width: 900px) {
+    .debt-status-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.debt-meter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #334155;
+}
+
+.debt-meter-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.debt-meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    border-radius: 999px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.debt-grid-breakdown {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    text-align: center;
+}
+
+.breakdown-box {
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 8px;
+    padding: 8px 10px;
+    transition: all 0.2s ease;
+}
+.breakdown-box:hover {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+}
+
+.breakdown-box .b-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+}
+.breakdown-box .b-amount {
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-top: 2px;
+    font-family: 'Prompt', monospace, sans-serif;
+}
+
+.debt-divider {
+    border: 0;
+    border-top: 1px dashed #e2e8f0;
+    margin: 10px 0 12px 0;
+}
+
+/* ==========================================
+   5. DECEASED COLLECTION BREAKDOWN TABLE (ศพไหนครบ / ไม่ครบ)
+   ========================================== */
+.deceased-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.deceased-header-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #273B4A;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.deceased-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.search-icon {
+    position: absolute;
+    left: 9px;
+    font-size: 12px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+.deceased-search-input {
+    padding: 4px 10px 4px 28px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-family: inherit;
+    outline: none;
+    width: 200px;
+    transition: all 0.2s ease;
+}
+.deceased-search-input:focus {
+    border-color: #273B4A;
+    box-shadow: 0 0 0 3px rgba(39, 59, 74, 0.1);
+}
+
+.filter-btn-group {
+    display: inline-flex;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 2px;
+    border-radius: 6px;
+    gap: 2px;
+}
+
+.btn-filter-chip {
+    border: none;
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s ease;
+    outline: none;
+}
+.btn-filter-chip:hover {
+    color: #1e293b;
+}
+.btn-filter-chip.active {
+    background: #ffffff;
+    color: #1e293b;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.btn-filter-chip.filter-pending.active {
+    background: #ffffff;
+    color: #b45309;
+}
+.btn-filter-chip.filter-paid.active {
+    background: #ffffff;
+    color: #047857;
+}
+.btn-filter-chip .chip-count {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 1px 5px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+}
+.btn-filter-chip.active .chip-count {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* Table Container with Sticky Header */
+.deceased-table-wrap {
+    max-height: 440px;
+    overflow-x: auto;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.deceased-status-table {
+    width: 100%;
+    min-width: 1060px;
+    border-collapse: collapse;
+    font-size: 11.5px;
+    text-align: left;
+}
+
+.deceased-status-table th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    padding: 7px 10px;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+    z-index: 5;
+}
+
+.deceased-status-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.deceased-status-table tr:hover td {
+    background: #f8fafc;
+}
+
+/* Mini Progress Bar inside Table */
+.mini-progress-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 110px;
+}
+.mini-progress-bar {
+    width: 100%;
+    height: 6.5px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.mini-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+.mini-progress-fill.completed { background: #10b981; }
+.mini-progress-fill.incomplete { background: #f59e0b; }
+.mini-progress-fill.empty { background: #cbd5e1; }
+
+.mini-progress-text {
+    font-size: 10.5px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    color: #64748b;
+}
+
+/* Status Badges */
+.badge-dec-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-dec-status.completed {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+.badge-dec-status.incomplete {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fcd34d;
+}
+.badge-dec-status.unpaid {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+.badge-dec-status.cancelled {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+.btn-table-action {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+.btn-table-action:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0284c7;
+    text-decoration: none;
+}
+.btn-table-action:active {
+    background: #f1f5f9;
+}
+
+.deceased-table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #64748b;
+}
+</style>
+
+<div class="dashboard-container">
+    <!-- 1. HERO WELCOME BANNER -->
+    <div class="dash-hero-banner">
+        <div class="hero-left-content">
+            <div class="hero-pill-tag">
+                <span class="hero-status-pulse"></span>
+                <span>ระบบบริหารงานฌาปนกิจสงเคราะห์ ออนไลน์</span>
+            </div>
+            <h1 class="hero-title-main">
+                <span>🏛️</span> แดชบอร์ดภาพรวมและการเงิน
+            </h1>
+            <p class="hero-subtitle-desc">
+                สรุปสถานะสมาชิก ธุรกรรมรับชำระเงิน และการตั้งหนี้สงเคราะห์มรณะแบบเรียลไทม์
+            </p>
+        </div>
+
+        <div class="hero-right-actions">
+            <div class="hero-clock-box">
+                <div class="hero-clock-time" id="liveClockTime">00:00:00</div>
+                <div class="hero-clock-date" id="liveClockDate">กำลังโหลดวันที่...</div>
+            </div>
+            <button type="button" class="btn-hero-refresh" id="btnHeroRefresh" title="รีเฟรชข้อมูลแดชบอร์ด">
+                <svg id="refreshIconSvg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                <span>รีเฟรชข้อมูล</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- QUICK ACTIONS LAUNCHPAD (ปุ่มเมนูด่วน) -->
+    <div class="dash-quick-actions-bar">
+        <div class="qa-bar-title">
+            <span>เมนูด่วน:</span>
+        </div>
+        <div class="qa-buttons-wrapper">
+            <a href="/DK_Movement" class="btn-dash-action" title="บันทึกรายการเก็บเงิน">
+                <span class="qa-btn-icon">💰</span>
+                <span>บันทึกเก็บเงิน</span>
+            </a>
+            <a href="/DK_Transaction" class="btn-dash-action" title="บันทึกรายการตั้งสมาชิกเสียชีวิต">
+                <span class="qa-btn-icon">🕊️</span>
+                <span>ตั้งสมาชิกเสียชีวิต</span>
+            </a>
+            <a href="/DK_customer" class="btn-dash-action" title="จัดการทะเบียนสมาชิก">
+                <span class="qa-btn-icon">👥</span>
+                <span>ทะเบียนสมาชิก</span>
+            </a>
+            <a href="/DK_showMovement" class="btn-dash-action" title="แสดงรายการรับชำระเงิน">
+                <span class="qa-btn-icon">🧾</span>
+                <span>แสดงบันทึกเก็บเงิน</span>
+            </a>
+            <a href="/DK_ViweTransaction" class="btn-dash-action" title="รายงานยอดค้างตามรายศพ">
+                <span class="qa-btn-icon">📊</span>
+                <span>รายงานยอดค้างรายศพ</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. FOUR LUXURY KPI STAT CARDS -->
+    <div class="stat-kpi-row">
+        <!-- Card 1: ยอดรับชำระวันนี้ -->
+        <div class="stat-kpi-card card-revenue">
+            <div class="kpi-accent-bar"></div>
+            <div class="kpi-card-header">
+                <span class="kpi-title-text">ยอดรับชำระเงินวันนี้</span>
+                <div class="kpi-icon-bubble">💰</div>
+            </div>
+            <div class="kpi-card-value">
+                <span class="curr-symbol">฿</span><span id="valTodayAmount">0.00</span>
+            </div>
+            <div class="kpi-footer-row">
+                <span class="kpi-pill-badge">
+                    🧾 ออกแล้ว <strong id="valTodayCount">0</strong> ใบเสร็จ
+                </span>
+                <a href="/DK_showMovement" class="kpi-action-link">ดูใบเสร็จ &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Card 2: ยอดรับชำระเดือนนี้ -->
+        <div class="stat-kpi-card card-monthly">
+            <div class="kpi-accent-bar"></div>
+            <div class="kpi-card-header">
+                <span class="kpi-title-text">ยอดรับชำระเดือนนี้ (<span id="valCurrentMonthName">-</span>)</span>
+                <div class="kpi-icon-bubble">📅</div>
+            </div>
+            <div class="kpi-card-value">
+                <span class="curr-symbol">฿</span><span id="valMonthAmount">0.00</span>
+            </div>
+            <div class="kpi-footer-row">
+                <span class="kpi-pill-badge">
+                    📈 รวม <strong id="valMonthCount">0</strong> รายการ
+                </span>
+                <a href="/DK_ViweMovement" class="kpi-action-link">รายงาน &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Card 3: ทะเบียนสมาชิกทั้งหมด -->
+        <div class="stat-kpi-card card-members">
+            <div class="kpi-accent-bar"></div>
+            <div class="kpi-card-header">
+                <span class="kpi-title-text">ทะเบียนสมาชิกทั้งหมด</span>
+                <div class="kpi-icon-bubble">👥</div>
+            </div>
+            <div class="kpi-card-value">
+                <span id="valMembersTotal">0</span><span class="curr-unit">คน</span>
+            </div>
+            <div class="kpi-footer-row">
+                <span class="kpi-pill-badge">
+                    🟢 ปกติ <strong id="valMembersActive">0</strong> | 🕊️ สิ้นสภาพ <strong id="valMembersDeceased">0</strong>
+                </span>
+                <a href="/DK_customer" class="kpi-action-link">ทะเบียน &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Card 4: รายการตั้งสมาชิกเสียชีวิต -->
+        <div class="stat-kpi-card card-claims">
+            <div class="kpi-accent-bar"></div>
+            <div class="kpi-card-header">
+                <span class="kpi-title-text">รายการตั้งสมาชิกเสียชีวิต</span>
+                <div class="kpi-icon-bubble">📜</div>
+            </div>
+            <div class="kpi-card-value">
+                <span id="valDeceasedTotal">0</span><span class="curr-unit">ศพ</span>
+            </div>
+            <div class="kpi-footer-row">
+                <span class="kpi-pill-badge">
+                    ✅ ครบ <strong id="valDeceasedPaid">0</strong> | ⏳ รอ <strong id="valDeceasedPending">0</strong>
+                </span>
+                <a href="/DK_showTransaction" class="kpi-action-link">หนี้สงเคราะห์ &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. COLLECTION & DEBT STATUS SECTION (ความคืบหน้าการจัดเก็บหนี้ + รายละเอียดรายศพ ครบ/ไม่ครบ) -->
+    <div class="dash-card-panel">
+        <div class="panel-head">
+            <h2><span>🎯</span> ความคืบหน้าการจัดเก็บหนี้สงเคราะห์</h2>
+            <a href="/DK_showTransaction" class="panel-head-link">จัดการรายการตั้งมรณะ &rarr;</a>
+        </div>
+
+        <!-- Overview Progress & Donut Chart -->
+        <div class="debt-status-container">
+            <div class="debt-status-left">
+                <div class="debt-meter-header">
+                    <span>ภาพรวมการจัดเก็บหนี้ทั้งระบบ</span>
+                    <span id="textDebtPercent" style="color: #059669; font-weight: 700; font-size: 14.5px;">0%</span>
+                </div>
+                <div class="debt-meter-bar">
+                    <div class="debt-meter-fill" id="barDebtProgress" style="width: 0%;"></div>
+                </div>
+
+                <div class="debt-grid-breakdown">
+                    <div class="breakdown-box">
+                        <div class="b-label">ยอดตั้งหนี้ทั้งหมด</div>
+                        <div class="b-amount" style="color: #273B4A;" id="textTotalClaim">฿0.00</div>
+                    </div>
+                    <div class="breakdown-box">
+                        <div class="b-label">รับชำระแล้ว</div>
+                        <div class="b-amount" style="color: #059669;" id="textTotalPaid">฿0.00</div>
+                    </div>
+                    <div class="breakdown-box">
+                        <div class="b-label">ค้างชำระคงเหลือ</div>
+                        <div class="b-amount" style="color: #dc2626;" id="textTotalRemain">฿0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doughnut Chart for Collection Ratio -->
+            <div style="position: relative; height: 100px; display: flex; align-items: center; justify-content: center;">
+                <canvas id="canvasDoughnutChart"></canvas>
+            </div>
+        </div>
+
+        <hr class="debt-divider">
+
+        <!-- Deceased Collection Table (ศพไหนเก็บ ครบ / ไม่ครบ) -->
+        <div class="deceased-section-header">
+            <div class="deceased-header-title">
+                <span>📋</span> ติดตามสถานะจัดเก็บรายศพ (ครบ / ไม่ครบ)
+            </div>
+            <div class="deceased-header-controls">
+                <div class="search-input-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="inputSearchDeceased" placeholder="ค้นหาเลขที่มรณะ / ชื่อผู้เสียชีวิต..." class="deceased-search-input">
+                </div>
+                <div class="filter-btn-group">
+                    <button type="button" class="btn-filter-chip active" data-filter="all" id="btnFilterAll">
+                        ทั้งหมด <span class="chip-count" id="countFilterAll">0</span>
+                    </button>
+                    <button type="button" class="btn-filter-chip filter-pending" data-filter="incomplete" id="btnFilterIncomplete">
+                        ⏳ ยังไม่ครบ <span class="chip-count" id="countFilterIncomplete">0</span>
+                    </button>
+                    <button type="button" class="btn-filter-chip filter-paid" data-filter="completed" id="btnFilterCompleted">
+                        ✅ เก็บครบแล้ว <span class="chip-count" id="countFilterCompleted">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="deceased-table-wrap">
+            <table class="deceased-status-table" id="tableDeceasedStatus">
+                <thead>
+                    <tr>
+                        <th style="width: 50px; text-align: center;">ลำดับ</th>
+                        <th style="width: 105px;">เลขที่มรณะ</th>
+                        <th style="width: 100px;">เลขที่เอกสาร</th>
+                        <th>ผู้เสียชีวิต</th>
+                        <th style="width: 95px; text-align: center;">วันที่มรณะ</th>
+                        <th style="width: 110px; text-align: right;">ยอดตั้งหนี้</th>
+                        <th style="width: 110px; text-align: right;">รับชำระแล้ว</th>
+                        <th style="width: 110px; text-align: right;">คงเหลือ</th>
+                        <th style="width: 130px;">ความคืบหน้า</th>
+                        <th style="width: 115px; text-align: center;">สถานะ</th>
+                        <th style="width: 130px; min-width: 130px; text-align: center;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="11" style="text-align: center; padding: 30px; color: #94a3b8;">⏳ กำลังโหลดข้อมูลรายการศพ...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="deceased-table-footer">
+            <span id="textDeceasedSummary">แสดง 0 รายการ</span>
+            <a href="/DK_showTransaction" class="panel-head-link">เปิดดูและจัดการในหน้าบันทึกรายการ &rarr;</a>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+const thaiMonthShort = [
+    "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+    "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+];
+
+const thaiMonthFull = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+];
+
+const thaiDays = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+
+let doughnutChartInstance = null;
+let allDeceasedList = [];
+let currentDeceasedFilter = "all"; // 'all', 'incomplete', 'completed'
+let searchDeceasedQuery = "";
+
+// ==========================================
+// REAL-TIME CLOCK & DATE
+// ==========================================
+function updateLiveClock() {
+    const now = new Date();
+    const clockEl = document.getElementById("liveClockTime");
+    const dateEl = document.getElementById("liveClockDate");
+    const monthEl = document.getElementById("valCurrentMonthName");
+
+    if (clockEl) {
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        clockEl.innerText = `${hh}:${mm}:${ss}`;
+    }
+
+    if (dateEl) {
+        const dayName = thaiDays[now.getDay()];
+        const d = now.getDate();
+        const m = thaiMonthShort[now.getMonth()];
+        const y = now.getFullYear() + 543;
+        dateEl.innerText = `วัน${dayName}ที่ ${d} ${m} ${y}`;
+    }
+
+    if (monthEl) {
+        monthEl.innerText = thaiMonthFull[now.getMonth()];
+    }
+}
+setInterval(updateLiveClock, 1000);
+updateLiveClock();
+
+// ==========================================
+// FORMATTERS
+// ==========================================
+function formatCurrency(val) {
+    const num = Number(val) || 0;
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatThaiDateShort(dateStr) {
+    if (!dateStr) return "-";
+    try {
+        const parts = String(dateStr).split("T")[0].split("-");
+        if (parts.length === 3) {
+            const y = parseInt(parts[0], 10) + 543;
+            const m = thaiMonthShort[parseInt(parts[1], 10) - 1] || parts[1];
+            const d = parseInt(parts[2], 10);
+            return `${d} ${m} ${String(y).slice(-2)}`;
+        }
+    } catch (e) {}
+    return dateStr;
+}
+
+// ==========================================
+// DATA FETCHING (Primary & Fallback)
+// ==========================================
+async function fetchDashboard() {
+    const btn = document.getElementById("btnHeroRefresh");
+    const icon = document.getElementById("refreshIconSvg");
+    if (btn) btn.disabled = true;
+    if (icon) icon.style.animation = "spin 0.8s linear infinite";
+
+    try {
+        const res = await fetch("/api/dashboard_summary");
+        if (!res.ok) throw new Error("Status " + res.status);
+        const data = await res.json();
+        if (data.status === "success") {
+            renderDashboard(data);
+            return;
+        }
+        throw new Error(data.message || "Endpoint error");
+    } catch (err) {
+        console.warn("Primary dashboard API failed, using fallback REST fetches:", err);
+        await fetchFallbackDashboard();
+    } finally {
+        if (btn) btn.disabled = false;
+        if (icon) icon.style.animation = "";
+    }
+}
+
+// Fallback direct REST queries
+async function fetchFallbackDashboard() {
+    try {
+        const [custRes, moveRes, tranRes] = await Promise.all([
+            fetch(`${API_BASE}/customer`).then(r => r.json()).catch(() => ({})),
+            fetch(`${API_BASE}/movement`).then(r => r.json()).catch(() => ({})),
+            fetch(`/api/transaction`).then(r => r.json()).catch(() => ({}))
+        ]);
+
+        const customers = Array.isArray(custRes.results) ? custRes.results : (Array.isArray(custRes) ? custRes : []);
+        const movements = Array.isArray(moveRes.results) ? moveRes.results : (Array.isArray(moveRes) ? moveRes : []);
+        const transactions = Array.isArray(tranRes.results) ? tranRes.results : (Array.isArray(tranRes.data) ? tranRes.data : []);
+
+        // Members
+        const totalMem = customers.length;
+        let activeMem = 0, deceasedMem = 0;
+        customers.forEach(c => {
+            const s = String(c.status || c.member_status || '1').trim();
+            if (s === '1' || s.toLowerCase() === 'active') activeMem++;
+            else deceasedMem++;
+        });
+
+        // Today & Month Financial
+        const now = new Date();
+        const yToday = now.getFullYear();
+        const mToday = String(now.getMonth() + 1).padStart(2, '0');
+        const dToday = String(now.getDate()).padStart(2, '0');
+        const ymdToday = `${yToday}-${mToday}-${dToday}`;
+        const ymCurrent = `${yToday}-${mToday}`;
+
+        let todayAmt = 0, todayCnt = 0;
+        let monthAmt = 0, monthCnt = 0;
+        let grandAmt = 0;
+
+        movements.forEach(m => {
+            const amt = Number(m.payamount) || 0;
+            const d = String(m.date || '').slice(0, 10);
+            grandAmt += amt;
+            if (d === ymdToday) {
+                todayAmt += amt;
+                todayCnt++;
+            }
+            if (d.startsWith(ymCurrent)) {
+                monthAmt += amt;
+                monthCnt++;
+            }
+        });
+
+        // Transactions & Deceased Collections
+        let paidCases = 0, partCases = 0, unpaidCases = 0, cancelCases = 0;
+        let totClaim = 0, totRemain = 0;
+        const deceasedList = [];
+
+        transactions.forEach(t => {
+            const tc = Number(t.total_amount) || 0;
+            const tp = Number(t.total_paid) || 0;
+            const rem = Number(t.total_remain) || Math.max(0, tc - tp);
+            const pct = tc > 0 ? Math.round((tp / tc) * 100) : 0;
+            const st = intVal(t.status) || 1;
+
+            let p_status = "unpaid";
+            let status_text = "ยังไม่เริ่มเก็บ";
+            if (st === 2 || t.payment_status === "cancelled") {
+                cancelCases++;
+                p_status = "cancelled";
+                status_text = "ยกเลิก";
+                return;
+            } else {
+                totClaim += tc;
+                totRemain += rem;
+                if (tp > 0 && rem <= 0) {
+                    paidCases++;
+                    p_status = "paid";
+                    status_text = "เก็บครบแล้ว";
+                } else if (tp > 0 && rem > 0) {
+                    partCases++;
+                    p_status = "partial";
+                    status_text = "ยังไม่ครบ";
+                } else {
+                    unpaidCases++;
+                }
+            }
+
+            deceasedList.push({
+                docid: t.docid || t.docId,
+                date: t.doc_date || t.date,
+                Idcustomer: t.Idcustomer || "",
+                fullname: `${t.prefix || ''}${t.name || ''} ${t.lastname || ''}`.trim(),
+                dateend: t.dateend,
+                numberend: t.numberend || '-',
+                claim_amount: tc,
+                paid_amount: tp,
+                remain_amount: rem,
+                progress_percent: pct,
+                payment_status: p_status,
+                status_text: status_text,
+                count_paid: intVal(t.count_paid),
+                count_remain: intVal(t.count_remain),
+                total_members: intVal(t.total_members),
+                status: st
+            });
+        });
+
+        renderDashboard({
+            members: { total: totalMem, active: activeMem, deceased: deceasedMem },
+            financial: {
+                today_amount: todayAmt,
+                today_count: todayCnt,
+                month_amount: monthAmt,
+                month_count: monthCnt,
+                total_amount: grandAmt,
+                total_debt_remaining: totRemain
+            },
+            transactions: {
+                total_cases: transactions.length,
+                paid_cases: paidCases,
+                partial_cases: partCases,
+                unpaid_cases: unpaidCases,
+                cancelled_cases: cancelCases,
+                total_claim_amount: totClaim
+            },
+            deceased_collections: deceasedList
+        });
+
+    } catch (e) {
+        console.error("Fallback execution error:", e);
+    }
+}
+
+function intVal(v) {
+    const n = parseInt(v, 10);
+    return isNaN(n) ? 0 : n;
+}
+
+// ==========================================
+// RENDER ALL DATA
+// ==========================================
+function renderDashboard(data) {
+    const mem = data.members || {};
+    const fin = data.financial || {};
+    const tran = data.transactions || {};
+
+    // 1. KPI Cards Values
+    document.getElementById("valTodayAmount").innerText = formatCurrency(fin.today_amount);
+    document.getElementById("valTodayCount").innerText = (fin.today_count || 0).toLocaleString();
+
+    document.getElementById("valMonthAmount").innerText = formatCurrency(fin.month_amount);
+    document.getElementById("valMonthCount").innerText = (fin.month_count || 0).toLocaleString();
+
+    document.getElementById("valMembersTotal").innerText = (mem.total || 0).toLocaleString();
+    document.getElementById("valMembersActive").innerText = (mem.active || 0).toLocaleString();
+    document.getElementById("valMembersDeceased").innerText = (mem.deceased || 0).toLocaleString();
+
+    const activeCases = Math.max(0, (tran.total_cases || 0) - (tran.cancelled_cases || 0));
+    const pendingCases = (tran.partial_cases || 0) + (tran.unpaid_cases || 0);
+    document.getElementById("valDeceasedTotal").innerText = activeCases.toLocaleString();
+    document.getElementById("valDeceasedPaid").innerText = (tran.paid_cases || 0).toLocaleString();
+    document.getElementById("valDeceasedPending").innerText = pendingCases.toLocaleString();
+
+    // 2. Debt & Claims Progress Meter
+    const claimAmt = Number(tran.total_claim_amount) || 0;
+    const remainAmt = Number(fin.total_debt_remaining) || 0;
+    const paidAmt = Math.max(0, claimAmt - remainAmt);
+    const percent = claimAmt > 0 ? Math.min(100, Math.round((paidAmt / claimAmt) * 100)) : 0;
+
+    document.getElementById("textTotalClaim").innerText = `฿${formatCurrency(claimAmt)}`;
+    document.getElementById("textTotalPaid").innerText = `฿${formatCurrency(paidAmt)}`;
+    document.getElementById("textTotalRemain").innerText = `฿${formatCurrency(remainAmt)}`;
+    document.getElementById("textDebtPercent").innerText = `${percent}% จัดเก็บแล้ว`;
+    document.getElementById("barDebtProgress").style.width = `${percent}%`;
+
+    // 3. Render Chart.js Doughnut Chart
+    renderChartJsDoughnut(paidAmt, remainAmt);
+
+    // 4. Populate Deceased Collections (ศพไหนครบ / ไม่ครบ)
+    allDeceasedList = Array.isArray(data.deceased_collections) ? data.deceased_collections : [];
+    updateDeceasedFilterCounts();
+    renderDeceasedTable();
+}
+
+// ==========================================
+// DECEASED COLLECTIONS TABLE LOGIC
+// ==========================================
+function updateDeceasedFilterCounts() {
+    let countAll = 0;
+    let countIncomplete = 0;
+    let countCompleted = 0;
+
+    allDeceasedList.forEach(item => {
+        if (item.status == 2 || item.payment_status === "cancelled") {
+            return;
+        }
+        if (item.payment_status === "paid" || (Number(item.remain_amount) <= 0 && Number(item.claim_amount) > 0)) {
+            countCompleted++;
+        } else {
+            countIncomplete++;
+        }
+        countAll++;
+    });
+
+    const elAll = document.getElementById("countFilterAll");
+    const elInc = document.getElementById("countFilterIncomplete");
+    const elCom = document.getElementById("countFilterCompleted");
+
+    if (elAll) elAll.innerText = countAll;
+    if (elInc) elInc.innerText = countIncomplete;
+    if (elCom) elCom.innerText = countCompleted;
+}
+
+function renderDeceasedTable() {
+    const tbody = document.querySelector("#tableDeceasedStatus tbody");
+    if (!tbody) return;
+
+    const query = searchDeceasedQuery.trim().toLowerCase();
+
+    const filtered = allDeceasedList.filter(item => {
+        const isCancelled = item.status == 2 || item.payment_status === "cancelled";
+        if (isCancelled) return false;
+
+        const isPaid = (item.payment_status === "paid" || (Number(item.remain_amount) <= 0 && Number(item.claim_amount) > 0));
+        const isIncomplete = !isPaid;
+
+        // Filter Tab
+        if (currentDeceasedFilter === "completed" && !isPaid) return false;
+        if (currentDeceasedFilter === "incomplete" && !isIncomplete) return false;
+
+        // Search Query
+        if (query) {
+            const numEnd = String(item.numberend || '').toLowerCase();
+            const docId = String(item.docid || '').toLowerCase();
+            const name = String(item.fullname || '').toLowerCase();
+            const idCust = String(item.Idcustomer || '').toLowerCase();
+            if (!numEnd.includes(query) && !docId.includes(query) && !name.includes(query) && !idCust.includes(query)) {
+                return false;
+            }
+        }
+        return true;
+    });
+
+    const activeTotal = allDeceasedList.filter(item => !(item.status == 2 || item.payment_status === "cancelled")).length;
+    
+    // แสดงเพียง 5 รายการล่าสุด
+    const displayList = filtered.slice(0, 5);
+
+    const summaryText = document.getElementById("textDeceasedSummary");
+    if (summaryText) {
+        summaryText.innerText = `แสดง ${displayList.length} จากทั้งหมด ${activeTotal} ศพ`;
+    }
+
+    if (displayList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 35px; color: #94a3b8;">
+            ${activeTotal === 0 ? 'ยังไม่มีรายการตั้งสมาชิกเสียชีวิตในระบบ' : '🔍 ไม่พบรายการศพที่ตรงกับเงื่อนไขค้นหา'}
+        </td></tr>`;
+        return;
+    }
+
+    let html = "";
+    displayList.forEach((item, index) => {
+        const isCancelled = item.status == 2 || item.payment_status === "cancelled";
+        const isPaid = !isCancelled && (item.payment_status === "paid" || (Number(item.remain_amount) <= 0 && Number(item.claim_amount) > 0));
+        const claim = Number(item.claim_amount) || 0;
+        const paid = Number(item.paid_amount) || 0;
+        const remain = Number(item.remain_amount) || Math.max(0, claim - paid);
+        const pct = claim > 0 ? Math.min(100, Math.round((paid / claim) * 100)) : 0;
+
+        let badgeHtml = "";
+        let fillClass = "incomplete";
+
+        if (isCancelled) {
+            badgeHtml = '<span class="badge-dec-status cancelled">🚫 ยกเลิก</span>';
+            fillClass = "empty";
+        } else if (isPaid) {
+            badgeHtml = '<span class="badge-dec-status completed">✅ เก็บครบแล้ว</span>';
+            fillClass = "completed";
+        } else if (paid > 0) {
+            badgeHtml = `<span class="badge-dec-status incomplete">⏳ ยังไม่ครบ (${pct}%)</span>`;
+            fillClass = "incomplete";
+        } else {
+            badgeHtml = '<span class="badge-dec-status unpaid">⏳ ยังไม่เริ่มเก็บ</span>';
+            fillClass = "empty";
+        }
+
+        const membersInfo = item.total_members > 0 ? `จ่ายแล้ว ${item.count_paid || 0}/${item.total_members} คน` : `${pct}%`;
+
+        html += `
+            <tr>
+                <td style="text-align: center; color: #94a3b8;">${index + 1}</td>
+                <td>
+                    <strong style="color: #273B4A; font-size: 13px;">${item.numberend || '-'}</strong>
+                </td>
+                <td>
+                    <span style="font-family: monospace; color: #64748b; font-size: 11.5px;">${item.docid || '-'}</span>
+                </td>
+                <td>
+                    <div style="font-weight: 600; color: #1e293b;">${item.fullname || '-'}</div>
+                    <div style="font-size: 11px; color: #94a3b8;">รหัส: ${item.Idcustomer || '-'}</div>
+                </td>
+                <td style="text-align: center; color: #64748b; font-size: 11.5px;">
+                    ${formatThaiDateShort(item.dateend || item.date)}
+                </td>
+                <td style="text-align: right; font-weight: 600; color: #334155;">
+                    ฿${formatCurrency(claim)}
+                </td>
+                <td style="text-align: right; font-weight: 600; color: #059669;">
+                    ฿${formatCurrency(paid)}
+                </td>
+                <td style="text-align: right; font-weight: 700; color: ${remain > 0 ? '#dc2626' : '#94a3b8'};">
+                    ฿${formatCurrency(remain)}
+                </td>
+                <td>
+                    <div class="mini-progress-box">
+                        <div class="mini-progress-bar">
+                            <div class="mini-progress-fill ${fillClass}" style="width: ${pct}%;"></div>
+                        </div>
+                        <div class="mini-progress-text">
+                            <span>${membersInfo}</span>
+                            <span>${pct}%</span>
+                        </div>
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    ${badgeHtml}
+                </td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <a href="/DK_ViweTransaction?docid=${encodeURIComponent(item.docid)}" class="btn-table-action" title="เปิดดูตารางคำนวณและรายละเอียดหนี้">
+                        👁️ ดูตารางคำนวณ
+                    </a>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+// Event Listeners for Filters & Search
+const btnAll = document.getElementById("btnFilterAll");
+const btnInc = document.getElementById("btnFilterIncomplete");
+const btnCom = document.getElementById("btnFilterCompleted");
+const inputSearch = document.getElementById("inputSearchDeceased");
+
+function setActiveFilter(filterName, btnActive) {
+    currentDeceasedFilter = filterName;
+    [btnAll, btnInc, btnCom].forEach(b => { if (b) b.classList.remove("active"); });
+    if (btnActive) btnActive.classList.add("active");
+    renderDeceasedTable();
+}
+
+if (btnAll) btnAll.addEventListener("click", () => setActiveFilter("all", btnAll));
+if (btnInc) btnInc.addEventListener("click", () => setActiveFilter("incomplete", btnInc));
+if (btnCom) btnCom.addEventListener("click", () => setActiveFilter("completed", btnCom));
+
+if (inputSearch) {
+    inputSearch.addEventListener("input", (e) => {
+        searchDeceasedQuery = e.target.value;
+        renderDeceasedTable();
+    });
+}
+
+// ==========================================
+// CHART.JS: DOUGHNUT RATIO
+// ==========================================
+function renderChartJsDoughnut(paid, remain) {
+    const canvas = document.getElementById("canvasDoughnutChart");
+    if (!canvas || typeof Chart === "undefined") return;
+
+    if (doughnutChartInstance) {
+        doughnutChartInstance.destroy();
+    }
+
+    const tot = paid + remain;
+    const paidVal = tot > 0 ? paid : 1;
+    const remainVal = tot > 0 ? remain : 0;
+
+    const ctx = canvas.getContext('2d');
+    doughnutChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['ชำระแล้ว', 'ค้างชำระ'],
+            datasets: [{
+                data: [paidVal, remainVal],
+                backgroundColor: ['#10b981', '#f43f5e'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 12,
+                        font: { family: 'Prompt', size: 11.5 },
+                        color: '#475569'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleFont: { family: 'Prompt', size: 11.5 },
+                    bodyFont: { family: 'Prompt', size: 12 },
+                    callbacks: {
+                        label: function(context) {
+                            return ` ฿${formatCurrency(context.parsed)} บาท`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Initial Load & Event Listener
+fetchDashboard();
+
+const btnRefresh = document.getElementById("btnHeroRefresh");
+if (btnRefresh) {
+    btnRefresh.addEventListener("click", fetchDashboard);
+}
+</script>
+
+<style>
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
 {% endblock %}

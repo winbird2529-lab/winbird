@@ -21,6 +21,12 @@
             </div>
         </div>
 
+        <!-- Audit Info: userid (empid) & useredit -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13px; color:#64748b; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span>👤 <strong>ผู้บันทึกข้อมูล (empid):</strong> <strong id="displayCurrentUser" style="color:#0f766e;">-</strong></span>
+            <span>✏️ <strong>ผู้แก้ไขข้อมูล:</strong> <span style="color:#94a3b8;">- (จะถูกบันทึกเมื่อมีการแก้ไข) -</span></span>
+        </div>
+
         <div class="form-grid-3">
             <!-- Column 1: ข้อมูลส่วนตัว -->
             <div class="form-section-card">
@@ -97,6 +103,27 @@ import { getRunningConfig } from "/static/js/runningConfig.js";
 const thaiInput = document.getElementById("thai-date");
 const adInput = document.getElementById("ad-date");
 
+// Current logged in operator (empid)
+try {
+    const s = sessionStorage.getItem("dk_logged_user");
+    if (s) {
+        const p = JSON.parse(s);
+        const el = document.getElementById("displayCurrentUser");
+        if (el) el.textContent = p.empid || p.username || "-";
+    }
+} catch(e) {}
+
+const currentUser = (function() {
+    try {
+        const s = sessionStorage.getItem("dk_logged_user");
+        if (s) {
+            const p = JSON.parse(s);
+            return p.empid || p.username || "001";
+        }
+    } catch(e) {}
+    return "001";
+})();
+
 // ======================
 // FLATPICKR
 // ======================
@@ -163,13 +190,46 @@ let isManualDocMode = false;
 
 async function loadRunning() {
     try {
-        const response = await fetch(`${API_BASE}/get-running?id=2`);
-        const data = await response.json();
-        const nextRun = String(parseInt(data.IdRunning) + 1).padStart(3, "0");
-        return `${data.docId}${nextRun}`;
+        let res = null;
+        try {
+            res = await fetch(`${API_BASE}/get-running?id=2`, { signal: AbortSignal.timeout(2000) });
+        } catch(e) {
+            console.warn("API_BASE get-running failed, falling back to local Flask:", e);
+        }
+        if (!res || !res.ok) {
+            try {
+                res = await fetch("/get-running?id=2");
+            } catch(e2) {
+                console.warn("Flask get-running failed, trying /api/running:", e2);
+            }
+        }
+        if (!res || !res.ok) {
+            try {
+                const resAll = await fetch("/api/running");
+                if (resAll && resAll.ok) {
+                    const j = await resAll.json();
+                    const list = j.data || j.results || [];
+                    const it = list.find(x => String(x.Id || x.id) === "2");
+                    if (it) {
+                        const doc = it.docid || it.docId || "EY";
+                        const run = String(it.IdRunning || it.id_running || "0");
+                        const nextRun = String(parseInt(run) + 1).padStart(3, "0");
+                        return `${doc}${nextRun}`;
+                    }
+                }
+            } catch(e3) {}
+        }
+        if (res && res.ok) {
+            const data = await res.json();
+            const doc = data.docId || data.docid || "EY";
+            const run = String(data.IdRunning || data.id_running || "0");
+            const nextRun = String(parseInt(run) + 1).padStart(3, "0");
+            return `${doc}${nextRun}`;
+        }
+        return "EY001";
     } catch (err) {
         console.error("Running Error:", err);
-        return "";
+        return "EY001";
     }
 }
 
@@ -293,7 +353,10 @@ form.addEventListener("submit", async (e) => {
             Tel: Tel,
             position: document.getElementById("position").value.trim(),
             date: dateVal,
-            status: 1
+            status: 1,
+            userid: currentUser,  // ผู้บันทึกข้อมูล (empid)
+            useredit: "",         // ผู้แก้ไขข้อมูล (ยังไม่แก้ไข)
+            cusid: sessionStorage.getItem("dk_constant_cusid") || ""
         };
 
         const response = await fetch(`${API_BASE}/saveuseremployee`, {
@@ -307,6 +370,8 @@ form.addEventListener("submit", async (e) => {
         const result = await response.json();
         if (result.error === "0") {
             alert("✅ บันทึกข้อมูลพนักงานเรียบร้อย");
+            window.location.reload();
+            return;
             // เคลียร์ฟอร์ม
             document.getElementById("prefix").value = "";
             document.getElementById("name").value = "";

@@ -21,6 +21,12 @@
             </div>
         </div>
 
+        <!-- Audit Info: userid (empid) & useredit -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13px; color:#64748b; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span>👤 <strong>ผู้บันทึกข้อมูล (empid):</strong> <strong id="displayCurrentUser" style="color:#0f766e;">-</strong></span>
+            <span>✏️ <strong>ผู้แก้ไขข้อมูล:</strong> <span style="color:#94a3b8;">- (จะถูกบันทึกเมื่อมีการแก้ไข) -</span></span>
+        </div>
+
         <!-- Tabs -->
         <div class="tabs-styled">
             <button type="button" class="tab-btn active" data-tab="personal">📋 ข้อมูลส่วนตัว</button>
@@ -54,6 +60,20 @@
                         <label for="lastname">นามสกุล <span class="req">*</span></label>
                         <input type="text" id="lastname" name="lastname" required>
                     </div>
+                    <div class="form-row-dob" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px; margin-bottom: 14px;">
+                        <div class="form-field" style="margin-bottom: 0;">
+                            <label for="thai-birthday">วันเกิด (ว/ด/ป พ.ศ.)</label>
+                            <div style="position: relative;">
+                                <input type="text" id="thai-birthday" name="thai-birthday" placeholder="เลือกหรือพิมพ์วันเกิด" autocomplete="off" style="padding-right: 28px;">
+                                <span id="btnClearBirthday" title="ล้างวันเกิด" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; font-size: 14px; display: none; font-weight: bold; user-select: none;">✕</span>
+                            </div>
+                            <input type="hidden" id="ad-birthday" name="birthday">
+                        </div>
+                        <div class="form-field" style="margin-bottom: 0;">
+                            <label for="age">อายุ (ปี)</label>
+                            <input type="text" id="age" name="age" readonly placeholder="คำนวณอัตโนมัติ" style="background: #f8fafc; font-weight: 600; color: #1e293b; text-align: center;">
+                        </div>
+                    </div>
                     <div class="form-field">
                         <label for="Idcard">เลขบัตรประชาชน</label>
                         <input type="text" id="Idcard" name="Idcard" maxlength="13">
@@ -64,32 +84,78 @@
                     </div>
                 </div>
 
-                <!-- Column 2: ที่อยู่ -->
+                <!-- Column 2: ที่อยู่ (2 แท็บ: ที่อยู่ตามบัตร กับ ที่อยู่ปัจจุบัน) -->
                 <div class="form-section-card">
-                    <h3>🏠 ข้อมูลที่อยู่</h3>
-                    <div class="form-field">
-                        <label for="addrNo">ที่อยู่ / บ้านเลขที่</label>
-                        <input type="text" id="addrNo" name="addrNo">
+                    <h3 style="margin-bottom: 12px;">🏠 ข้อมูลที่อยู่</h3>
+                    
+                    <!-- Sub-tabs สำหรับเลือกประเภทที่อยู่ -->
+                    <div class="address-subtabs">
+                        <button type="button" class="addr-tab-btn active" data-addr-tab="idcard">
+                            <span>🪪</span> ที่อยู่ตามบัตร
+                        </button>
+                        <button type="button" class="addr-tab-btn" data-addr-tab="current">
+                            <span>🏡</span> ที่อยู่ปัจจุบัน
+                        </button>
                     </div>
-                    <div class="form-field">
-                        <label for="moo">หมู่</label>
-                        <input type="text" id="moo" name="moo">
+
+                    <!-- แถบ 1: ที่อยู่ตามบัตร -->
+                    <div id="addr-panel-idcard" class="addr-panel" style="display:block;">
+                        <div class="form-field">
+                            <label for="addrNo">ที่อยู่ / บ้านเลขที่</label>
+                            <input type="text" id="addrNo" name="addrNo">
+                        </div>
+                        <div class="form-field">
+                            <label for="moo">หมู่</label>
+                            <input type="text" id="moo" name="moo">
+                        </div>
+                        <div class="form-field">
+                            <label for="locality">ตำบล / แขวง</label>
+                            <input type="text" id="locality" name="locality">
+                        </div>
+                        <div class="form-field">
+                            <label for="district">อำเภอ / เขต</label>
+                            <input type="text" id="district" name="district">
+                        </div>
+                        <div class="form-field">
+                            <label for="province">จังหวัด</label>
+                            <input type="text" id="province" name="province">
+                        </div>
+                        <div class="form-field">
+                            <label for="zipCode">รหัสไปรษณีย์</label>
+                            <input type="text" id="zipCode" name="zipCode">
+                        </div>
                     </div>
-                    <div class="form-field">
-                        <label for="locality">ตำบล / แขวง</label>
-                        <input type="text" id="locality" name="locality">
-                    </div>
-                    <div class="form-field">
-                        <label for="district">อำเภอ / เขต</label>
-                        <input type="text" id="district" name="district">
-                    </div>
-                    <div class="form-field">
-                        <label for="province">จังหวัด</label>
-                        <input type="text" id="province" name="province">
-                    </div>
-                    <div class="form-field">
-                        <label for="zipCode">รหัสไปรษณีย์</label>
-                        <input type="text" id="zipCode" name="zipCode">
+
+                    <!-- แถบ 2: ที่อยู่ปัจจุบัน -->
+                    <div id="addr-panel-current" class="addr-panel" style="display:none;">
+                        <div class="addr-same-box">
+                            <input type="checkbox" id="chkSameAddress">
+                            <label for="chkSameAddress">ใช้ที่อยู่เดียวกับที่อยู่ตามบัตร</label>
+                        </div>
+                        <div class="form-field">
+                            <label for="cur_addrNo">ที่อยู่ / บ้านเลขที่</label>
+                            <input type="text" id="cur_addrNo" name="cur_addrNo">
+                        </div>
+                        <div class="form-field">
+                            <label for="cur_moo">หมู่</label>
+                            <input type="text" id="cur_moo" name="cur_moo">
+                        </div>
+                        <div class="form-field">
+                            <label for="cur_locality">ตำบล / แขวง</label>
+                            <input type="text" id="cur_locality" name="cur_locality">
+                        </div>
+                        <div class="form-field">
+                            <label for="cur_district">อำเภอ / เขต</label>
+                            <input type="text" id="cur_district" name="cur_district">
+                        </div>
+                        <div class="form-field">
+                            <label for="cur_province">จังหวัด</label>
+                            <input type="text" id="cur_province" name="cur_province">
+                        </div>
+                        <div class="form-field">
+                            <label for="cur_zipCode">รหัสไปรษณีย์</label>
+                            <input type="text" id="cur_zipCode" name="cur_zipCode">
+                        </div>
                     </div>
                 </div>
 
@@ -141,6 +207,45 @@ import { getRunningConfig } from "/static/js/runningConfig.js";
 const thaiInput = document.getElementById("thai-date");
 const adInput = document.getElementById("ad-date");
 
+const thaiBirthdayInput = document.getElementById("thai-birthday");
+const adBirthdayInput = document.getElementById("ad-birthday");
+const ageInput = document.getElementById("age");
+const btnClearBirthday = document.getElementById("btnClearBirthday");
+
+// ======================
+// CALCULATION & FORMATTING
+// ======================
+function calculateAge(birthDate) {
+    if (!birthDate) return "";
+    const today = new Date();
+    const birth = (birthDate instanceof Date) ? birthDate : new Date(birthDate);
+    if (isNaN(birth.getTime())) return "";
+
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    const d = today.getDate() - birth.getDate();
+
+    if (m < 0 || (m === 0 && d < 0)) {
+        age--;
+    }
+    return age >= 0 ? age : 0;
+}
+
+function updateHiddenBirthday(date) {
+    if (!date) {
+        adBirthdayInput.value = "";
+        ageInput.value = "";
+        if (btnClearBirthday) btnClearBirthday.style.display = "none";
+        return;
+    }
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    adBirthdayInput.value = `${yyyy}-${mm}-${dd}`;
+    ageInput.value = calculateAge(date);
+    if (btnClearBirthday) btnClearBirthday.style.display = "block";
+}
+
 // ======================
 // FLATPICKR
 // ======================
@@ -169,12 +274,135 @@ flatpickr("#thai-date", {
     }
 });
 
+const fpBirthday = flatpickr("#thai-birthday", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    maxDate: "today",
+    allowInput: true,
+    formatDate: function(date, format, locale) {
+        return formatThaiDate(date);
+    },
+    parseDate: function(dateStr, format) {
+        if (!dateStr) return undefined;
+        if (dateStr instanceof Date) return dateStr;
+        const s = String(dateStr).trim();
+        const m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+        if (m) {
+            let d = parseInt(m[1], 10);
+            let mo = parseInt(m[2], 10);
+            let yr = parseInt(m[3], 10);
+            if (yr > 2400) yr -= 543;
+            return new Date(yr, mo - 1, d);
+        }
+        return new Date(dateStr);
+    },
+    onReady: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onOpen: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onChange: function(selectedDates, dateStr, instance) {
+        if (selectedDates && selectedDates.length > 0) {
+            const date = selectedDates[0];
+            instance.input.value = formatThaiDate(date);
+            updateHiddenBirthday(date);
+            changeToBuddhistYear(instance);
+        } else {
+            if (!instance.input.value || !instance.input.value.trim()) {
+                updateHiddenBirthday(null);
+            }
+        }
+    },
+    onMonthChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    },
+    onYearChange: function(selectedDates, dateStr, instance) {
+        changeToBuddhistYear(instance);
+    }
+});
+
+// ตรวจจับเมื่อผู้ใช้พิมพ์วันเกิดเอง (คำนวณอายุทันทีในระหว่างพิมพ์)
+thaiBirthdayInput.addEventListener("input", function() {
+    const val = this.value.trim();
+    if (!val) {
+        adBirthdayInput.value = "";
+        ageInput.value = "";
+        if (btnClearBirthday) btnClearBirthday.style.display = "none";
+        return;
+    }
+    const m = val.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+    if (m) {
+        const d = parseInt(m[1], 10);
+        const mo = parseInt(m[2], 10);
+        let yr = parseInt(m[3], 10);
+        if (yr > 2400) yr -= 543;
+        const dt = new Date(yr, mo - 1, d);
+        if (dt.getFullYear() === yr && dt.getMonth() === mo - 1 && dt.getDate() === d) {
+            const today = new Date();
+            if (dt <= today) {
+                const yyyy = dt.getFullYear();
+                const mm = String(dt.getMonth() + 1).padStart(2, '0');
+                const dd = String(dt.getDate()).padStart(2, '0');
+                adBirthdayInput.value = `${yyyy}-${mm}-${dd}`;
+                ageInput.value = calculateAge(dt);
+                if (btnClearBirthday) btnClearBirthday.style.display = "block";
+            }
+        }
+    }
+});
+
+// เมื่อผู้ใช้พิมพ์เสร็จแล้วออกจากช่อง (blur หรือ change)
+thaiBirthdayInput.addEventListener("change", function() {
+    const val = this.value.trim();
+    if (!val) {
+        fpBirthday.clear();
+        updateHiddenBirthday(null);
+        return;
+    }
+    const m = val.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+    if (m) {
+        const d = parseInt(m[1], 10);
+        const mo = parseInt(m[2], 10);
+        let yr = parseInt(m[3], 10);
+        let adYear = yr;
+        if (yr > 2400) {
+            adYear = yr - 543;
+        }
+        const dt = new Date(adYear, mo - 1, d);
+        if (dt.getFullYear() === adYear && dt.getMonth() === mo - 1 && dt.getDate() === d) {
+            const today = new Date();
+            if (dt > today) {
+                alert("⚠️ วันเกิดต้องไม่เกินวันปัจจุบัน");
+                fpBirthday.clear();
+                updateHiddenBirthday(null);
+                return;
+            }
+            fpBirthday.setDate(dt, false);
+            this.value = formatThaiDate(dt);
+            updateHiddenBirthday(dt);
+            return;
+        }
+    }
+    alert("⚠️ รูปแบบวันเกิดไม่ถูกต้อง กรุณากรอกเป็น วว/ดด/ปปปป (พ.ศ.) เช่น 15/05/2535 หรือเลือกจากปฏิทิน");
+    fpBirthday.clear();
+    updateHiddenBirthday(null);
+});
+
+if (btnClearBirthday) {
+    btnClearBirthday.addEventListener("click", () => {
+        fpBirthday.clear();
+        thaiBirthdayInput.value = "";
+        updateHiddenBirthday(null);
+    });
+}
+
 function changeToBuddhistYear(instance) {
     setTimeout(() => {
         const yearElement = instance.currentYearElement;
         if (yearElement) {
             const christianYear = parseInt(yearElement.value);
-            if (!isNaN(christianYear)) {
+            if (!isNaN(christianYear) && christianYear < 2400) {
                 yearElement.value = christianYear + 543;
             }
         }
@@ -207,13 +435,46 @@ let isManualDocMode = false;
 
 async function loadRunning() {
     try {
-        const response = await fetch(`${API_BASE}/get-running?id=1`);
-        const data = await response.json();
-        const nextRun = String(parseInt(data.IdRunning) + 1).padStart(6, "0");
-        return `${data.docId}${nextRun}`;
+        let res = null;
+        try {
+            res = await fetch(`${API_BASE}/get-running?id=1`, { signal: AbortSignal.timeout(2000) });
+        } catch(e) {
+            console.warn("API_BASE get-running failed, falling back to local Flask:", e);
+        }
+        if (!res || !res.ok) {
+            try {
+                res = await fetch("/get-running?id=1");
+            } catch(e2) {
+                console.warn("Flask get-running failed, trying /api/running:", e2);
+            }
+        }
+        if (!res || !res.ok) {
+            try {
+                const resAll = await fetch("/api/running");
+                if (resAll && resAll.ok) {
+                    const j = await resAll.json();
+                    const list = j.data || j.results || [];
+                    const it = list.find(x => String(x.Id || x.id) === "1");
+                    if (it) {
+                        const doc = it.docid || it.docId || "PC";
+                        const run = String(it.IdRunning || it.id_running || "0");
+                        const nextRun = String(parseInt(run) + 1).padStart(6, "0");
+                        return `${doc}${nextRun}`;
+                    }
+                }
+            } catch(e3) {}
+        }
+        if (res && res.ok) {
+            const data = await res.json();
+            const doc = data.docId || data.docid || "PC";
+            const run = String(data.IdRunning || data.id_running || "0");
+            const nextRun = String(parseInt(run) + 1).padStart(6, "0");
+            return `${doc}${nextRun}`;
+        }
+        return "PC000001";
     } catch (err) {
         console.error("Running Error:", err);
-        return "";
+        return "PC000001";
     }
 }
 
@@ -247,6 +508,17 @@ async function initDocMode() {
 }
 initDocMode();
 
+(function() {
+    try {
+        const s = sessionStorage.getItem("dk_logged_user");
+        if (s) {
+            const p = JSON.parse(s);
+            const el = document.getElementById("displayCurrentUser");
+            if (el) el.textContent = p.empid || p.username || "-";
+        }
+    } catch(e) {}
+})();
+
 // ======================
 // TABS
 // ======================
@@ -260,6 +532,73 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         if (panel) panel.style.display = 'block';
     });
 });
+
+// ======================
+// ADDRESS SUB-TABS & SYNC
+// ======================
+const addrTabBtns = document.querySelectorAll('.addr-tab-btn');
+const addrPanels = document.querySelectorAll('.addr-panel');
+const chkSameAddress = document.getElementById('chkSameAddress');
+
+const cardAddrFields = ['addrNo', 'moo', 'locality', 'district', 'province', 'zipCode'];
+const curAddrFields = ['cur_addrNo', 'cur_moo', 'cur_locality', 'cur_district', 'cur_province', 'cur_zipCode'];
+
+function syncAddressValues() {
+    if (!chkSameAddress || !chkSameAddress.checked) return;
+    cardAddrFields.forEach((field, i) => {
+        const srcEl = document.getElementById(field);
+        const destEl = document.getElementById(curAddrFields[i]);
+        if (srcEl && destEl) {
+            destEl.value = srcEl.value;
+        }
+    });
+}
+
+function setCurAddressReadOnly(isReadOnly) {
+    curAddrFields.forEach(field => {
+        const el = document.getElementById(field);
+        if (el) {
+            el.readOnly = isReadOnly;
+            el.style.backgroundColor = isReadOnly ? '#f1f5f9' : '#ffffff';
+            el.style.cursor = isReadOnly ? 'not-allowed' : 'text';
+        }
+    });
+}
+
+if (addrTabBtns.length > 0) {
+    addrTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            addrTabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const target = btn.dataset.addrTab;
+            addrPanels.forEach(p => p.style.display = 'none');
+            const activePanel = document.getElementById(`addr-panel-${target}`);
+            if (activePanel) activePanel.style.display = 'block';
+        });
+    });
+}
+
+if (chkSameAddress) {
+    chkSameAddress.addEventListener('change', function() {
+        if (this.checked) {
+            syncAddressValues();
+            setCurAddressReadOnly(true);
+        } else {
+            setCurAddressReadOnly(false);
+        }
+    });
+
+    cardAddrFields.forEach(field => {
+        const el = document.getElementById(field);
+        if (el) {
+            el.addEventListener('input', () => {
+                if (chkSameAddress.checked) {
+                    syncAddressValues();
+                }
+            });
+        }
+    });
+}
 
 // ======================
 // BENEFICIARIES
@@ -301,9 +640,9 @@ function createBeneficiaryRow(b = {}, index = null) {
                 <input type="text" class="ben-lastname" placeholder="นามสกุล" value="${b.lastname || ''}">
             </div>
             <div class="form-field">
-                <label>ความเกี่ยวข้อง</label>
+                <label>ความสัมพันธ์</label>
                 <select class="ben-relation">
-                    <option value="">-- เลือกความเกี่ยวข้อง --</option>
+                    <option value="">-- เลือก --</option>
                     <option value="บิดา">บิดา</option>
                     <option value="มารดา">มารดา</option>
                     <option value="สามี">สามี</option>
@@ -327,6 +666,18 @@ function createBeneficiaryRow(b = {}, index = null) {
             <div class="form-field">
                 <label>เลขบัตรประชาชน</label>
                 <input type="text" class="ben-idcard" placeholder="13 หลัก" maxlength="13" value="${b.Idcard || b.idcard || ''}">
+            </div>
+            <div class="form-field">
+                <label>วันเกิด (พ.ศ.)</label>
+                <div style="position: relative;">
+                    <input type="text" class="ben-birthday-thai" placeholder="วว/ดด/ปปปป" autocomplete="off" style="padding-right: 22px;">
+                    <span class="ben-clear-birthday" title="ล้างวันเกิด" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; font-size: 12px; display: none; font-weight: bold; user-select: none;">✕</span>
+                </div>
+                <input type="hidden" class="ben-birthday-ad" value="${b.birthday || ''}">
+            </div>
+            <div class="form-field">
+                <label>อายุ (ปี)</label>
+                <input type="text" class="ben-age" readonly placeholder="คำนวณ" value="${b.age !== undefined && b.age !== null ? b.age : ''}" style="background: #f8fafc; font-weight: 600; color: #1e293b; text-align: center;">
             </div>
             <div class="form-field">
                 <label>สถานะ</label>
@@ -357,6 +708,130 @@ function createBeneficiaryRow(b = {}, index = null) {
         statusSelect.value = String(b.status === 2 || b.status === "2" ? "2" : "1");
     }
 
+    // Flatpickr & Age calculation for Beneficiary
+    const thaiBdayInput = row.querySelector('.ben-birthday-thai');
+    const adBdayInput = row.querySelector('.ben-birthday-ad');
+    const ageInput = row.querySelector('.ben-age');
+    const clearBdayBtn = row.querySelector('.ben-clear-birthday');
+
+    function updateBenAge(date) {
+        if (!date) {
+            adBdayInput.value = "";
+            ageInput.value = "";
+            if (clearBdayBtn) clearBdayBtn.style.display = "none";
+            return;
+        }
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        adBdayInput.value = `${yyyy}-${mm}-${dd}`;
+        ageInput.value = calculateAge(date);
+        if (clearBdayBtn) clearBdayBtn.style.display = "block";
+    }
+
+    const fpBen = flatpickr(thaiBdayInput, {
+        locale: "th",
+        dateFormat: "d/m/Y",
+        maxDate: "today",
+        allowInput: true,
+        formatDate: function(date, format, locale) {
+            return formatThaiDate(date);
+        },
+        parseDate: function(dateStr, format) {
+            if (!dateStr) return undefined;
+            if (dateStr instanceof Date) return dateStr;
+            const s = String(dateStr).trim();
+            const m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+            if (m) {
+                let d = parseInt(m[1], 10);
+                let mo = parseInt(m[2], 10);
+                let yr = parseInt(m[3], 10);
+                if (yr > 2400) yr -= 543;
+                return new Date(yr, mo - 1, d);
+            }
+            return new Date(dateStr);
+        },
+        onReady: function(selectedDates, dateStr, instance) {
+            changeToBuddhistYear(instance);
+        },
+        onOpen: function(selectedDates, dateStr, instance) {
+            changeToBuddhistYear(instance);
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates && selectedDates.length > 0) {
+                const date = selectedDates[0];
+                instance.input.value = formatThaiDate(date);
+                updateBenAge(date);
+                changeToBuddhistYear(instance);
+            } else {
+                updateBenAge(null);
+            }
+        },
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            changeToBuddhistYear(instance);
+        },
+        onYearChange: function(selectedDates, dateStr, instance) {
+            changeToBuddhistYear(instance);
+        }
+    });
+
+    thaiBdayInput.addEventListener("blur", function() {
+        const val = this.value.trim();
+        if (!val) {
+            fpBen.clear();
+            updateBenAge(null);
+            return;
+        }
+        const m = val.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+        if (m) {
+            const d = parseInt(m[1], 10);
+            const mo = parseInt(m[2], 10);
+            let yr = parseInt(m[3], 10);
+            let adYear = yr > 2400 ? yr - 543 : yr;
+            const dt = new Date(adYear, mo - 1, d);
+            if (dt.getFullYear() === adYear && dt.getMonth() === mo - 1 && dt.getDate() === d) {
+                const today = new Date();
+                if (dt > today) {
+                    alert("⚠️ วันเกิดต้องไม่เกินวันปัจจุบัน");
+                    fpBen.clear();
+                    updateBenAge(null);
+                    return;
+                }
+                fpBen.setDate(dt, false);
+                this.value = formatThaiDate(dt);
+                updateBenAge(dt);
+                return;
+            }
+        }
+        alert("⚠️ รูปแบบวันเกิดไม่ถูกต้อง กรุณากรอกเป็น วว/ดด/ปปปป (พ.ศ.) เช่น 15/05/2535 หรือเลือกจากปฏิทิน");
+        fpBen.clear();
+        updateBenAge(null);
+    });
+
+    if (clearBdayBtn) {
+        clearBdayBtn.addEventListener("click", () => {
+            fpBen.clear();
+            thaiBdayInput.value = "";
+            updateBenAge(null);
+        });
+    }
+
+    if (b.birthday) {
+        const dt = new Date(b.birthday);
+        if (!isNaN(dt.getTime())) {
+            fpBen.setDate(dt, false);
+            thaiBdayInput.value = formatThaiDate(dt);
+            const yyyy = dt.getFullYear();
+            const mm = String(dt.getMonth() + 1).padStart(2, '0');
+            const dd = String(dt.getDate()).padStart(2, '0');
+            adBdayInput.value = `${yyyy}-${mm}-${dd}`;
+            ageInput.value = (b.age !== undefined && b.age !== null && b.age !== "") ? b.age : calculateAge(dt);
+            if (clearBdayBtn) clearBdayBtn.style.display = "block";
+        }
+    } else if (b.age !== undefined && b.age !== null && b.age !== "") {
+        ageInput.value = b.age;
+    }
+
     row.querySelector('.ben-remove').addEventListener('click', () => {
         row.remove();
         updateBeneficiaryNumbers();
@@ -381,7 +856,7 @@ document.getElementById('add-beneficiary').addEventListener('click', () => {
 // แถวแรกเริ่มต้น
 beneficiaryListEl.appendChild(createBeneficiaryRow({}, 1));
 
-function collectBeneficiaries() {
+function collectBeneficiaries(operator) {
     const items = [];
     document.querySelectorAll('.ben-card').forEach(r => {
         const prefix = r.querySelector('.ben-prefix').value.trim();
@@ -391,8 +866,42 @@ function collectBeneficiaries() {
         const Idcard = r.querySelector('.ben-idcard').value.trim();
         const statusEl = r.querySelector('.ben-status');
         const status = statusEl ? parseInt(statusEl.value, 10) || 1 : 1;
+
+        let bDay = (r.querySelector('.ben-birthday-ad').value || "").trim();
+        let bAge = (r.querySelector('.ben-age').value || "").trim();
+        const thaiBdayVal = (r.querySelector('.ben-birthday-thai').value || "").trim();
+
+        if (!bDay && thaiBdayVal) {
+            const m = thaiBdayVal.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+            if (m) {
+                let d = parseInt(m[1], 10);
+                let mo = parseInt(m[2], 10);
+                let yr = parseInt(m[3], 10);
+                if (yr > 2400) yr -= 543;
+                bDay = `${yr}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                if (!bAge) {
+                    bAge = String(calculateAge(new Date(yr, mo - 1, d)));
+                }
+            }
+        }
+        if (!bAge && bDay) {
+            bAge = String(calculateAge(new Date(bDay)));
+        }
+
         if (name || lastname || Idcard) {
-            items.push({ prefix, name, lastname, relation, Idcard, status });
+            items.push({ 
+                prefix, 
+                name, 
+                lastname, 
+                relation, 
+                Idcard, 
+                status,
+                birthday: bDay || null,
+                age: bAge ? parseInt(bAge, 10) : null,
+                userid: operator || "001",
+                useredit: "",
+                cusid: sessionStorage.getItem("dk_constant_cusid") || ""
+            });
         }
     });
     return items;
@@ -432,13 +941,78 @@ form.addEventListener("submit", async (e) => {
             return;
         }
 
-        const beneficiaries = collectBeneficiaries();
+        const currentUser = (function() {
+            try {
+                const s = sessionStorage.getItem("dk_logged_user");
+                if (s) {
+                    const p = JSON.parse(s);
+                    if (p.empid) return p.empid;
+                    if (p.username) return p.username;
+                }
+            } catch(e) {}
+            return "001";
+        })();
+
+        const beneficiaries = collectBeneficiaries(currentUser);
+        const beneficiaryStr = beneficiaries
+            .map(b => `${b.prefix || ''}${b.name || ''} ${b.lastname || ''}`.trim())
+            .filter(Boolean)
+            .join(", ");
+
+        let bDay = (document.getElementById("ad-birthday").value || "").trim();
+        let bAge = (document.getElementById("age").value || "").trim();
+        const thaiBdayVal = (document.getElementById("thai-birthday").value || "").trim();
+
+        if (!bDay && thaiBdayVal) {
+            const m = thaiBdayVal.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+            if (m) {
+                let d = parseInt(m[1], 10);
+                let mo = parseInt(m[2], 10);
+                let yr = parseInt(m[3], 10);
+                if (yr > 2400) yr -= 543;
+                bDay = `${yr}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                document.getElementById("ad-birthday").value = bDay;
+                if (!bAge) {
+                    bAge = String(calculateAge(new Date(yr, mo - 1, d)));
+                    document.getElementById("age").value = bAge;
+                }
+            }
+        }
+        if (!bAge && bDay) {
+            bAge = String(calculateAge(new Date(bDay)));
+            document.getElementById("age").value = bAge;
+        }
+
+        let regDate = (document.getElementById("ad-date").value || "").trim();
+        const thaiRegDate = (document.getElementById("thai-date").value || "").trim();
+        if (!regDate && thaiRegDate) {
+            const m = thaiRegDate.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+            if (m) {
+                let d = parseInt(m[1], 10);
+                let mo = parseInt(m[2], 10);
+                let yr = parseInt(m[3], 10);
+                if (yr > 2400) yr -= 543;
+                regDate = `${yr}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                document.getElementById("ad-date").value = regDate;
+            }
+        }
+        if (!regDate) {
+            const today = new Date();
+            regDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            document.getElementById("ad-date").value = regDate;
+        }
+
+        if (chkSameAddress && chkSameAddress.checked) {
+            syncAddressValues();
+        }
 
         const data = {
             Idcustomer: Idcustomer,
             prefix: document.getElementById("prefix").value,
             name: document.getElementById("name").value,
             lastname: document.getElementById("lastname").value,
+            birthday: bDay || null,
+            age: bAge ? parseInt(bAge, 10) : null,
             Idcard: document.getElementById("Idcard").value,
             Tel: document.getElementById("Tel").value,
             addrNo: document.getElementById("addrNo").value,
@@ -447,10 +1021,20 @@ form.addEventListener("submit", async (e) => {
             district: document.getElementById("district").value,
             province: document.getElementById("province").value,
             zipCode: document.getElementById("zipCode").value,
-            date: document.getElementById("ad-date").value,
+            cur_addrNo: document.getElementById("cur_addrNo") ? document.getElementById("cur_addrNo").value : "",
+            cur_moo: document.getElementById("cur_moo") ? document.getElementById("cur_moo").value : "",
+            cur_locality: document.getElementById("cur_locality") ? document.getElementById("cur_locality").value : "",
+            cur_district: document.getElementById("cur_district") ? document.getElementById("cur_district").value : "",
+            cur_province: document.getElementById("cur_province") ? document.getElementById("cur_province").value : "",
+            cur_zipCode: document.getElementById("cur_zipCode") ? document.getElementById("cur_zipCode").value : "",
+            date: regDate,
             free: document.getElementById("free").value,
             status: 1,
-            beneficiaries: beneficiaries
+            beneficiary: beneficiaryStr,
+            beneficiaries: beneficiaries,
+            userid: currentUser,  // ผู้บันทึกข้อมูล
+            useredit: "",         // ผู้แก้ไขข้อมูล (ยังไม่แก้ไข)
+            cusid: sessionStorage.getItem("dk_constant_cusid") || ""
         };
 
         const response = await fetch(`${API_BASE}/savecustomer`, {
@@ -464,10 +1048,17 @@ form.addEventListener("submit", async (e) => {
         const result = await response.json();
         if (result.error === "0") {
             alert("✅ บันทึกข้อมูลสมาชิกเรียบร้อย");
+            window.location.reload();
+            return;
             // เคลียร์ฟอร์ม
             document.getElementById("prefix").value = "";
             document.getElementById("name").value = "";
             document.getElementById("lastname").value = "";
+            document.getElementById("thai-birthday").value = "";
+            document.getElementById("ad-birthday").value = "";
+            document.getElementById("age").value = "";
+            if (btnClearBirthday) btnClearBirthday.style.display = "none";
+            if (fpBirthday) fpBirthday.clear();
             document.getElementById("Idcard").value = "";
             document.getElementById("Tel").value = "";
             document.getElementById("addrNo").value = "";

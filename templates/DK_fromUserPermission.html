@@ -1,0 +1,850 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}กำหนดสิทธิ์ผู้ใช้งาน (User Permission){% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='permission.css') }}">
+
+<div class="permission-wrap">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-nav">
+        <a href="/DK_Home">HOME</a> \ <span>กำหนดสิทธิ์ผู้ใช้งาน</span>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="perm-action-bar">
+        <h2>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#273B4A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            กำหนดสิทธิ์ผู้ใช้งาน (User Permission & ทะเบียนพนักงาน)
+        </h2>
+        <div class="perm-btn-group">
+            <button type="button" class="btn-save-perm" id="btnSavePermission" onclick="saveUserPermission()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                <span id="btnSaveText">💾 บันทึก / Update ฐานข้อมูล</span>
+            </button>
+            <button type="button" class="btn-cancel-perm" onclick="resetForm()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <polyline points="23 20 23 14 17 14"></polyline>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                </svg>
+                <span>ล้างฟอร์ม</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Two-Column Layout -->
+    <div class="perm-grid">
+        
+        <!-- Left Column: Form -->
+        <div class="perm-card">
+            <div class="card-title">
+                <span id="formCardHeader">➕ บันทึก / กำหนดสิทธิ์ใหม่</span>
+                <span id="editModeBadge" style="display:none; font-size:12px; background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:10px;">กำลังแก้ไข</span>
+            </div>
+
+            <form id="permissionForm" onsubmit="event.preventDefault(); saveUserPermission();">
+                <input type="hidden" id="userId" value="">
+                <input type="hidden" id="idlogin" value="">
+                <input type="hidden" id="recordUserId" value="">
+                <input type="hidden" id="recordUserEdit" value="">
+
+
+                <!-- Row 1: Username & Password -->
+                <div class="form-row-2col">
+                    <div class="form-field">
+                        <label for="username">ชื่อผู้ใช้ (Username) <span class="req">*</span></label>
+                        <input type="text" id="username" placeholder="เช่น user01" required autocomplete="off">
+                    </div>
+                    <div class="form-field">
+                        <label for="password">รหัสผ่าน (Password) <span class="req">*</span></label>
+                        <input type="password" id="password" placeholder="ป้อนรหัสผ่าน" required>
+                    </div>
+                </div>
+
+                <!-- Row 2: Full Name -->
+                <div class="form-field">
+                    <label for="fullname">ชื่อ - นามสกุล ผู้ใช้งาน <span class="req">*</span></label>
+                    <input type="text" id="fullname" placeholder="เช่น นายสมศักดิ์ รักดี" required>
+                </div>
+
+                <!-- Row 3: ทะเบียนพนักงาน (Employee ID) -->
+                <div class="form-field">
+                    <label for="empid">
+                        ทะเบียนพนักงาน
+                        <span style="font-weight:normal; font-size:11.5px; color:#64748b;">(ผูกบัญชีเข้ากับพนักงาน)</span>
+                    </label>
+                    <div class="empid-input-group">
+                        <input type="text" id="empid" placeholder="รหัส เช่น 001 หรือกดเลือก" oninput="handleEmpidInput(this.value)">
+                        <button type="button" class="btn-search-emp" onclick="openEmployeeModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            เลือก
+                        </button>
+                    </div>
+
+                    <!-- Employee info chip when Empid is selected -->
+                    <div id="empInfoChip" class="emp-info-chip" style="margin-top:5px; padding:4px 8px;">
+                        <div style="font-size:12px;">
+                            <span>👔 </span>
+                            <strong id="empInfoName">-</strong>
+                            <span id="empInfoPosition" style="font-size:11px; color:#15803d; margin-left:6px; background:#dcfce7; padding:1px 5px; border-radius:4px;"></span>
+                        </div>
+                        <span style="cursor:pointer; color:#ef4444; font-size:11px;" onclick="clearEmpid()">✕ ล้าง</span>
+                    </div>
+                </div>
+
+                <!-- Row 4: Role & Status -->
+                <div class="form-row-2col">
+                    <div class="form-field">
+                        <label for="role">ระดับบทบาท (Role) <span class="req">*</span></label>
+                        <select id="role" onchange="handleRoleChange(this.value)" required>
+                            <option value="CEO">👔 CEO</option>
+                            <option value="admin">👑 admin</option>
+                            <option value="user" selected>👤 user</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="status">สถานะ</label>
+                        <select id="status">
+                            <option value="active">🟢 ปกติ (Active)</option>
+                            <option value="inactive">🔴 ระงับ (Inactive)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Accordion: Detailed Menu Permissions -->
+                <div class="perm-accordion-box">
+                    <div class="perm-accordion-toggle" onclick="togglePermAccordion()">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span>⚙️</span>
+                            <span style="font-weight:600; font-size:12.5px; color:#334155;">สิทธิ์การเข้าถึงเมนูระบบ</span>
+                            <span id="permSummaryBadge" class="perm-summary-badge">สิทธิ์ตาม Role</span>
+                        </div>
+                        <span id="permAccordionIcon" style="font-size:11.5px; color:#0284c7; font-weight:500;">▼ ขยาย/ปรับแต่ง</span>
+                    </div>
+                    <div id="permAccordionContent" class="perm-accordion-content" style="display:none;">
+                        <!-- Group 1: ค่าคงที่ -->
+                        <div class="perm-checkbox-group">
+                            <div class="perm-group-header">
+                                <span>1. กลุ่มค่าคงที่</span>
+                                <span class="select-all-link" onclick="toggleGroupCheck('group_const', true)">เลือกทั้งหมด</span>
+                            </div>
+                            <div class="perm-items-grid group_const">
+                                <label class="checkbox-label"><input type="checkbox" value="running" onchange="updatePermSummaryBadge()"> เลขที่เอกสาร</label>
+                                <label class="checkbox-label"><input type="checkbox" value="customer" checked onchange="updatePermSummaryBadge()"> ทะเบียนสมาชิก</label>
+                                <label class="checkbox-label"><input type="checkbox" value="employee" checked onchange="updatePermSummaryBadge()"> ทะเบียนพนักงาน</label>
+                                <label class="checkbox-label"><input type="checkbox" value="beneficiary" checked onchange="updatePermSummaryBadge()"> ทะเบียนผู้รับผลประโยชน์</label>
+                            </div>
+                        </div>
+
+                        <!-- Group 2: เมนูทำรายการ -->
+                        <div class="perm-checkbox-group">
+                            <div class="perm-group-header">
+                                <span>2. กลุ่มบันทึกรายการ</span>
+                                <span class="select-all-link" onclick="toggleGroupCheck('group_trans', true)">เลือกทั้งหมด</span>
+                            </div>
+                            <div class="perm-items-grid group_trans">
+                                <label class="checkbox-label"><input type="checkbox" value="deceased" checked onchange="updatePermSummaryBadge()"> สมาชิกลาออก/เสียชีวิต</label>
+                                <label class="checkbox-label"><input type="checkbox" value="transaction" checked onchange="updatePermSummaryBadge()"> บันทึกตั้งสมาชิกเสียชีวิต</label>
+                                <label class="checkbox-label"><input type="checkbox" value="movement" checked onchange="updatePermSummaryBadge()"> บันทึกรายการเก็บเงิน</label>
+                            </div>
+                        </div>
+
+                        <!-- Group 3: รายงาน -->
+                        <div class="perm-checkbox-group">
+                            <div class="perm-group-header">
+                                <span>3. กลุ่มรายงาน</span>
+                                <span class="select-all-link" onclick="toggleGroupCheck('group_report', true)">เลือกทั้งหมด</span>
+                            </div>
+                            <div class="perm-items-grid group_report">
+                                <label class="checkbox-label"><input type="checkbox" value="view_customer" checked onchange="updatePermSummaryBadge()"> รายงานทะเบียนสมาชิก</label>
+                                <label class="checkbox-label"><input type="checkbox" value="view_employee" checked onchange="updatePermSummaryBadge()"> รายงานทะเบียนพนักงาน</label>
+                                <label class="checkbox-label"><input type="checkbox" value="view_movement" checked onchange="updatePermSummaryBadge()"> รายงานการรับชำระเงิน</label>
+                                <label class="checkbox-label"><input type="checkbox" value="view_transaction" checked onchange="updatePermSummaryBadge()"> รายงานยอดค้างตามรายศพ</label>
+                                <label class="checkbox-label"><input type="checkbox" value="view_person" checked onchange="updatePermSummaryBadge()"> รายงานข้อมูลบุคคล</label>
+                            </div>
+                        </div>
+
+                        <!-- Group 4: APPS & การตั้งค่า -->
+                        <div class="perm-checkbox-group">
+                            <div class="perm-group-header">
+                                <span>4. กลุ่มระบบ & APPS</span>
+                                <span class="select-all-link" onclick="toggleGroupCheck('group_apps', true)">เลือกทั้งหมด</span>
+                            </div>
+                            <div class="perm-items-grid group_apps">
+                                <label class="checkbox-label"><input type="checkbox" value="permission" onchange="updatePermSummaryBadge()"> กำหนดสิทธิ์ (Permission)</label>
+                                <label class="checkbox-label"><input type="checkbox" value="template" onchange="updatePermSummaryBadge()"> แม่แบบหน้าจอ</label>
+                            </div>
+                        </div>
+
+                        <!-- Group 5: บัญชี (GL) -->
+                        <div class="perm-checkbox-group">
+                            <div class="perm-group-header">
+                                <span>5. กลุ่มระบบบัญชี (GL)</span>
+                                <span class="select-all-link" onclick="toggleGroupCheck('group_gl', true)">เลือกทั้งหมด</span>
+                            </div>
+                            <div class="perm-items-grid group_gl">
+                                <label class="checkbox-label"><input type="checkbox" value="GLPeriod" checked onchange="updatePermSummaryBadge()"> รอบบัญชี</label>
+                                <label class="checkbox-label"><input type="checkbox" value="GLAccountChart" checked onchange="updatePermSummaryBadge()"> ผังบัญชี</label>
+                                <label class="checkbox-label"><input type="checkbox" value="GLBook" checked onchange="updatePermSummaryBadge()"> สมุดบัญชี</label>
+                                <label class="checkbox-label"><input type="checkbox" value="GLtran" checked onchange="updatePermSummaryBadge()"> ข้อมูลรายวัน</label>
+                                <label class="checkbox-label"><input type="checkbox" value="GLtranEdit" checked onchange="updatePermSummaryBadge()"> รายการบัญชี</label>
+                                <label class="checkbox-label"><input type="checkbox" value="GLPattern" checked onchange="updatePermSummaryBadge()"> รูปแบบบัญชี</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Right Column: User & Permissions Table -->
+        <div class="perm-card">
+            <div class="card-title">
+                <span>📋 รายชื่อผู้ใช้งานและสิทธิ์ในระบบ</span>
+                <span id="userCountBadge" style="font-size:13px; font-weight:normal; color:#64748b;">กำลังโหลด...</span>
+            </div>
+
+            <!-- Table Top Search & Filter -->
+            <div class="table-filter-bar">
+                <div class="search-input-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchUser" placeholder="ค้นหา Username, ชื่อ, ทะเบียนพนักงาน..." oninput="filterUserTable(this.value)">
+                </div>
+                <div style="font-size:13px; color:#64748b;">
+                    💡 กด <strong>✏️ แก้ไข</strong> เพื่อดึงข้อมูลมา Update ฐานข้อมูล
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="perm-table-container">
+                <table class="perm-table" id="userTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 45px; text-align:center;">ลำดับ</th>
+                            <th>รหัส (idlogin)</th>
+                            <th>Username</th>
+                            <th>ชื่อ - นามสกุล</th>
+                            <th>ทะเบียนพนักงาน</th>
+                            <th>บทบาท (Role)</th>
+                            <th>สถานะ</th>
+                            <th style="width: 140px; text-align:center; white-space:nowrap;">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">
+                                กำลังโหลดข้อมูลผู้ใช้งาน...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Database Info Note -->
+            <div style="margin-top:16px; padding:12px 14px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; font-size:13px; color:#166534; line-height:1.6;">
+                <strong>📌 หมายเหตุการ Update ฐานข้อมูล:</strong><br>
+                เมื่อบันทึกข้อมูล ระบบจะอัปเดตฟิลด์ <code>empid</code> (ทะเบียนพนักงาน), <code>userid</code> (ผู้บันทึก) และ <code>useredit</code> (ผู้แก้ไขล่าสุด) ลงในฐานข้อมูล เพื่อการตรวจสอบย้อนหลัง (Audit Log)
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal: ค้นหาและเลือกทะเบียนพนักงาน -->
+<div id="employeeModal" class="modal-overlay" onclick="handleModalOverlayClick(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>👔 ค้นหาและเลือกทะเบียนพนักงาน</h3>
+            <button type="button" class="btn-modal-close" onclick="closeEmployeeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-search-box">
+                <input type="text" id="modalSearchInput" placeholder="พิมพ์ค้นหา รหัสพนักงาน, ชื่อ, นามสกุล, ตำแหน่ง..." oninput="filterEmployeeModal(this.value)">
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>ทะเบียนพนักงาน</th>
+                            <th>ชื่อ - นามสกุล</th>
+                            <th>ตำแหน่ง</th>
+                            <th>เลขบัตรประชาชน</th>
+                            <th style="text-align:center;">เลือก</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalEmployeeTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">กำลังดึงข้อมูลพนักงาน...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Integration -->
+<script type="module">
+    import { API_BASE } from "/static/js/config.js";
+
+    // Access guard: only admin can use this page
+    (function checkAdminAccess() {
+        try {
+            const saved = sessionStorage.getItem("dk_logged_user");
+            if (!saved) {
+                alert("กรุณาเข้าสู่ระบบก่อนใช้งาน");
+                window.location.replace("/login");
+                return;
+            }
+            const u = JSON.parse(saved);
+            const role = (u.role || "").toLowerCase();
+            const perms = Array.isArray(u.permissions) ? u.permissions : [];
+            if (role !== "admin" && !perms.includes("permission")) {
+                alert("⚠️ คุณไม่มีสิทธิ์เข้าถึงหน้ากำหนดสิทธิ์ผู้ใช้งาน (เฉพาะ Admin เท่านั้น)");
+                window.location.replace("/DK_Home");
+            }
+        } catch(e) {}
+    })();
+
+    // Application state
+    let usersList = [];
+    let employeesList = [];
+
+    window.addEventListener("DOMContentLoaded", () => {
+        const currentUser = getCurrentUser();
+        const disp = document.getElementById("displayUserId");
+        if (disp) disp.textContent = `${currentUser} (อัตโนมัติ)`;
+        loadRoles();
+        loadUsers();
+        loadEmployees();
+        updatePermSummaryBadge();
+    });
+
+    // 0. Load Roles from Database (bk_role)
+    async function loadRoles() {
+        try {
+            const res = await fetch("/api/roles");
+            if (res.ok) {
+                const data = await res.json();
+                const roles = data.data || [];
+                const roleSelect = document.getElementById("role");
+                if (roles.length > 0 && roleSelect) {
+                    const currentVal = roleSelect.value;
+                    roleSelect.innerHTML = roles.map(r => 
+                        `<option value="${escapeHtml(r.role_code)}">${escapeHtml(r.role_name || r.role_code)}</option>`
+                    ).join("");
+                    if (currentVal && roles.some(r => r.role_code === currentVal)) {
+                        roleSelect.value = currentVal;
+                    } else {
+                        roleSelect.value = "user";
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("Could not load roles from database:", e);
+        }
+    }
+
+    // 1. Load All Users & Permissions
+    async function loadUsers() {
+        const tbody = document.getElementById("userTableBody");
+        const countBadge = document.getElementById("userCountBadge");
+        try {
+            const res = await fetch("/api/user-permissions");
+            if (res.ok) {
+                const data = await res.json();
+                usersList = data.data || [];
+            } else {
+                throw new Error("API returned status " + res.status);
+            }
+        } catch (err) {
+            console.warn("Using local storage fallback for users:", err);
+            const saved = localStorage.getItem("dk_user_permissions");
+            usersList = saved ? JSON.parse(saved) : getDefaultUsers();
+        }
+
+        renderUserTable(usersList);
+        countBadge.textContent = `ทั้งหมด ${usersList.length} รายการ`;
+    }
+
+    // 2. Load Employees from API
+    async function loadEmployees() {
+        try {
+            const res = await fetch(`${API_BASE}/employees`);
+            if (res.ok) {
+                const data = await res.json();
+                employeesList = data.results || (Array.isArray(data) ? data : []);
+            }
+        } catch (err) {
+            console.warn("Could not fetch employees from API_BASE:", err);
+            employeesList = [
+                { IdEmployee: "001", prefix: "นาย", name: "สมเกียรติ", lastname: "มั่นคง", position: "ผู้จัดการ", Idcard: "1100500123456" },
+                { IdEmployee: "002", prefix: "นางสาว", name: "เพ็ญศรี", lastname: "ปฏิบัติงาน", position: "เจ้าหน้าที่การเงิน", Idcard: "3100600987654" },
+                { IdEmployee: "003", prefix: "นาย", name: "วิชัย", lastname: "สุขสมบูรณ์", position: "เจ้าหน้าที่ธุรการ", Idcard: "1103700234567" }
+            ];
+        }
+    }
+
+    // Default seed users if none exist
+    function getDefaultUsers() {
+        return [
+            {
+                id: "1",
+                username: "admin",
+                password: "password123",
+                fullname: "ผู้ดูแลระบบสูงสุด",
+                empid: "001",
+                role: "admin",
+                status: "active",
+                permissions: ["running", "customer", "employee", "beneficiary", "deceased", "transaction", "movement", "view_customer", "view_employee", "view_movement", "view_transaction", "view_person", "permission", "template"],
+                userid: "system",
+                useredit: ""
+            },
+            {
+                id: "2",
+                username: "staff01",
+                password: "password123",
+                fullname: "นางสาวเพ็ญศรี ปฏิบัติงาน",
+                empid: "002",
+                role: "staff",
+                status: "active",
+                permissions: ["customer", "employee", "beneficiary", "deceased", "transaction", "movement", "view_customer", "view_employee", "view_movement", "view_transaction", "view_person"],
+                userid: "admin",
+                useredit: ""
+            },
+            {
+                id: "3",
+                username: "user01",
+                password: "password123",
+                fullname: "นายวิชัย สุขสมบูรณ์",
+                empid: "003",
+                role: "member",
+                status: "active",
+                permissions: ["view_movement", "view_transaction"],
+                userid: "admin",
+                useredit: "staff01"
+            }
+        ];
+    }
+
+    // Render User Table
+    window.renderUserTable = function(list) {
+        const tbody = document.getElementById("userTableBody");
+        if (!list || list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">ไม่พบข้อมูลผู้ใช้งาน</td></tr>`;
+            return;
+        }
+
+        let html = "";
+        list.forEach((u, idx) => {
+            const idloginVal = u.idlogin || u.id || "-";
+            const empVal = u.empid || u.cusid || "";
+            const empidBadge = empVal 
+                ? `<span class="badge-empid">${escapeHtml(empVal)}</span>` 
+                : `<span style="color:#94a3b8; font-size:12px;">- ไม่ได้ผูก -</span>`;
+            
+            let roleBadge = `<span class="badge-role badge-role-user">👤 User</span>`;
+            if (u.role === "CEO") {
+                roleBadge = `<span class="badge-role badge-role-ceo">👔 CEO</span>`;
+            } else if (u.role === "admin") {
+                roleBadge = `<span class="badge-role badge-role-admin">👑 Admin</span>`;
+            } else if (u.role === "user" || u.role === "staff" || u.role === "member") {
+                roleBadge = `<span class="badge-role badge-role-user">👤 User</span>`;
+            }
+
+            const statusBadge = u.status === "active" 
+                ? `<span class="badge-status-active">🟢 ปกติ</span>` 
+                : `<span class="badge-status-inactive">🔴 ระงับ</span>`;
+
+            html += `
+                <tr>
+                    <td style="text-align:center; color:#64748b;">${idx + 1}</td>
+                    <td><strong class="badge-empid" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">${escapeHtml(idloginVal)}</strong></td>
+                    <td><strong>${escapeHtml(u.username)}</strong></td>
+                    <td>${escapeHtml(u.fullname || "-")}</td>
+                    <td>${empidBadge}</td>
+                    <td>${roleBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td style="text-align:center; white-space:nowrap;">
+                        <div class="table-actions">
+                            <button type="button" class="btn-table-edit" onclick="editUser('${u.id}')">✏️ แก้ไข</button>
+                            <button type="button" class="btn-table-delete" onclick="deleteUser('${u.id}')">🗑️ ลบ</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    };
+
+    // Filter Users Table
+    window.filterUserTable = function(keyword) {
+        const q = keyword.trim().toLowerCase();
+        if (!q) {
+            renderUserTable(usersList);
+            return;
+        }
+        const filtered = usersList.filter(u => {
+            const empVal = (u.empid || u.cusid || "").toLowerCase();
+            const idloginVal = (u.idlogin || "").toLowerCase();
+            return (u.username && u.username.toLowerCase().includes(q)) ||
+                   (u.fullname && u.fullname.toLowerCase().includes(q)) ||
+                   idloginVal.includes(q) ||
+                   empVal.includes(q);
+        });
+        renderUserTable(filtered);
+    };
+
+    // Toggle accordion for permissions
+    window.togglePermAccordion = function() {
+        const content = document.getElementById("permAccordionContent");
+        const icon = document.getElementById("permAccordionIcon");
+        if (!content) return;
+        if (content.style.display === "none" || !content.style.display) {
+            content.style.display = "block";
+            if (icon) icon.textContent = "▲ ซ่อน";
+        } else {
+            content.style.display = "none";
+            if (icon) icon.textContent = "▼ ขยาย/ปรับแต่ง";
+        }
+    };
+
+    window.updatePermSummaryBadge = function() {
+        const checkedCount = document.querySelectorAll(".perm-items-grid input[type='checkbox']:checked").length;
+        const roleEl = document.getElementById("role");
+        const role = roleEl ? roleEl.value : "";
+        const badge = document.getElementById("permSummaryBadge");
+        if (badge) {
+            badge.textContent = `${checkedCount} สิทธิ์ (${role})`;
+        }
+    };
+
+    // Role Change auto-select permissions
+    window.handleRoleChange = function(role) {
+        const allCheckboxes = document.querySelectorAll(".perm-items-grid input[type='checkbox']");
+        if (role === "admin") {
+            // admin: สิทธิ์เต็มทุกเมนู
+            allCheckboxes.forEach(cb => cb.checked = true);
+        } else if (role === "CEO") {
+            // CEO: สิทธิ์ดูรายงานทั้งหมด ภาพรวม การเงิน และเมนูหลัก (ยกเว้นกำหนดสิทธิ์ระบบ)
+            allCheckboxes.forEach(cb => {
+                cb.checked = (cb.value !== "permission");
+            });
+        } else if (role === "user" || role === "staff") {
+            // user: สิทธิ์บันทึกข้อมูลและดูรายงาน
+            allCheckboxes.forEach(cb => {
+                cb.checked = (cb.value !== "permission" && cb.value !== "running" && cb.value !== "template");
+            });
+        } else if (role === "member") {
+            allCheckboxes.forEach(cb => {
+                cb.checked = (cb.value === "view_movement" || cb.value === "view_transaction");
+            });
+        }
+        updatePermSummaryBadge();
+    };
+
+    // Toggle group checkboxes
+    window.toggleGroupCheck = function(groupClass, state) {
+        const boxes = document.querySelectorAll(`.${groupClass} input[type="checkbox"]`);
+        boxes.forEach(b => b.checked = state);
+        updatePermSummaryBadge();
+    };
+
+    // Empid manual input check
+    window.handleEmpidInput = function(val) {
+        const id = val.trim();
+        const chip = document.getElementById("empInfoChip");
+        const found = employeesList.find(e => String(e.IdEmployee).trim() === id);
+        if (found) {
+            const empName = `${found.prefix || ''}${found.name || ''} ${found.lastname || ''}`.trim();
+            document.getElementById("empInfoName").textContent = empName;
+            document.getElementById("empInfoPosition").textContent = found.position || "พนักงาน";
+            chip.classList.add("show");
+            const fnInput = document.getElementById("fullname");
+            fnInput.value = empName;
+            fnInput.style.transition = "background-color 0.4s ease";
+            fnInput.style.backgroundColor = "#dcfce7";
+            setTimeout(() => { fnInput.style.backgroundColor = ""; }, 500);
+        } else {
+            chip.classList.remove("show");
+        }
+    };
+
+    window.clearEmpid = function() {
+        document.getElementById("empid").value = "";
+        document.getElementById("empInfoChip").classList.remove("show");
+        document.getElementById("fullname").value = "";
+    };
+
+    // Employee Search Modal logic
+    window.openEmployeeModal = function() {
+        document.getElementById("employeeModal").classList.add("active");
+        renderEmployeeModalTable(employeesList);
+    };
+
+    window.closeEmployeeModal = function() {
+        document.getElementById("employeeModal").classList.remove("active");
+    };
+
+    window.handleModalOverlayClick = function(e) {
+        if (e.target.id === "employeeModal") {
+            closeEmployeeModal();
+        }
+    };
+
+    window.renderEmployeeModalTable = function(list) {
+        const tbody = document.getElementById("modalEmployeeTableBody");
+        if (!list || list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">ไม่พบข้อมูลทะเบียนพนักงาน</td></tr>`;
+            return;
+        }
+
+        let html = "";
+        list.slice(0, 50).forEach(e => {
+            const fullName = `${e.prefix || ''}${e.name || ''} ${e.lastname || ''}`.trim();
+            html += `
+                <tr onclick="selectEmployee('${e.IdEmployee}', '${escapeHtml(fullName)}', '${escapeHtml(e.position || '')}')">
+                    <td><strong class="badge-empid">${e.IdEmployee}</strong></td>
+                    <td>${escapeHtml(fullName)}</td>
+                    <td>${escapeHtml(e.position || '-')}</td>
+                    <td>${e.Idcard || '-'}</td>
+                    <td style="text-align:center;">
+                        <button type="button" class="btn-search-emp" style="padding:4px 10px; font-size:12px;" onclick="selectEmployee('${e.IdEmployee}', '${escapeHtml(fullName)}', '${escapeHtml(e.position || '')}'); event.stopPropagation();">เลือก</button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    };
+
+    window.filterEmployeeModal = function(keyword) {
+        const q = keyword.trim().toLowerCase();
+        if (!q) {
+            renderEmployeeModalTable(employeesList);
+            return;
+        }
+        const filtered = employeesList.filter(e => 
+            (e.IdEmployee && String(e.IdEmployee).toLowerCase().includes(q)) ||
+            (e.name && e.name.toLowerCase().includes(q)) ||
+            (e.lastname && e.lastname.toLowerCase().includes(q)) ||
+            (e.position && e.position.toLowerCase().includes(q)) ||
+            (e.Idcard && String(e.Idcard).includes(q))
+        );
+        renderEmployeeModalTable(filtered);
+    };
+
+    window.selectEmployee = function(id, name, position) {
+        document.getElementById("empid").value = id;
+        document.getElementById("empInfoName").textContent = name;
+        document.getElementById("empInfoPosition").textContent = position || "พนักงาน";
+        document.getElementById("empInfoChip").classList.add("show");
+        const fnInput = document.getElementById("fullname");
+        fnInput.value = name;
+        fnInput.style.transition = "background-color 0.4s ease";
+        fnInput.style.backgroundColor = "#dcfce7";
+        setTimeout(() => { fnInput.style.backgroundColor = ""; }, 500);
+        closeEmployeeModal();
+    };
+
+    function getCurrentUser() {
+        try {
+            const saved = sessionStorage.getItem("dk_logged_user");
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                return parsed.empid || parsed.username || "001";
+            }
+        } catch (e) {}
+        return "001";
+    }
+
+    // Edit User - Load user details to form for updating
+    window.editUser = function(id) {
+        const u = usersList.find(item => String(item.id) === String(id));
+        if (!u) return;
+
+        document.getElementById("userId").value = u.id;
+        document.getElementById("idlogin").value = u.idlogin || u.id || "";
+        document.getElementById("recordUserId").value = u.userid || "";
+        document.getElementById("recordUserEdit").value = u.useredit || "";
+        const dispUserId = document.getElementById("displayUserId");
+        if (dispUserId) dispUserId.textContent = u.userid || "-";
+        const dispUserEdit = document.getElementById("displayUserEdit");
+        if (dispUserEdit) {
+            dispUserEdit.textContent = u.useredit 
+                ? `${u.useredit} (${new Date(u.updated_at || Date.now()).toLocaleDateString('th-TH')})` 
+                : "- ยังไม่เคยแก้ไข -";
+        }
+
+        document.getElementById("username").value = u.username;
+        document.getElementById("password").value = u.password || "";
+        document.getElementById("fullname").value = u.fullname || "";
+        const empVal = u.empid || u.cusid || "";
+        document.getElementById("empid").value = empVal;
+        document.getElementById("role").value = u.role || "staff";
+        document.getElementById("status").value = u.status || "active";
+
+        handleEmpidInput(empVal);
+
+        // Set permissions checkboxes
+        const perms = u.permissions || [];
+        document.querySelectorAll(".perm-items-grid input[type='checkbox']").forEach(cb => {
+            cb.checked = perms.includes(cb.value);
+        });
+        updatePermSummaryBadge();
+
+        // Update form state indicators
+        document.getElementById("formCardHeader").textContent = `✏️ แก้ไขสิทธิ์ผู้ใช้งาน: ${u.username} (รหัส: ${u.idlogin || u.id})`;
+        document.getElementById("editModeBadge").style.display = "inline-block";
+        document.getElementById("btnSaveText").textContent = "💾 Update ฐานข้อมูล";
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Reset Form
+    window.resetForm = function() {
+        document.getElementById("userId").value = "";
+        document.getElementById("idlogin").value = "";
+        document.getElementById("recordUserId").value = "";
+        document.getElementById("recordUserEdit").value = "";
+        const dispUserId = document.getElementById("displayUserId");
+        if (dispUserId) dispUserId.textContent = `${getCurrentUser()} (อัตโนมัติ)`;
+        const dispUserEdit = document.getElementById("displayUserEdit");
+        if (dispUserEdit) dispUserEdit.textContent = "- ยังไม่เคยแก้ไข -";
+
+        document.getElementById("permissionForm").reset();
+        document.getElementById("empInfoChip").classList.remove("show");
+        document.getElementById("formCardHeader").textContent = "➕ บันทึก / กำหนดสิทธิ์ใหม่";
+        document.getElementById("editModeBadge").style.display = "none";
+        document.getElementById("btnSaveText").textContent = "💾 บันทึก / Update ฐานข้อมูล";
+        
+        const permContent = document.getElementById("permAccordionContent");
+        if (permContent) permContent.style.display = "none";
+        const icon = document.getElementById("permAccordionIcon");
+        if (icon) icon.textContent = "▼ ขยาย/ปรับแต่ง";
+
+        handleRoleChange("user");
+    };
+
+    // Save or Update User with Empid & Audit fields (userid, useredit)
+    window.saveUserPermission = async function() {
+        const id = document.getElementById("userId").value;
+        const idlogin = document.getElementById("idlogin").value.trim();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const fullname = document.getElementById("fullname").value.trim();
+        const empid = document.getElementById("empid").value.trim();
+        const role = document.getElementById("role").value;
+        const status = document.getElementById("status").value;
+
+        if (!username || !password || !fullname) {
+            alert("กรุณากรอก Username, Password และ ชื่อ-นามสกุล ให้ครบถ้วน");
+            return;
+        }
+
+        // Collect checked permissions
+        const permissions = [];
+        document.querySelectorAll(".perm-items-grid input[type='checkbox']:checked").forEach(cb => {
+            permissions.push(cb.value);
+        });
+
+        const currentUser = getCurrentUser();
+        const existingUserId = document.getElementById("recordUserId").value.trim();
+        const recordUserId = id ? (existingUserId || currentUser) : currentUser;
+        const recordUserEdit = id ? currentUser : "";
+
+        const constantCusid = sessionStorage.getItem("dk_constant_cusid") || "";
+        const payload = {
+            id: id || Date.now().toString(),
+            idlogin: idlogin, // <<--- รหัสล็อกอินผู้ใช้
+            username: username,
+            password: password,
+            fullname: fullname,
+            empid: empid, // <<--- ทะเบียนพนักงาน
+            cusid: constantCusid || empid,
+            role: role,
+            status: status,
+            permissions: permissions,
+            userid: recordUserId,       // บันทึกโดย
+            useredit: recordUserEdit,   // แก้ไขโดย
+            current_operator: currentUser,
+            updated_at: new Date().toISOString()
+        };
+
+        const btnSave = document.getElementById("btnSavePermission");
+        btnSave.disabled = true;
+        btnSave.innerHTML = `<span>⏳ กำลังบันทึกข้อมูล...</span>`;
+
+        try {
+            // 1. Post to Flask API
+            const res = await fetch("/api/user-permissions/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            // 2. Also attempt update to Backend FastAPI if available
+            try {
+                await fetch(`${API_BASE}/updateuser_permission`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } catch (backendErr) {
+                // Secondary backend may be offline, ignore
+            }
+
+            alert("✅ บันทึกและ Update ฐานข้อมูลเรียบร้อยแล้ว!");
+            window.location.reload();
+        } catch (err) {
+            console.error("Save error:", err);
+            // Fallback to local storage update
+            if (id) {
+                const idx = usersList.findIndex(u => String(u.id) === String(id));
+                if (idx >= 0) usersList[idx] = payload;
+            } else {
+                usersList.push(payload);
+            }
+            localStorage.setItem("dk_user_permissions", JSON.stringify(usersList));
+            alert("✅ บันทึกข้อมูลสำเร็จ");
+            window.location.reload();
+        } finally {
+            btnSave.disabled = false;
+            btnSave.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span id="btnSaveText">💾 บันทึก / Update ฐานข้อมูล</span>`;
+        }
+    };
+
+    // Delete User
+    window.deleteUser = async function(id) {
+        if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้งานนี้ออกจากตาราง login?")) return;
+
+        try {
+            await fetch(`/api/user-permissions/${id}`, { method: "DELETE" });
+        } catch (e) {
+            console.warn("Flask delete API failed:", e);
+        }
+
+        try {
+            await fetch(`${API_BASE}/delete_user_permission/${id}`, { method: "DELETE" });
+        } catch (e) {}
+
+        await loadUsers();
+        alert("ลบผู้ใช้งานออกจากฐานข้อมูลเรียบร้อยแล้ว");
+        window.location.reload();
+    };
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+</script>
+{% endblock %}

@@ -392,6 +392,8 @@
                     <div class="tran-card-body">
                         <!-- Banner for Beneficiary -->
                         <div id="beneficiaryOwnerTag" style="display: none;"></div>
+                        <input type="hidden" id="deceased_owner_id" name="deceased_owner_id" value="">
+                        <input type="hidden" id="deceased_record_type" name="deceased_record_type" value="">
 
                         <div class="tran-form-row">
                             <div class="tran-field">
@@ -477,6 +479,12 @@
                     </div>
                 </div>
             </div>
+ 
+            <!-- Notice: สมาชิกที่ได้รับการยกเว้นไม่เรียกเก็บ -->
+            <div id="excludedOwnerNotice" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 16px; margin-bottom: 14px; font-size: 13.5px; color: #1e40af; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">ℹ️</span>
+                <span id="excludedOwnerNoticeText"></span>
+            </div>
 
             <!-- Card 3: ตารางเก็บเงิน -->
             <div class="tran-table-card">
@@ -550,8 +558,15 @@
                 </div>
 
                 <!-- SEARCH BAR -->
-                <div class="search-wrapper" style="width: 100%; margin-bottom: 12px;">
-                    <input type="text" id="popupSearchInput" class="search-input" placeholder="🔍 ค้นหารหัส, ชื่อ-นามสกุล, เลขบัตรประชาชน...">
+                <div class="popup-search-box">
+                    <div class="popup-search-wrapper">
+                        <svg class="popup-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="popupSearchInput" class="popup-search-input" placeholder="ค้นหารหัส, ชื่อ-นามสกุล, หรือเลขประจำตัวประชาชน..." autocomplete="off">
+                        <button type="button" class="popup-search-clear" id="popupSearchClear" style="display: none;" title="ล้างข้อความ">✕</button>
+                    </div>
                 </div>
 
                 <!-- TABLE CONTAINER -->
@@ -708,13 +723,46 @@ let isManualDocMode = false;
 
 async function loadRunning() {
     try {
-        const response = await fetch(`${API_BASE}/get-running?id=3`);
-        const data = await response.json();
-        const nextRun = String(parseInt(data.IdRunning) + 1).padStart(6, "0");
-        return `${data.docId}${nextRun}`;
+        let res = null;
+        try {
+            res = await fetch(`${API_BASE}/get-running?id=3`, { signal: AbortSignal.timeout(2000) });
+        } catch(e) {
+            console.warn("API_BASE get-running failed, falling back to local Flask:", e);
+        }
+        if (!res || !res.ok) {
+            try {
+                res = await fetch("/get-running?id=3");
+            } catch(e2) {
+                console.warn("Flask get-running failed, trying /api/running:", e2);
+            }
+        }
+        if (!res || !res.ok) {
+            try {
+                const resAll = await fetch("/api/running");
+                if (resAll && resAll.ok) {
+                    const j = await resAll.json();
+                    const list = j.data || j.results || [];
+                    const it = list.find(x => String(x.Id || x.id) === "3");
+                    if (it) {
+                        const doc = it.docid || it.docId || "DW";
+                        const run = String(it.IdRunning || it.id_running || "0");
+                        const nextRun = String(parseInt(run) + 1).padStart(6, "0");
+                        return `${doc}${nextRun}`;
+                    }
+                }
+            } catch(e3) {}
+        }
+        if (res && res.ok) {
+            const data = await res.json();
+            const doc = data.docId || data.docid || "DW";
+            const run = String(data.IdRunning || data.id_running || "0");
+            const nextRun = String(parseInt(run) + 1).padStart(6, "0");
+            return `${doc}${nextRun}`;
+        }
+        return "DW000001";
     } catch (err) {
         console.error("Running Error:", err);
-        return "";
+        return "DW000001";
     }
 }
 
@@ -838,6 +886,12 @@ let popupCurrentPage = 1;
 if (openBtn) {
     openBtn.addEventListener("click", function() {
         popup.style.display = "flex";
+        if (popupSearchInput) {
+            popupSearchInput.value = "";
+            const clearBtn = document.getElementById("popupSearchClear");
+            if (clearBtn) clearBtn.style.display = "none";
+            setTimeout(() => popupSearchInput.focus(), 120);
+        }
         loadPopupMembers();
     });
 }
@@ -935,8 +989,26 @@ function applyPopupFilter() {
 }
 
 const popupSearchInput = document.getElementById("popupSearchInput");
+const popupSearchClear = document.getElementById("popupSearchClear");
+
 if (popupSearchInput) {
-    popupSearchInput.addEventListener("input", applyPopupFilter);
+    popupSearchInput.addEventListener("input", () => {
+        if (popupSearchClear) {
+            popupSearchClear.style.display = popupSearchInput.value ? "inline-flex" : "none";
+        }
+        applyPopupFilter();
+    });
+}
+
+if (popupSearchClear) {
+    popupSearchClear.addEventListener("click", () => {
+        if (popupSearchInput) {
+            popupSearchInput.value = "";
+            popupSearchClear.style.display = "none";
+            popupSearchInput.focus();
+            applyPopupFilter();
+        }
+    });
 }
 
 function renderPopupTable() {
@@ -1062,17 +1134,27 @@ window.selectDeceasedPerson = function(emp) {
     const isBeneficiary = emp.record_type === "beneficiary";
 
     // กำหนดค่าลงในฟอร์ม
-    document.getElementById("Idcustomer").value = isBeneficiary ? emp.Idbeneficiary : emp.Idcustomer;
+    const deceasedId = isBeneficiary ? emp.Idbeneficiary : emp.Idcustomer;
+    document.getElementById("Idcustomer").value = deceasedId;
     document.getElementById("prefix").value = emp.prefix || "";
     document.getElementById("name").value = emp.name || "";
     document.getElementById("lastname").value = emp.lastname || "";
     document.getElementById("Idcard").value = emp.Idcard || "";
 
+    // บันทึกรหัสสมาชิกเจ้าของ (กรณีผู้รับผลประโยชน์ สมาชิกเจ้าของคือ emp.Idcustomer)
+    const ownerMemberId = isBeneficiary 
+        ? (emp.Idcustomer || (emp.Idbeneficiary ? emp.Idbeneficiary.split("-")[0] : "")) 
+        : emp.Idcustomer;
+    const ownerInput = document.getElementById("deceased_owner_id");
+    if (ownerInput) ownerInput.value = ownerMemberId || "";
+    const typeInput = document.getElementById("deceased_record_type");
+    if (typeInput) typeInput.value = emp.record_type || (isBeneficiary ? "beneficiary" : "member");
+
     const ownerTag = document.getElementById("beneficiaryOwnerTag");
     if (ownerTag) {
         if (isBeneficiary) {
             ownerTag.style.display = "block";
-            ownerTag.innerHTML = `👥 ผู้รับผลประโยชน์ของ: <strong>${emp.customer_fullname || emp.Idcustomer}</strong> ${emp.relation ? `(${emp.relation})` : ''}`;
+            ownerTag.innerHTML = `👥 ผู้รับผลประโยชน์ของ: <strong>${emp.customer_fullname || emp.Idcustomer}</strong> ${emp.relation ? `(${emp.relation})` : ''} <span style="font-size: 12px; color: #dc2626; font-weight: 600; margin-left: 8px; background: #fee2e2; padding: 2px 8px; border-radius: 4px;">*ยกเว้นการเรียกเก็บเงินจากสมาชิกรายนี้</span>`;
         } else {
             ownerTag.style.display = "none";
         }
@@ -1098,6 +1180,20 @@ window.selectDeceasedPerson = function(emp) {
         const dd = String(today.getDate()).padStart(2, "0");
         document.getElementById("ad-dateend").value = `${yyyy}-${mm}-${dd}`;
     }
+
+    // หากมีการสร้างตารางเรียกเก็บเงินไว้แล้ว ให้ตัดสมาชิกเจ้าของ/สมาชิกผู้เสียชีวิตออกจากตารางทันที
+    if (allMembers && allMembers.length > 0 && ownerMemberId) {
+        const cleanOwner = String(ownerMemberId).trim().toUpperCase();
+        const prevLen = allMembers.length;
+        allMembers = allMembers.filter(row => String(row.Idcustomer || "").trim().toUpperCase() !== cleanOwner);
+        if (allMembers.length !== prevLen) {
+            tableFilteredList = [...allMembers];
+            renderMoneyTable();
+            const amt = Number(document.getElementById("collect_amount").value) || 0;
+            updateKPIStats(allMembers.length, amt);
+            updateTab2Badge(allMembers.length);
+        }
+    }
 };
 
 window.selectMember = window.selectDeceasedPerson;
@@ -1117,6 +1213,13 @@ if (btnReset) {
         document.getElementById("dateend").value = "";
         document.getElementById("ad-dateend").value = "";
         document.getElementById("numberend").value = "";
+
+        const ownerInput = document.getElementById("deceased_owner_id");
+        if (ownerInput) ownerInput.value = "";
+        const typeInput = document.getElementById("deceased_record_type");
+        if (typeInput) typeInput.value = "";
+        const noticeEl = document.getElementById("excludedOwnerNotice");
+        if (noticeEl) noticeEl.style.display = "none";
 
         const tag = document.getElementById("beneficiaryOwnerTag");
         if (tag) tag.style.display = "none";
@@ -1413,8 +1516,48 @@ if (calculateBtn) {
                 return;
             }
 
-            // กรองเฉพาะสมาชิกที่สถานะปกติ (status == 1)
-            const activeMembers = (data.results || []).filter(row => row.status == 1 || row.status == "1");
+            // หา รหัสสมาชิกที่ต้องยกเว้นไม่ให้ขึ้นในตารางเรียกเก็บ:
+            // 1. กรณีผู้รับผลประโยชน์เสียชีวิต -> ไม่เรียกเก็บจากสมาชิกเจ้าของ (Idcustomer)
+            // 2. กรณีสมาชิกเสียชีวิต -> ไม่เรียกเก็บจากสมาชิกผู้เสียชีวิต
+            let ownerIdToExclude = (document.getElementById("deceased_owner_id") ? document.getElementById("deceased_owner_id").value : "").trim();
+            if (!ownerIdToExclude) {
+                if (deadMember.includes("-")) {
+                    ownerIdToExclude = deadMember.split("-")[0].trim();
+                } else {
+                    ownerIdToExclude = deadMember.trim();
+                }
+            }
+            const excludeClean = ownerIdToExclude.toUpperCase();
+            const recordType = (document.getElementById("deceased_record_type") ? document.getElementById("deceased_record_type").value : "") || (deadMember.includes("-") ? "beneficiary" : "member");
+
+            // กรองเฉพาะสมาชิกที่สถานะปกติ (status == 1) และไม่รวมสมาชิกเจ้าของ / ผู้เสียชีวิต
+            let excludedMemberName = "";
+            const activeMembers = (data.results || []).filter(row => {
+                const isNormal = (row.status == 1 || row.status == "1");
+                const rowId = String(row.Idcustomer || "").trim().toUpperCase();
+                const isExcluded = excludeClean && (rowId === excludeClean);
+                if (isExcluded) {
+                    excludedMemberName = `${row.prefix || ""}${row.name || ""} ${row.lastname || ""}`.trim();
+                }
+                return isNormal && !isExcluded;
+            });
+
+            // แสดงแจ้งเตือนใน Tab 2 ถึงสมาชิกที่ได้รับการยกเว้น
+            const noticeEl = document.getElementById("excludedOwnerNotice");
+            const noticeText = document.getElementById("excludedOwnerNoticeText");
+            if (noticeEl && noticeText) {
+                if (excludeClean) {
+                    noticeEl.style.display = "flex";
+                    const displayMember = excludedMemberName ? `${excludedMemberName} (${excludeClean})` : excludeClean;
+                    if (recordType === "beneficiary") {
+                        noticeText.innerHTML = `🛡️ <strong>ยกเว้นการเรียกเก็บเงิน:</strong> สมาชิก <strong>${displayMember}</strong> ได้รับการยกเว้นไม่ต้องร่วมจ่าย เนื่องจากเป็นเจ้าของของผู้รับผลประโยชน์ที่เสียชีวิต`;
+                    } else {
+                        noticeText.innerHTML = `🛡️ <strong>ยกเว้นการเรียกเก็บเงิน:</strong> สมาชิก <strong>${displayMember}</strong> ได้รับการยกเว้นเนื่องจากเป็นสมาชิกผู้เสียชีวิต`;
+                    }
+                } else {
+                    noticeEl.style.display = "none";
+                }
+            }
 
             if (activeMembers.length === 0) {
                 allMembers = [];
@@ -1487,6 +1630,18 @@ if (registerForm) {
         const amount = Number(document.getElementById("collect_amount").value) || 0;
         const numberend = document.getElementById("numberend").value;
 
+        const currentOperator = (function() {
+            try {
+                const s = sessionStorage.getItem("dk_logged_user");
+                if (s) {
+                    const p = JSON.parse(s);
+                    return p.empid || p.username || "admin";
+                }
+            } catch(e) {}
+            return "admin";
+        })();
+        const constantCusid = sessionStorage.getItem("dk_constant_cusid") || "";
+
         const details = [];
         allMembers.forEach(row => {
             details.push({
@@ -1497,7 +1652,8 @@ if (registerForm) {
                 numberend: row.numberend || numberend,
                 amount: Number(row.amount) || amount,
                 payamount: 0,
-                status: 1
+                status: 1,
+                cusid: constantCusid
             });
         });
 
@@ -1513,7 +1669,8 @@ if (registerForm) {
             dateend: document.getElementById("ad-dateend").value,
             numberend: document.getElementById("numberend").value,
             status: 1,
-            details: details
+            details: details,
+            cusid: constantCusid
         };
 
         console.log("Submitting transaction data:", data);

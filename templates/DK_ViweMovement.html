@@ -230,8 +230,10 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-<script type="module">
-import { API_BASE } from "/static/js/config.js";
+<script>
+// Host & API configuration
+const apiHost = (typeof window !== "undefined" && window.location.hostname) ? window.location.hostname : "127.0.0.1";
+const API_BASE = `http://${apiHost}:8000`;
 
 // ==========================================
 // Formatting & Date Helpers
@@ -453,23 +455,44 @@ selectDateFilterMode('range');
 // ==========================================
 // Load Data from APIs
 // ==========================================
+let associationName = "สมาคมฌาปนกิจสงเคราะห์";
+
 async function loadInitialData() {
     try {
+        // Load Office / Association name from Constant
+        try {
+            let resConst = await fetch(`${API_BASE}/constant`).catch(() => null);
+            if (!resConst || !resConst.ok) resConst = await fetch(`/api/constant`).catch(() => null);
+            if (!resConst || !resConst.ok) resConst = await fetch(`http://127.0.0.1:8000/constant`).catch(() => null);
+            if (resConst && resConst.ok) {
+                const dataConst = await resConst.json().catch(() => null);
+                if (dataConst && dataConst.data && (dataConst.data.office_name || dataConst.data.name)) {
+                    associationName = (dataConst.data.office_name || dataConst.data.name).trim();
+                }
+            }
+        } catch (e) {}
+
         // Load Movement data
-        const resMov = await fetch(`${API_BASE}/movement`);
-        const dataMov = await resMov.json();
-        if (dataMov.error === "0" && Array.isArray(dataMov.results)) {
-            allMovements = dataMov.results;
-            populateStaffDropdown();
-        } else {
-            console.error("Failed to load movement data:", dataMov.message);
+        let resMov = await fetch(`${API_BASE}/movement`).catch(() => null);
+        if (!resMov || !resMov.ok) resMov = await fetch(`/api/movement`).catch(() => null);
+        if (!resMov || !resMov.ok) resMov = await fetch(`http://127.0.0.1:8000/movement`).catch(() => null);
+        if (resMov && resMov.ok) {
+            const dataMov = await resMov.json().catch(() => null);
+            if (dataMov && dataMov.error === "0" && Array.isArray(dataMov.results)) {
+                allMovements = dataMov.results;
+                populateStaffDropdown();
+            }
         }
 
         // Load Customer data for modal lookup
-        const resCust = await fetch(`${API_BASE}/customer`);
-        const dataCust = await resCust.json();
-        if (dataCust.error === "0" && Array.isArray(dataCust.results)) {
-            allCustomers = dataCust.results;
+        let resCust = await fetch(`${API_BASE}/customer`).catch(() => null);
+        if (!resCust || !resCust.ok) resCust = await fetch(`/api/customer`).catch(() => null);
+        if (!resCust || !resCust.ok) resCust = await fetch(`http://127.0.0.1:8000/customer`).catch(() => null);
+        if (resCust && resCust.ok) {
+            const dataCust = await resCust.json().catch(() => null);
+            if (dataCust && Array.isArray(dataCust.results || dataCust)) {
+                allCustomers = dataCust.results || dataCust;
+            }
         }
 
         // Check if URL params specify filters
@@ -653,50 +676,75 @@ function buildOfficialReportDocument(filteredList, autoPrint = false) {
     const payTypeFilter = document.getElementById("critPayType").value || "ทั้งหมด";
     const staffFilter = document.getElementById("critStaff").value || "ทั้งหมด";
 
+    // สรุปข้อมูลเจ้าหน้าที่เพื่อแสดงด้านล่างรายงาน (กล่องสรุปและช่องลงชื่อ)
+    const uniqueStaffs = [...new Set(filteredList.map(m => (m.staff_name || "").trim()).filter(Boolean))];
+    let staffDisplay = "ทั้งหมด";
+    let staffSignName = "";
+    if (staffFilter && staffFilter !== "ทั้งหมด") {
+        staffDisplay = staffFilter;
+        staffSignName = staffFilter;
+    } else if (uniqueStaffs.length === 1) {
+        staffDisplay = uniqueStaffs[0];
+        staffSignName = uniqueStaffs[0];
+    } else if (uniqueStaffs.length > 1) {
+        staffDisplay = uniqueStaffs.join(", ");
+        staffSignName = uniqueStaffs.join(" / ");
+    } else {
+        staffDisplay = "-";
+        staffSignName = "";
+    }
+
     let countNormal = 0;
     let countCanceled = 0;
-    let sumTotalAmount = 0;
     let sumPayAmount = 0;
-    let sumRemainAmount = 0;
+    let sumCash = 0;
+    let sumTransfer = 0;
 
     let rowsHtml = "";
     filteredList.forEach((m, idx) => {
         const isCanceled = (m.status == 2);
+        const payAmt = Number(m.payamount) || 0;
+
         if (isCanceled) {
             countCanceled++;
         } else {
             countNormal++;
-            sumPayAmount += Number(m.payamount) || 0;
-            sumTotalAmount += Number(m.total_amount) || 0;
-            sumRemainAmount += Number(m.remain_amount) || 0;
+            sumPayAmount += payAmt;
+            const pt = (m.pay_type || "").trim();
+            if (pt === "เงินสด") {
+                sumCash += payAmt;
+            } else if (pt.includes("โอน")) {
+                sumTransfer += payAmt;
+            }
         }
 
         const fullName = `${m.prefix || ''}${m.name || ''} ${m.lastname || ''}`.trim() || '-';
         const stText = isCanceled ? "ยกเลิก" : "ชำระแล้ว";
-        const stStyle = isCanceled ? "color: #dc2626; font-weight: bold;" : "color: #047857;";
+        const stStyle = isCanceled ? "color: #dc2626; font-weight: bold;" : "color: #047857; font-weight: 600;";
         const payAmountDisplay = isCanceled 
             ? `<span style="text-decoration: line-through; color: #94a3b8;">${formatCurrency(m.payamount)}</span>` 
             : `<strong>${formatCurrency(m.payamount)}</strong>`;
 
+        const payTypeDisplay = m.pay_type ? `${m.pay_type}${m.bank_name ? ` (${m.bank_name})` : ''}` : '-';
+
+        // คอลัมน์ที่จัดเรียงใหม่ (เจ้าหน้าที่ย้ายไปไว้ด้านล่าง): ลำดับ | วันที่รับเงิน | เลขที่เอกสาร | รหัสสมาชิก | ชื่อ-นามสกุล | ยอดรับชำระ | ช่องทางชำระ | หมายเหตุ | สถานะ
         rowsHtml += `
             <tr style="${isCanceled ? 'background-color: #fef2f2;' : ''}">
                 <td style="text-align: center;">${idx + 1}</td>
-                <td style="text-align: center; font-family: monospace; font-weight: 600;">${m.docidmove || '-'}</td>
                 <td style="text-align: center;">${formatThaiDate(m.date)}</td>
+                <td style="text-align: center; font-family: monospace; font-weight: 600;">${m.docidmove || '-'}</td>
                 <td style="text-align: center; font-family: monospace;">${m.Idcustomer || '-'}</td>
-                <td>${fullName}</td>
-                <td style="text-align: center;">${m.pay_type || '-'}</td>
-                <td style="text-align: right; color: #475569;">${formatCurrency(m.total_amount)}</td>
+                <td style="white-space: nowrap;">${fullName}</td>
                 <td style="text-align: right; color: #047857;">${payAmountDisplay}</td>
-                <td style="text-align: right; color: #475569;">${formatCurrency(m.remain_amount)}</td>
+                <td style="text-align: center;">${payTypeDisplay}</td>
+                <td style="color: #64748b;">${m.remark || '-'}</td>
                 <td style="text-align: center; ${stStyle}">${stText}</td>
-                <td>${m.staff_name || '-'}</td>
             </tr>
         `;
     });
 
     if (!rowsHtml) {
-        rowsHtml = `<tr><td colspan="11" style="text-align: center; padding: 25px; color: #64748b;">ไม่พบข้อมูลรายการรับชำระเงินตามเงื่อนไขที่ระบุ</td></tr>`;
+        rowsHtml = `<tr><td colspan="9" style="text-align: center; padding: 25px; color: #64748b;">ไม่พบข้อมูลรายการรับชำระเงินตามเงื่อนไขที่ระบุ</td></tr>`;
     }
 
     const printScript = autoPrint ? `
@@ -720,25 +768,54 @@ function buildOfficialReportDocument(filteredList, autoPrint = false) {
         <html lang="th">
         <head>
             <meta charset="UTF-8">
-            <title>รายงานการรับชำระเงินสงเคราะห์ - สมาคมฌาปนกิจสงเคราะห์</title>
+            <title>รายงานการรับชำระเงินสงเคราะห์ - ${associationName}</title>
             <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
             <style>
                 @page {
                     size: A4 landscape;
-                    margin: 10mm;
+                    margin: 8mm 10mm;
                 }
                 body {
                     font-family: 'Sarabun', 'Prompt', sans-serif;
                     color: #000;
                     margin: 0;
-                    padding: 15px;
+                    padding: 12px;
                     font-size: 13px;
+                    background: #fff;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                    margin-bottom: 14px;
+                }
+                thead {
+                    display: table-header-group;
+                }
+                tbody {
+                    display: table-row-group;
+                }
+                tfoot {
+                    display: table-footer-group;
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+                tr {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+                .report-title-cell {
+                    background: transparent !important;
+                    border: none !important;
+                    padding: 0 0 10px 0 !important;
+                    font-weight: normal;
+                    text-align: center;
                 }
                 .report-header {
                     text-align: center;
                     border-bottom: 2px solid #000;
                     padding-bottom: 8px;
-                    margin-bottom: 12px;
+                    margin-bottom: 8px;
                 }
                 .report-header h2 {
                     margin: 0 0 4px 0;
@@ -752,41 +829,45 @@ function buildOfficialReportDocument(filteredList, autoPrint = false) {
                 }
                 .report-header p {
                     margin: 0;
-                    font-size: 12.5px;
-                    color: #333;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
                     font-size: 12px;
-                    margin-bottom: 14px;
+                    color: #333;
                 }
                 th {
                     background: #f1f5f9;
                     border: 1px solid #000;
-                    padding: 6px 8px;
+                    padding: 6px 6px;
                     text-align: center;
                     font-weight: 600;
                 }
                 td {
                     border: 1px solid #000;
-                    padding: 5px 8px;
+                    padding: 5px 6px;
+                    vertical-align: middle;
+                }
+                tfoot td {
+                    background: #f8fafc;
+                    border: 1px solid #000;
                 }
                 .summary-box {
                     font-size: 12.5px;
                     font-weight: 600;
-                    margin-bottom: 24px;
-                    padding: 8px 14px;
+                    margin-bottom: 20px;
+                    padding: 10px 14px;
                     border: 1px dashed #000;
                     display: flex;
                     justify-content: space-around;
+                    flex-wrap: wrap;
+                    gap: 8px 16px;
                     background: #fafafa;
+                    page-break-inside: avoid;
+                    break-inside: avoid;
                 }
                 .signatures-grid {
                     display: flex;
                     justify-content: space-between;
-                    margin-top: 36px;
+                    margin-top: 32px;
                     page-break-inside: avoid;
+                    break-inside: avoid;
                 }
                 .sign-box {
                     text-align: center;
@@ -795,12 +876,15 @@ function buildOfficialReportDocument(filteredList, autoPrint = false) {
                 }
                 @media print {
                     .no-print { display: none !important; }
+                    thead { display: table-header-group !important; }
+                    tfoot { display: table-footer-group !important; }
+                    tr { page-break-inside: avoid !important; break-inside: avoid !important; }
                 }
             </style>
         </head>
         <body>
             <!-- Sticky Toolbar in New Tab -->
-            <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Prompt', sans-serif; margin: -15px -15px 15px -15px;">
+            <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Prompt', sans-serif; margin: -12px -12px 14px -12px;">
                 <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">📋 รายงานการรับชำระเงิน (${filteredList.length} รายการ)</div>
                 <div style="display: flex; gap: 10px;">
                     <button onclick="window.print()" style="padding: 7px 18px; background: #059669; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">🖨️ สั่งพิมพ์เอกสาร</button>
@@ -808,49 +892,66 @@ function buildOfficialReportDocument(filteredList, autoPrint = false) {
                 </div>
             </div>
 
-            <div class="report-header">
-                <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
-                <h3>รายงานการรับชำระเงินสงเคราะห์ (ประวัติการเก็บเงิน)</h3>
-                <p>${dateFilterHeaderText} | ช่องทางชำระ: ${payTypeFilter} | เจ้าหน้าที่: ${staffFilter}</p>
-                <p style="font-size: 11.5px; margin-top: 3px; color: #64748b;">ช่วงเลขที่เอกสาร: ${docRangeDisplay} | ช่วงรหัสสมาชิก: ${custRangeDisplay}</p>
-            </div>
-
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 45px;">ลำดับ</th>
-                        <th style="width: 105px;">เลขที่เอกสาร</th>
-                        <th style="width: 85px;">วันที่รับเงิน</th>
-                        <th style="width: 95px;">รหัสสมาชิก</th>
-                        <th style="text-align: left;">ชื่อ - นามสกุล สมาชิก</th>
-                        <th style="width: 90px;">ช่องทางชำระ</th>
-                        <th style="width: 95px; text-align: right;">หนี้รวม (บาท)</th>
-                        <th style="width: 105px; text-align: right;">ยอดรับชำระ (บาท)</th>
-                        <th style="width: 95px; text-align: right;">คงเหลือ (บาท)</th>
-                        <th style="width: 80px;">สถานะ</th>
-                        <th style="width: 110px;">ผู้รับเงิน</th>
+                        <th colspan="9" class="report-title-cell">
+                            <div class="report-header">
+                                <h2>${associationName}</h2>
+                                <h3>รายงานการรับชำระเงินสงเคราะห์</h3>
+                                <p>${dateFilterHeaderText} | ช่องทางชำระ: <strong>${payTypeFilter}</strong></p>
+                                <p style="font-size: 11.5px; margin-top: 3px; color: #64748b;">
+                                    ช่วงเลขที่เอกสาร: <strong>${docRangeDisplay}</strong> | ช่วงรหัสสมาชิก: <strong>${custRangeDisplay}</strong> | วันที่พิมพ์: <strong>${formatThaiDate(new Date().toISOString())}</strong>
+                                </p>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th style="width: 45px; text-align: center;">ลำดับ</th>
+                        <th style="width: 85px; text-align: center;">วันที่รับเงิน</th>
+                        <th style="width: 105px; text-align: center;">เลขที่เอกสาร</th>
+                        <th style="width: 95px; text-align: center;">รหัสสมาชิก</th>
+                        <th style="text-align: left; min-width: 160px; white-space: nowrap;">ชื่อ - นามสกุล</th>
+                        <th style="width: 110px; text-align: right;">ยอดรับชำระ (บาท)</th>
+                        <th style="width: 95px; text-align: center;">ช่องทางชำระ</th>
+                        <th style="min-width: 120px; text-align: left;">หมายเหตุ</th>
+                        <th style="width: 80px; text-align: center;">สถานะ</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${rowsHtml}
                 </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000;">
+                        <td colspan="5" style="text-align: right; padding: 6px 8px; font-weight: 700;">รวมยอดรับชำระทั้งสิ้น:</td>
+                        <td style="text-align: right; padding: 6px 8px; color: #047857; font-size: 13px; font-weight: 700;">${formatCurrency(sumPayAmount)}</td>
+                        <td colspan="3" style="text-align: left; padding: 6px 8px; font-size: 11.5px; color: #475569;">
+                            (ปกติ ${countNormal.toLocaleString()} รายการ${countCanceled > 0 ? `, ยกเลิก ${countCanceled.toLocaleString()} รายการ` : ''})
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
 
             <div class="summary-box">
                 <span>จำนวนรายการทั้งหมด: <strong>${filteredList.length.toLocaleString()}</strong> รายการ</span>
                 <span>ปกติ: <strong style="color:#047857;">${countNormal.toLocaleString()}</strong> รายการ</span>
                 <span>ยกเลิก: <strong style="color:#dc2626;">${countCanceled.toLocaleString()}</strong> รายการ</span>
+                <span>เงินสด: <strong style="color:#0284c7;">${formatCurrency(sumCash)} บาท</strong></span>
+                <span>โอนเงิน: <strong style="color:#7c3aed;">${formatCurrency(sumTransfer)} บาท</strong></span>
+                <span>เจ้าหน้าที่ผู้รับเงิน: <strong>${staffDisplay}</strong></span>
                 <span>รวมยอดรับชำระเงินสุทธิ: <strong style="color:#047857; font-size:14px;">${formatCurrency(sumPayAmount)} บาท</strong></span>
             </div>
 
             <div class="signatures-grid">
                 <div class="sign-box">
-                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>เจ้าหน้าที่ผู้รับเงิน / ผู้จัดทำรายงาน</p>
-                    <p>(.......................................................)</p>
+                    <p style="margin: 0 0 45px 0;">ลงชื่อ.......................................................</p>
+                    <p style="margin: 0 0 6px 0;">( ${staffSignName ? staffSignName : '.......................................................'} )</p>
+                    <p style="margin: 0; font-weight: 500;">เจ้าหน้าที่ผู้รับเงิน / ผู้จัดทำรายงาน</p>
                 </div>
                 <div class="sign-box">
-                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>เหรัญญิก / ผู้ตรวจสอบการเงิน</p>
-                    <p>(.......................................................)</p>
+                    <p style="margin: 0 0 45px 0;">ลงชื่อ.......................................................</p>
+                    <p style="margin: 0 0 6px 0;">(.......................................................)</p>
+                    <p style="margin: 0; font-weight: 500;">เหรัญญิก / ผู้ตรวจสอบการเงิน</p>
                 </div>
             </div>
 
@@ -911,26 +1012,34 @@ document.getElementById("btnExportExcel").addEventListener("click", () => {
         return;
     }
 
-    const headers = ["ลำดับ", "เลขที่เอกสาร", "วันที่รับเงิน", "รหัสสมาชิก", "คำนำหน้า", "ชื่อ", "นามสกุล", "เลขบัตรประชาชน", "ช่องทางชำระ", "ธนาคาร/อ้างอิง", "ยอดหนี้รวม", "ยอดชำระครั้งนี้", "หนี้คงเหลือ", "สถานะ", "ผู้รับเงิน", "หมายเหตุ"];
+    // จัดเรียงคอลัมน์ Excel ให้ตรงกับรายงาน: ลำดับ | วันที่รับเงิน | เลขที่เอกสาร | รหัสสมาชิก | ชื่อ-นามสกุล | ยอดรับชำระ | ช่องทางชำระ | ผู้รับเงิน | หมายเหตุ | สถานะ
+    const headers = [
+        "ลำดับ",
+        "วันที่รับเงิน",
+        "เลขที่เอกสาร",
+        "รหัสสมาชิก",
+        "ชื่อ - นามสกุล",
+        "ยอดรับชำระ (บาท)",
+        "ช่องทางชำระ",
+        "ผู้รับเงิน",
+        "หมายเหตุ",
+        "สถานะ"
+    ];
     const rows = filtered.map((m, idx) => {
-        const stName = (m.status == 2) ? "ยกเลิก" : "ปกติ";
+        const fullName = `${m.prefix || ''}${m.name || ''} ${m.lastname || ''}`.trim() || '-';
+        const stName = (m.status == 2) ? "ยกเลิก" : "ชำระแล้ว";
+        const payTypeDisplay = m.pay_type ? `${m.pay_type}${m.bank_name ? ` (${m.bank_name})` : ''}` : '-';
         return [
             idx + 1,
-            `"${m.docidmove || ''}"`,
             `"${formatThaiDate(m.date)}"`,
+            `"${m.docidmove || ''}"`,
             `"${m.Idcustomer || ''}"`,
-            `"${m.prefix || ''}"`,
-            `"${m.name || ''}"`,
-            `"${m.lastname || ''}"`,
-            `"${m.Idcard || ''}"`,
-            `"${m.pay_type || ''}"`,
-            `"${(m.bank_name || '') + ' ' + (m.ref_no || '')}".trim()`,
-            m.total_amount || 0,
+            `"${fullName}"`,
             m.payamount || 0,
-            m.remain_amount || 0,
-            `"${stName}"`,
+            `"${payTypeDisplay}"`,
             `"${m.staff_name || ''}"`,
-            `"${m.remark || ''}"`
+            `"${m.remark || ''}"`,
+            `"${stName}"`
         ];
     });
 

@@ -1,0 +1,715 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}บันทึกผังบัญชี (GL Account Chart){% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='GL.css') }}">
+
+<div class="gl-chart-container">
+    <!-- 1. Top Windows-Form Style Toolbar -->
+    <div class="gl-chart-toolbar">
+        <button type="button" class="btn-chart-tool btn-chart-refresh" id="btnRefreshChart" title="โหลดข้อมูลผังบัญชีใหม่">
+            <span>🔄</span>
+            <span>Refresh</span>
+        </button>
+        <button type="button" class="btn-chart-tool btn-chart-add" id="btnAddChart" title="เพิ่มผังบัญชีใหม่">
+            <span>➕</span>
+            <span>เพิ่ม</span>
+        </button>
+        <button type="button" class="btn-chart-tool btn-chart-edit" id="btnEditChart" title="แก้ไขผังบัญชีที่เลือก">
+            <span>✏️</span>
+            <span>แก้ไข</span>
+        </button>
+        <button type="button" class="btn-chart-tool btn-chart-delete" id="btnDeleteChart" title="ลบผังบัญชีที่เลือก">
+            <span>🗑️</span>
+            <span>ลบ</span>
+        </button>
+        <button type="button" class="btn-chart-tool btn-chart-save" id="btnSaveChart" disabled title="บันทึกข้อมูลผังบัญชีลงฐานข้อมูล">
+            <span>💾</span>
+            <span>บันทึก</span>
+        </button>
+        <button type="button" class="btn-chart-tool btn-chart-exit" id="btnExitChart" title="ออกจากหน้านี้">
+            <span>❌</span>
+            <span>ออก</span>
+        </button>
+    </div>
+
+    <!-- 2. Tabs Header -->
+    <div class="gl-chart-tabs">
+        <button type="button" class="gl-chart-tab-btn active" data-tab="tab-record">บันทึกผังบัญชี</button>
+        <button type="button" class="gl-chart-tab-btn" data-tab="tab-copy">คัดลอกผังบัญชี</button>
+        <button type="button" class="gl-chart-tab-btn" data-tab="tab-opening">ยอดยกมาย้อนหลัง</button>
+    </div>
+
+    <!-- 3. Main Body Container -->
+    <div class="gl-chart-body-card">
+        <!-- TAB 1: บันทึกผังบัญชี -->
+        <div class="gl-chart-tab-panel active" id="tab-record">
+            <div class="gl-chart-split">
+                <!-- Left Column: ฟอร์มผังบัญชี -->
+                <div class="gl-chart-fieldset">
+                    <div class="gl-chart-legend">ผังบัญชี</div>
+
+                    <!-- สาขา -->
+                    <div class="gl-chart-form-row">
+                        <label for="chartBranchCode">สาขา</label>
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <input type="text" id="chartBranchCode" class="gl-chart-input" value="01" disabled>
+                            <button type="button" class="btn-browse-dots chart-browse-btn" onclick="window.openLookupModal('branch')" disabled title="เลือกสาขา">...</button>
+                        </div>
+                    </div>
+
+                    <!-- ชื่อสาขา -->
+                    <div class="gl-chart-form-row" style="margin-bottom: 16px;">
+                        <label for="chartBranchName">ชื่อสาขา</label>
+                        <input type="text" id="chartBranchName" class="gl-chart-input" value="สถาบันการเงิน" readonly disabled>
+                    </div>
+
+                    <!-- หมวดบัญชี -->
+                    <div class="gl-chart-form-row">
+                        <label for="chartCategorySelect">หมวดบัญชี</label>
+                        <select id="chartCategorySelect" class="gl-chart-select" disabled>
+                            <option value="1">1.สินทรัพย์</option>
+                            <option value="2">2.หนี้สิน</option>
+                            <option value="3">3.ทุน</option>
+                            <option value="4">4.รายได้</option>
+                            <option value="5">5.ค่าใช้จ่าย</option>
+                        </select>
+                    </div>
+
+                    <!-- เลขที่บัญชี -->
+                    <div class="gl-chart-form-row">
+                        <label for="chartAccCode">เลขที่บัญชี</label>
+                        <input type="text" id="chartAccCode" class="gl-chart-input" value="" placeholder="เช่น 1100" disabled>
+                    </div>
+
+                    <!-- ชื่อบัญชี(ไทย) -->
+                    <div class="gl-chart-form-row align-top" style="margin-bottom: 16px;">
+                        <label for="chartAccName" style="padding-top: 6px;">ชื่อบัญชี(ไทย)</label>
+                        <textarea id="chartAccName" class="gl-chart-textarea" rows="3" disabled></textarea>
+                    </div>
+
+                    <!-- รหัสกลุ่มบัญชี -->
+                    <div class="gl-chart-form-row">
+                        <label for="chartGroupCode">รหัสกลุ่มบัญชี</label>
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <input type="text" id="chartGroupCode" class="gl-chart-input" value="01" disabled>
+                            <button type="button" class="btn-browse-dots chart-browse-btn" onclick="window.openLookupModal('group')" disabled title="เลือกกลุ่มบัญชี">...</button>
+                        </div>
+                    </div>
+
+                    <!-- ชื่อกลุ่มบัญชี -->
+                    <div class="gl-chart-form-row">
+                        <label for="chartGroupName">ชื่อกลุ่มบัญชี</label>
+                        <input type="text" id="chartGroupName" class="gl-chart-input" value="บัญชี 1" readonly disabled>
+                    </div>
+
+                    <!-- ยอดยกมาต้นปี -->
+                    <div class="gl-chart-sub-fieldset">
+                        <div class="gl-chart-sub-legend">ยอดยกมาต้นปี</div>
+                        <div class="gl-chart-radio-row">
+                            <label class="gl-chart-radio-lbl">
+                                <input type="radio" name="chartBalanceSide" id="radioDebit" value="debit" checked disabled>
+                                <span>เดบิต</span>
+                            </label>
+                            <label class="gl-chart-radio-lbl">
+                                <input type="radio" name="chartBalanceSide" id="radioCredit" value="credit" disabled>
+                                <span>เครดิต</span>
+                            </label>
+                        </div>
+                        <div class="gl-chart-form-row" style="margin-bottom: 2px; grid-template-columns: 80px 1fr;">
+                            <label for="chartOpeningBalance">จำนวนเงิน</label>
+                            <input type="text" id="chartOpeningBalance" class="gl-chart-input" value="0.00" style="text-align: right; font-weight: 600;" disabled>
+                        </div>
+                    </div>
+
+                    <!-- ข้อความแจ้งเตือนสีแดงด้านล่าง -->
+                    <div class="gl-chart-warnings">
+                        <div>** เลขที่บัญชี ต้องไม่กำหนดซ้ำกัน **</div>
+                        <div>** กลุ่มบัญชีส่วนใหญ่ ควรเป็นบัญชีหลักเท่านั้น</div>
+                    </div>
+                </div>
+
+                <!-- Right Column: ตารางผังบัญชี + กล่องค้นหา -->
+                <div class="gl-chart-right-col">
+                    <div class="gl-chart-grid-wrap">
+                        <table class="gl-chart-grid-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 55px;">สาขา</th>
+                                    <th style="width: 50px;">หมวด</th>
+                                    <th style="width: 95px;">เลขที่บัญชี</th>
+                                    <th>ชื่อบัญชี</th>
+                                    <th style="width: 75px;">กลุ่มบัญชี</th>
+                                </tr>
+                            </thead>
+                            <tbody id="chartGridBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- กล่องค้นหาด้านล่าง -->
+                    <div class="gl-chart-search-box">
+                        <div class="gl-chart-legend">ค้นหา</div>
+                        <div class="gl-chart-search-item">
+                            <label for="searchAccCode">รหัสบัญชี</label>
+                            <input type="text" id="searchAccCode" class="gl-chart-input" style="width: 130px; background: #ffffff !important; cursor: text !important;" placeholder="ค้นหารหัส...">
+                        </div>
+                        <div class="gl-chart-search-item" style="flex: 1; min-width: 220px;">
+                            <label for="searchAccName">ชื่อบัญชี</label>
+                            <input type="text" id="searchAccName" class="gl-chart-input" style="width: 100%; max-width: 280px; background: #ffffff !important; cursor: text !important;" placeholder="ค้นหาชื่อบัญชี...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: คัดลอกผังบัญชี -->
+        <div class="gl-chart-tab-panel" id="tab-copy">
+            <div class="gl-chart-fieldset" style="max-width: 620px; margin: 10px auto;">
+                <div class="gl-chart-legend">คัดลอกผังบัญชีระหว่างสาขา / กลุ่มบัญชี</div>
+                <div class="gl-chart-form-row" style="grid-template-columns: 140px 1fr; margin-top: 8px;">
+                    <label>จากสาขาต้นทาง</label>
+                    <input type="text" class="gl-chart-input" value="01 - สถาบันการเงิน" readonly>
+                </div>
+                <div class="gl-chart-form-row" style="grid-template-columns: 140px 1fr;">
+                    <label>ไปยังสาขาปลายทาง</label>
+                    <input type="text" id="copyTargetBranch" class="gl-chart-input" value="02" placeholder="ระบุรหัสสาขาปลายทาง เช่น 02">
+                </div>
+                <div class="gl-chart-form-row" style="grid-template-columns: 140px 1fr;">
+                    <label>ไปยังกลุ่มบัญชี</label>
+                    <input type="text" id="copyTargetGroup" class="gl-chart-input" value="01" placeholder="ระบุรหัสกลุ่มบัญชี เช่น 01">
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+                    <button type="button" class="btn-chart-tool btn-chart-save" id="btnExecuteCopy">
+                        <span>📋</span>
+                        <span>ดำเนินการคัดลอกผังบัญชี</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: ยอดยกมาย้อนหลัง -->
+        <div class="gl-chart-tab-panel" id="tab-opening">
+            <div class="gl-chart-fieldset">
+                <div class="gl-chart-legend">สรุปยอดยกมาต้นปีตามผังบัญชี</div>
+                <div class="gl-chart-grid-wrap" style="height: 360px; margin-top: 6px;">
+                    <table class="gl-chart-grid-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">สาขา</th>
+                                <th style="width: 60px;">หมวด</th>
+                                <th style="width: 110px;">เลขที่บัญชี</th>
+                                <th>ชื่อบัญชี</th>
+                                <th style="width: 90px;">ฝั่งบัญชี</th>
+                                <th style="width: 140px;">ยอดยกมาต้นปี</th>
+                            </tr>
+                        </thead>
+                        <tbody id="openingBalanceGridBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notification -->
+<div id="glChartToast" class="gl-toast"></div>
+
+<!-- Modal สำหรับเลือกสาขา / กลุ่มบัญชี -->
+<div id="modalLookup" class="chart-modal-overlay">
+    <div class="chart-modal-box" style="width: 460px;">
+        <div class="chart-modal-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span>🔍</span>
+                <span id="modalLookupTitle" style="font-weight:700; font-size:15px; color:#ffffff;">เลือกรายการ</span>
+            </div>
+            <button type="button" class="btn-modal-close" onclick="window.closeLookupModal()">✕</button>
+        </div>
+        <div class="chart-modal-body">
+            <div class="chart-table-wrap">
+                <table class="chart-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 90px;">รหัส</th>
+                            <th>ชื่อรายการ</th>
+                            <th style="width: 80px; text-align:center;">เลือก</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalLookupBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="chart-modal-footer">
+            <button type="button" class="btn-gl-tool btn-gl-exit" onclick="window.closeLookupModal()" style="padding:6px 16px;">ปิด</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const BRANCH_LIST = [
+        { code: "01", name: "สถาบันการเงิน" },
+        { code: "02", name: "กองทุนหมู่บ้าน" },
+        { code: "03", name: "สวัสดิการชุมชน" }
+    ];
+
+    const GROUP_LIST = [
+        { code: "01", name: "บัญชี 1" },
+        { code: "02", name: "บัญชี 2" },
+        { code: "03", name: "บัญชี 3" }
+    ];
+
+    const CATEGORY_MAP = {
+        1: "สินทรัพย์",
+        2: "หนี้สิน",
+        3: "ทุน",
+        4: "รายได้",
+        5: "ค่าใช้จ่าย"
+    };
+
+    let accountsList = [];
+    let selectedAccCode = "";
+    let formMode = "view"; // "view" | "add" | "edit"
+    let currentLookupType = null;
+
+    function showToast(msg, type = "success") {
+        const toast = document.getElementById("glChartToast");
+        if (!toast) return;
+        toast.className = `gl-toast ${type} show`;
+        toast.innerHTML = (type === "success" ? "✅ " : "❌ ") + msg;
+        setTimeout(() => {
+            toast.className = "gl-toast";
+        }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return "";
+        return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+    }
+
+    function inferCategoryNo(item) {
+        if (item.acc_category_no) return parseInt(item.acc_category_no, 10) || 1;
+        const codeStr = String(item.acc_code || "");
+        if (/^[1-5]/.test(codeStr)) return parseInt(codeStr[0], 10);
+        const typeMap = { "สินทรัพย์": 1, "หนี้สิน": 2, "ทุน": 3, "รายได้": 4, "ค่าใช้จ่าย": 5 };
+        return typeMap[item.acc_type] || 1;
+    }
+
+    function normalizeAccountItem(raw) {
+        const catNo = inferCategoryNo(raw);
+        const bCode = raw.branch_code || "01";
+        const bFound = BRANCH_LIST.find(b => b.code === bCode);
+        const gCode = raw.acc_group || "01";
+        const gFound = GROUP_LIST.find(g => g.code === gCode);
+
+        return {
+            branch_code: bCode,
+            branch_name: raw.branch_name || (bFound ? bFound.name : "สถาบันการเงิน"),
+            acc_category_no: catNo,
+            acc_type: raw.acc_type || CATEGORY_MAP[catNo] || "สินทรัพย์",
+            acc_code: String(raw.acc_code || "").trim(),
+            acc_name: String(raw.acc_name || "").trim(),
+            acc_group: gCode,
+            acc_group_name: raw.acc_group_name || (gFound ? gFound.name : "บัญชี 1"),
+            balance_side: raw.balance_side || (catNo === 2 || catNo === 3 || catNo === 4 ? "credit" : "debit"),
+            opening_balance: parseFloat(raw.opening_balance || 0) || 0.00
+        };
+    }
+
+    function setFormState(mode) {
+        formMode = mode; // "view" | "add" | "edit"
+        const isEditable = (mode === "add" || mode === "edit");
+
+        const editableIds = [
+            "chartBranchCode",
+            "chartCategorySelect",
+            "chartAccCode",
+            "chartAccName",
+            "chartGroupCode",
+            "radioDebit",
+            "radioCredit",
+            "chartOpeningBalance"
+        ];
+        editableIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = !isEditable;
+        });
+
+        document.querySelectorAll(".chart-browse-btn").forEach(btn => {
+            btn.disabled = !isEditable;
+        });
+
+        const btnAdd = document.getElementById("btnAddChart");
+        const btnEdit = document.getElementById("btnEditChart");
+        const btnDelete = document.getElementById("btnDeleteChart");
+        const btnSave = document.getElementById("btnSaveChart");
+
+        if (btnAdd) btnAdd.disabled = isEditable;
+        if (btnEdit) btnEdit.disabled = isEditable || !selectedAccCode;
+        if (btnDelete) btnDelete.disabled = isEditable || !selectedAccCode;
+        if (btnSave) btnSave.disabled = !isEditable;
+    }
+
+    function populateFormFromItem(item) {
+        if (!item) {
+            document.getElementById("chartBranchCode").value = "01";
+            document.getElementById("chartBranchName").value = "สถาบันการเงิน";
+            document.getElementById("chartCategorySelect").value = "1";
+            document.getElementById("chartAccCode").value = "";
+            document.getElementById("chartAccName").value = "";
+            document.getElementById("chartGroupCode").value = "01";
+            document.getElementById("chartGroupName").value = "บัญชี 1";
+            document.getElementById("radioDebit").checked = true;
+            document.getElementById("radioCredit").checked = false;
+            document.getElementById("chartOpeningBalance").value = "0.00";
+            return;
+        }
+        document.getElementById("chartBranchCode").value = item.branch_code || "01";
+        document.getElementById("chartBranchName").value = item.branch_name || "สถาบันการเงิน";
+        document.getElementById("chartCategorySelect").value = String(item.acc_category_no || 1);
+        document.getElementById("chartAccCode").value = item.acc_code || "";
+        document.getElementById("chartAccName").value = item.acc_name || "";
+        document.getElementById("chartGroupCode").value = item.acc_group || "01";
+        document.getElementById("chartGroupName").value = item.acc_group_name || "บัญชี 1";
+
+        const isCredit = item.balance_side === "credit";
+        document.getElementById("radioDebit").checked = !isCredit;
+        document.getElementById("radioCredit").checked = isCredit;
+        document.getElementById("chartOpeningBalance").value = Number(item.opening_balance || 0).toFixed(2);
+    }
+
+    function renderGrid() {
+        const tbody = document.getElementById("chartGridBody");
+        if (!tbody) return;
+
+        const kwCode = (document.getElementById("searchAccCode")?.value || "").toLowerCase().trim();
+        const kwName = (document.getElementById("searchAccName")?.value || "").toLowerCase().trim();
+
+        const filtered = accountsList.filter(item => {
+            const matchCode = !kwCode || item.acc_code.toLowerCase().includes(kwCode);
+            const matchName = !kwName || item.acc_name.toLowerCase().includes(kwName);
+            return matchCode && matchName;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#64748b;">ไม่พบข้อมูลผังบัญชีในฐานข้อมูล</td></tr>`;
+            renderOpeningBalanceTab();
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(item => {
+            const isSel = item.acc_code === selectedAccCode;
+            return `
+                <tr class="${isSel ? 'selected' : ''}" data-code="${escapeHtml(item.acc_code)}">
+                    <td style="text-align:center;">${escapeHtml(item.branch_code)}</td>
+                    <td style="text-align:center;">${escapeHtml(item.acc_category_no)}</td>
+                    <td>${escapeHtml(item.acc_code)}</td>
+                    <td>${escapeHtml(item.acc_name)}</td>
+                    <td style="text-align:center;">${escapeHtml(item.acc_group)}</td>
+                </tr>
+            `;
+        }).join("");
+
+        tbody.querySelectorAll("tr[data-code]").forEach(tr => {
+            tr.addEventListener("click", () => {
+                const code = tr.getAttribute("data-code");
+                selectedAccCode = code;
+                const found = accountsList.find(a => a.acc_code === code);
+                if (found) {
+                    setFormState("view");
+                    populateFormFromItem(found);
+                    renderGrid();
+                }
+            });
+        });
+
+        renderOpeningBalanceTab();
+    }
+
+    function renderOpeningBalanceTab() {
+        const tbody = document.getElementById("openingBalanceGridBody");
+        if (!tbody) return;
+        if (accountsList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#64748b;">ไม่พบข้อมูลผังบัญชีในฐานข้อมูล</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = accountsList.map(item => `
+            <tr>
+                <td style="text-align:center;">${escapeHtml(item.branch_code)}</td>
+                <td style="text-align:center;">${escapeHtml(item.acc_category_no)}</td>
+                <td>${escapeHtml(item.acc_code)}</td>
+                <td>${escapeHtml(item.acc_name)}</td>
+                <td style="text-align:center;">${item.balance_side === 'credit' ? 'เครดิต' : 'เดบิต'}</td>
+                <td style="text-align:right; font-weight:600;">${Number(item.opening_balance || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+        `).join("");
+    }
+
+    async function loadAccountsFromDatabase() {
+        try {
+            const res = await fetch("/api/gl_chart");
+            const data = await res.json();
+            if (data.error === "0" && Array.isArray(data.results)) {
+                accountsList = data.results
+                    .map(normalizeAccountItem)
+                    .filter(a => a.acc_code)
+                    .sort((a, b) => a.acc_code.localeCompare(b.acc_code, undefined, { numeric: true }));
+            } else {
+                accountsList = [];
+            }
+        } catch (e) {
+            console.error("loadAccountsFromDatabase error:", e);
+            accountsList = [];
+        }
+
+        const sel = accountsList.find(a => a.acc_code === selectedAccCode) || accountsList[0] || null;
+        if (sel) {
+            selectedAccCode = sel.acc_code;
+            populateFormFromItem(sel);
+        } else {
+            selectedAccCode = "";
+            populateFormFromItem(null);
+        }
+        setFormState("view");
+        renderGrid();
+    }
+
+    async function handleSaveChart() {
+        if (formMode !== "add" && formMode !== "edit") return;
+
+        const branchCode = (document.getElementById("chartBranchCode")?.value || "01").trim();
+        const branchName = (document.getElementById("chartBranchName")?.value || "สถาบันการเงิน").trim();
+        const catNo = parseInt(document.getElementById("chartCategorySelect")?.value || "1", 10) || 1;
+        const accCode = (document.getElementById("chartAccCode")?.value || "").trim();
+        const accName = (document.getElementById("chartAccName")?.value || "").trim();
+        const groupCode = (document.getElementById("chartGroupCode")?.value || "01").trim();
+        const groupName = (document.getElementById("chartGroupName")?.value || "บัญชี 1").trim();
+        const balanceSide = document.getElementById("radioCredit")?.checked ? "credit" : "debit";
+        const openingBalance = parseFloat((document.getElementById("chartOpeningBalance")?.value || "0").replace(/,/g, "")) || 0.00;
+
+        if (!accCode) {
+            showToast("กรุณาระบุเลขที่บัญชี", "error");
+            document.getElementById("chartAccCode")?.focus();
+            return;
+        }
+        if (!accName) {
+            showToast("กรุณาระบุชื่อบัญชี(ไทย)", "error");
+            document.getElementById("chartAccName")?.focus();
+            return;
+        }
+
+        const dup = accountsList.find(a => a.acc_code === accCode && (formMode === "add" || a.acc_code !== selectedAccCode));
+        if (dup) {
+            showToast(`เลขที่บัญชี ${accCode} มีอยู่แล้ว (ห้ามกำหนดซ้ำกัน)`, "error");
+            document.getElementById("chartAccCode")?.focus();
+            return;
+        }
+
+        const payload = {
+            mode: formMode,
+            original_acc_code: selectedAccCode,
+            branch_code: branchCode,
+            branch_name: branchName,
+            acc_category_no: catNo,
+            acc_type: CATEGORY_MAP[catNo] || "สินทรัพย์",
+            acc_code: accCode,
+            acc_name: accName,
+            acc_group: groupCode,
+            acc_group_name: groupName,
+            balance_side: balanceSide,
+            opening_balance: openingBalance
+        };
+
+        try {
+            const res = await fetch("/api/gl_chart/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                const j = await res.json();
+                if (j.error && j.error !== "0") {
+                    showToast(j.message || "ไม่สามารถบันทึกข้อมูลได้", "error");
+                    return;
+                }
+            }
+        } catch (err) {
+            console.warn("Save API warning:", err);
+        }
+
+        const newItem = normalizeAccountItem(payload);
+        if (formMode === "edit" && selectedAccCode && selectedAccCode !== accCode) {
+            accountsList = accountsList.filter(a => a.acc_code !== selectedAccCode);
+        }
+        const idx = accountsList.findIndex(a => a.acc_code === accCode);
+        if (idx >= 0) {
+            accountsList[idx] = newItem;
+        } else {
+            accountsList.push(newItem);
+        }
+        accountsList.sort((a, b) => a.acc_code.localeCompare(b.acc_code, undefined, { numeric: true }));
+
+        selectedAccCode = accCode;
+        populateFormFromItem(newItem);
+        setFormState("view");
+        renderGrid();
+        showToast(`บันทึกผังบัญชี ${accCode} (${accName}) เรียบร้อยแล้ว`, "success");
+    }
+
+    async function handleDeleteChart() {
+        if (!selectedAccCode) {
+            showToast("กรุณาเลือกรายการผังบัญชีที่ต้องการลบ", "error");
+            return;
+        }
+        const target = accountsList.find(a => a.acc_code === selectedAccCode);
+        if (!confirm(`ยืนยันการลบผังบัญชี ${selectedAccCode} - ${target ? target.acc_name : ''} ?`)) {
+            return;
+        }
+
+        try {
+            await fetch("/api/gl_chart/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ acc_code: selectedAccCode })
+            });
+        } catch (e) {
+            console.warn("Delete API warning:", e);
+        }
+
+        accountsList = accountsList.filter(a => a.acc_code !== selectedAccCode);
+        const nextSel = accountsList[0] || null;
+        selectedAccCode = nextSel ? nextSel.acc_code : "";
+        if (nextSel) populateFormFromItem(nextSel);
+        setFormState("view");
+        renderGrid();
+        showToast("ลบข้อมูลผังบัญชีเรียบร้อยแล้ว", "success");
+    }
+
+    // Modal เลือกสาขา / กลุ่มบัญชี
+    window.openLookupModal = function(type) {
+        if (formMode !== "add" && formMode !== "edit") return;
+        currentLookupType = type;
+        const modal = document.getElementById("modalLookup");
+        const title = document.getElementById("modalLookupTitle");
+        const tbody = document.getElementById("modalLookupBody");
+
+        const list = type === "branch" ? BRANCH_LIST : GROUP_LIST;
+        if (title) title.textContent = type === "branch" ? "เลือกสาขา" : "เลือกกลุ่มบัญชี";
+
+        if (tbody) {
+            tbody.innerHTML = list.map(item => `
+                <tr onclick="window.selectLookupItem('${escapeHtml(item.code)}', '${escapeHtml(item.name)}')">
+                    <td style="font-weight:700; color:#0284c7;">${escapeHtml(item.code)}</td>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td style="text-align:center;"><button type="button" class="btn-select-acc">เลือก</button></td>
+                </tr>
+            `).join("");
+        }
+        if (modal) modal.classList.add("active");
+    };
+
+    window.closeLookupModal = function() {
+        const modal = document.getElementById("modalLookup");
+        if (modal) modal.classList.remove("active");
+    };
+
+    window.selectLookupItem = function(code, name) {
+        if (currentLookupType === "branch") {
+            document.getElementById("chartBranchCode").value = code;
+            document.getElementById("chartBranchName").value = name;
+        } else if (currentLookupType === "group") {
+            document.getElementById("chartGroupCode").value = code;
+            document.getElementById("chartGroupName").value = name;
+        }
+        window.closeLookupModal();
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadAccountsFromDatabase();
+
+        // สลับ Tabs
+        document.querySelectorAll(".gl-chart-tab-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".gl-chart-tab-btn").forEach(b => b.classList.remove("active"));
+                document.querySelectorAll(".gl-chart-tab-panel").forEach(p => p.classList.remove("active"));
+                btn.classList.add("active");
+                const targetId = btn.getAttribute("data-tab");
+                const panel = document.getElementById(targetId);
+                if (panel) panel.classList.add("active");
+            });
+        });
+
+        // ปุ่ม Refresh
+        document.getElementById("btnRefreshChart")?.addEventListener("click", () => {
+            const sCode = document.getElementById("searchAccCode");
+            const sName = document.getElementById("searchAccName");
+            if (sCode) sCode.value = "";
+            if (sName) sName.value = "";
+            loadAccountsFromDatabase();
+            showToast("รีเฟรชข้อมูลผังบัญชีเรียบร้อยแล้ว", "success");
+        });
+
+        // ปุ่ม เพิ่ม
+        document.getElementById("btnAddChart")?.addEventListener("click", () => {
+            setFormState("add");
+            document.getElementById("chartBranchCode").value = "01";
+            document.getElementById("chartBranchName").value = "สถาบันการเงิน";
+            document.getElementById("chartCategorySelect").value = "1";
+            document.getElementById("chartAccCode").value = "";
+            document.getElementById("chartAccName").value = "";
+            document.getElementById("chartGroupCode").value = "01";
+            document.getElementById("chartGroupName").value = "บัญชี 1";
+            document.getElementById("radioDebit").checked = true;
+            document.getElementById("chartOpeningBalance").value = "0.00";
+            document.getElementById("chartAccCode")?.focus();
+        });
+
+        // ปุ่ม แก้ไข
+        document.getElementById("btnEditChart")?.addEventListener("click", () => {
+            if (!selectedAccCode) {
+                showToast("กรุณาเลือกรายการในตารางที่ต้องการแก้ไข", "error");
+                return;
+            }
+            setFormState("edit");
+            document.getElementById("chartAccName")?.focus();
+        });
+
+        // ปุ่ม ลบ
+        document.getElementById("btnDeleteChart")?.addEventListener("click", handleDeleteChart);
+
+        // ปุ่ม บันทึก
+        document.getElementById("btnSaveChart")?.addEventListener("click", handleSaveChart);
+
+        // ปุ่ม ออก
+        document.getElementById("btnExitChart")?.addEventListener("click", () => {
+            window.location.href = "/DK_Home";
+        });
+
+        // ค้นหาแบบ Real-time
+        document.getElementById("searchAccCode")?.addEventListener("input", renderGrid);
+        document.getElementById("searchAccName")?.addEventListener("input", renderGrid);
+
+        // อัปเดตชื่อสาขา/กลุ่มอัตโนมัติเมื่อพิมพ์รหัส
+        document.getElementById("chartBranchCode")?.addEventListener("input", function() {
+            const found = BRANCH_LIST.find(b => b.code === this.value.trim());
+            if (found) document.getElementById("chartBranchName").value = found.name;
+        });
+        document.getElementById("chartGroupCode")?.addEventListener("input", function() {
+            const found = GROUP_LIST.find(g => g.code === this.value.trim());
+            if (found) document.getElementById("chartGroupName").value = found.name;
+        });
+
+        // ปุ่มคัดลอกผังบัญชีใน Tab 2
+        document.getElementById("btnExecuteCopy")?.addEventListener("click", () => {
+            const targetBr = document.getElementById("copyTargetBranch")?.value || "02";
+            showToast(`คัดลอกผังบัญชีไปยังสาขา ${targetBr} เรียบร้อยแล้ว`, "success");
+        });
+    });
+})();
+</script>
+{% endblock %}

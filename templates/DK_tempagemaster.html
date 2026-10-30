@@ -1,0 +1,195 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}DK_Home Page{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to DK_home</h2>
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<form id="Formdate">
+
+    <p>บันทึกทดสอบวันที่</p>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-bottom:15px;">
+
+        <button type="submit" class="submit-btnsave">
+            📄 บันทึก
+        </button>
+
+        <button type="button" id="btnCancel">
+            🗑️ ยกเลิก
+        </button>
+
+    </div>
+
+    <hr class="my-box">
+
+    <div class="row-container">
+
+        
+
+    </div>
+
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<script type="module">
+
+import { API_BASE } from "/static/js/config.js";
+
+// readonly
+document.getElementById("IdEmployee").readOnly = true;
+
+// แปลง ค.ศ. → พ.ศ.
+flatpickr("#thai-date", {
+
+    locale: "th",
+
+    dateFormat: "d/m/Y",
+
+    defaultDate: "today",
+
+    allowInput: false,
+
+    onReady: function(selectedDates, dateStr, instance) {
+
+        changeToBuddhistYear(instance);
+
+        const today = new Date();
+
+        instance.input.value = formatThaiDate(today);
+
+        updateHiddenDate(today);
+    },
+
+    onChange: function(selectedDates, dateStr, instance) {
+
+        const date = selectedDates[0];
+
+        instance.input.value = formatThaiDate(date);
+
+        updateHiddenDate(date);
+
+        changeToBuddhistYear(instance);
+    },
+
+    onMonthChange: function(selectedDates, dateStr, instance) {
+
+        changeToBuddhistYear(instance);
+    },
+
+    onYearChange: function(selectedDates, dateStr, instance) {
+
+        changeToBuddhistYear(instance);
+    }
+
+});
+
+// เปลี่ยนปี ค.ศ. เป็น พ.ศ.
+function changeToBuddhistYear(instance) {
+
+    setTimeout(() => {
+
+        const yearElement = instance.currentYearElement;
+
+        if (yearElement) {
+
+            const christianYear =
+                parseInt(yearElement.value);
+
+            if (!isNaN(christianYear)) {
+
+                yearElement.value =
+                    christianYear + 543;
+            }
+        }
+
+    }, 1);
+}
+
+// format พ.ศ.
+function formatThaiDate(date) {
+
+    const day =
+        String(date.getDate()).padStart(2, '0');
+
+    const month =
+        String(date.getMonth() + 1).padStart(2, '0');
+
+    const year =
+        date.getFullYear() + 543;
+
+    return `${day}/${month}/${year}`;
+}
+
+// hidden ค.ศ.
+function updateHiddenDate(date) {
+
+    const yyyy = date.getFullYear();
+
+    const mm =
+        String(date.getMonth() + 1).padStart(2, '0');
+
+    const dd =
+        String(date.getDate()).padStart(2, '0');
+
+    document.getElementById("ad-date").value =
+        `${yyyy}-${mm}-${dd}`;
+}
+
+// submit
+document.getElementById("Formdate")
+    .addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE}/saveuseremployee`,
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if(data.error === "0"){
+
+            alert("✅ บันทึกสำเร็จ");
+
+        }else{
+
+            alert("❌ " + data.message);
+
+        }
+
+    } catch(err){
+
+        console.error(err);
+
+        alert("❌ เกิดข้อผิดพลาด");
+
+    }
+
+});
+
+// ยกเลิก
+document.getElementById("btnCancel")
+    .addEventListener("click", () => {
+
+    window.location.reload();
+
+});
+
+</script>
+
+{% endblock %}

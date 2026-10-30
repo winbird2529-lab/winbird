@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='permission.css') }}">
 <p>Hello Flask layout!</p>
 <h3><a href="/DK_Home">HOME</a> \ ทะเบียนพนักงาน</h3>
 <div class="main">
@@ -31,7 +32,7 @@
             </div>
 
             <!-- Search Box & Add Button -->
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                 <div class="search-box" style="margin-bottom: 0;">
                     <div class="search-wrapper">
                         <span class="search-icon">🔍</span>
@@ -41,7 +42,7 @@
                 </div>
 
                 <a href="/DK_fromemployee" class="btn-add-customer">
-                    <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
@@ -64,7 +65,8 @@
                     <th>ตำแหน่ง</th>
                     <th>วันที่เริ่มงาน</th>
                     <th>สถานะ</th>
-                    <th>จัดการ</th>
+                    <th>บันทึกโดย</th>
+                    <th style="width: 220px; white-space:nowrap; text-align:center;">จัดการ</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -242,7 +244,7 @@
       tbody.innerHTML = "";
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 25px; color: #888;">ไม่พบข้อมูลพนักงานที่ค้นหา</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 25px; color: #888;">ไม่พบข้อมูลพนักงานที่ค้นหา</td></tr>`;
         if (summary) summary.innerText = `แสดง 0 จากทั้งหมด ${allData.length} รายการ`;
         return;
       }
@@ -266,16 +268,19 @@
             <td>${emp.position || ''}</td>
             <td>${formatThaiDate(emp.date)}</td>
             <td>${emp.status_name || ''}</td>
-            <td class="action-col">
-              <button class="btn-viwe" data-id="${emp.IdEmployee}">
-                ดูข้อมูล
-              </button>
-              <button class="btn-edit" data-id="${emp.IdEmployee}">
-                แก้ไข
-              </button>
-              <button class="btn-delete" data-id="${emp.IdEmployee}">
-                ลบ
-              </button>
+            <td><span class="badge-audit badge-userid" style="font-size:12px;">${emp.userid || '-'}</span></td>
+            <td class="action-col" style="white-space:nowrap; text-align:center;">
+              <div class="action-buttons" style="display:inline-flex; align-items:center; gap:5px; white-space:nowrap;">
+                <button type="button" class="btn-viwe" data-id="${emp.IdEmployee}" title="ดูรายละเอียดข้อมูลพนักงาน">
+                  👁️ ดูข้อมูล
+                </button>
+                <button type="button" class="btn-edit" data-id="${emp.IdEmployee}" title="แก้ไขข้อมูลพนักงาน">
+                  ✏️ แก้ไข
+                </button>
+                <button type="button" class="btn-delete" data-id="${emp.IdEmployee}" title="ลบข้อมูลพนักงาน">
+                  🗑️ ลบ
+                </button>
+              </div>
             </td>
           </tr>
         `;
@@ -339,28 +344,29 @@
 // เมื่อกดปุ่มดูข้อมูล
 
 document.addEventListener("click", function (e) {
-  if (e.target.classList.contains("btn-viwe")) {
-    const id = e.target.dataset.id;
+  const btn = e.target.closest(".btn-viwe");
+  if (btn) {
+    const id = btn.dataset.id;
     window.location.href = `/DK_Viweemployee?id=${id}`;
   }
 });
 
 // ✅ ปุ่มแก้ไข
 document.addEventListener("click", function (e) {
-  if (e.target.classList.contains("btn-edit")) {
-    const id = e.target.dataset.id;
+  const btn = e.target.closest(".btn-edit");
+  if (btn) {
+    const id = btn.dataset.id;
 
     // ส่ง id ไปหน้าแก้ไขแบบ query string
     window.location.href = `/DK_Editemployee?id=${id}`;
   }
 });
 
-
-
 //ปุ่มลบ
 document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("btn-delete")) {
-    const id = e.target.dataset.id;
+  const btn = e.target.closest(".btn-delete");
+  if (btn) {
+    const id = btn.dataset.id;
 
     if (!confirm(`ต้องการลบพนักงาน ${id} ใช่หรือไม่?`)) return;
 

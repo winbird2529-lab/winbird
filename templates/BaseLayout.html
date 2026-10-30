@@ -5,53 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='css.css') }}">
     <title>{% block title %}DK_Home{% endblock %}</title>
-    
+    <script>
+      if (localStorage.getItem("dk_sidebar_collapsed") === "1") {
+        document.documentElement.classList.add("preload-sidebar-collapsed");
+      }
+    </script>
   </head>
-
   <body>
     <div class="layout">
         
       <div class="header">
-        
-        <h2>ระบบบันทึกรายการ</h2>
-          
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button type="button" id="btnToggleSidebar" class="sidebar-toggle-btn" title="หุบ/กางแถบเมนู (Ctrl+B)">
+            ☰
+          </button>
+          <h2 style="margin:0; font-size:18px;">ระบบฌาปนกิจสงเคราะห์</h2>
+        </div>
+        <div style="margin-right:20px; font-size:14px; color:#f8fafc; display:flex; align-items:center; gap:8px;">
+          <span>👤 ผู้ใช้งาน: <strong id="headerCurrentUser" style="color:#fed7aa;">admin</strong></span>
+        </div>
       </div>
+
       <!-- Sidebar -->
-      <div class="sidebar">
+      <div class="sidebar" id="appSidebar">
         <nav>
-           <h2>ค่าคงที่</h2>
-           <ul class="navbar">
-            <li><a href="/DK_Home">HOME</a></li>
-            <li><a href="/DK_Running">เลขที่เอกสาร</a></li>
-            <li><a href="/DK_customer">ทะเบียนสมาชิก</a></li>
-            <li><a href="/DK_Employee">ทะเบียนพนักงาน</a></li>
-            <li><a href="/DK_Beneficiary">ทะเบียนผู้รับผลประโยชน์</a></li>
-           </ul>
-          
-          
-          <h2>เมนู</h2>
-          <ul class="navbar">
-            <li><a href="/DK_customerDeceased">สมาชิกลาออก/เสียชีวิต</a></li>
-            <li><a href="/DK_Transaction">บันทึกรายการตั้งสมาชิกเสียชีวิต</a></li>
-            <li><a href="/DK_showTransaction">แสดงรายการตั้งสมาชิกเสียชีวิต</a></li>
-            <li><a href="/DK_Movement">บันทึกรายการเก็บเงิน</a></li>
-            <li><a href="/DK_showMovement">แสดงบันทึกรายการเก็บเงิน</a></li>
-          </ul>
-        
+          <div class="sidebar-top-title">
+            <span>เมนูระบบงาน</span>
+            <span style="font-size: 10px; font-weight: normal; color: #94a3b8;">v2.0</span>
+          </div>
 
-          <h2>รายงาน</h2>
-          <ul class="navbar">
-            <li><a href="/DK_Viwecustomer">รายงานทะเบียนสมาชิก</a></li>
-            <li><a href="/DK_Viweemployee">รายงานทะเบียนพนักงาน</a></li>
-            <li><a href="/DK_ViweMovement">รายงานการรับชำระเงิน</a></li>
-            <li><a href="/DK_Test">ทดสอบ form</a></li>
-            <li><a href="/fromdate">ทดสอบ บันทึกวันที</a></li>
+          <a href="/DK_Home" class="sidebar-home-link" title="หน้าแดชบอร์ดภาพรวมระบบ">
+            <span style="font-size: 16px;">📊</span>
+            <span>แดชบอร์ดภาพรวม</span>
+          </a>
+
+          <h2 class="menu-group-header group-constant" data-target="menuListConstant" id="menuTitleConstant">
+            <span class="group-title-content"><span class="group-icon">⚙️</span> ค่าคงที่ระบบ</span>
+            <span class="group-arrow">▼</span>
+          </h2>
+          <ul class="navbar" id="menuListConstant">
+            <li class="menu-item-running"><a href="/DK_Running" data-perm="running">ค่าคงที่ระบบ</a></li>
+            <li class="menu-item-running"><a href="/DK_Constant" data-perm="Constant">ชื่อสำนักงาน</a></li>
+            <li class="menu-item-customer"><a href="/DK_customer" data-perm="customer">ทะเบียนสมาชิก</a></li>
+            <li class="menu-item-employee"><a href="/DK_Employee" data-perm="employee">ทะเบียนพนักงาน</a></li>
+            <li class="menu-item-beneficiary"><a href="/DK_Beneficiary" data-perm="beneficiary">ทะเบียนผู้รับผลประโยชน์</a></li>
+          </ul>
+          
+          <h2 class="menu-group-header group-cremation" data-target="menuListTrans" id="menuTitleTrans">
+            <span class="group-title-content"><span class="group-icon">🕊️</span> ระบบฌาปนกิจสงเคราะห์</span>
+            <span class="group-arrow">▼</span>
+          </h2>
+          <ul class="navbar" id="menuListTrans">
+            <li class="menu-item-deceased"><a href="/DK_customerDeceased" data-perm="deceased">สมาชิกลาออก/เสียชีวิต</a></li>
+            <li class="menu-item-transaction"><a href="/DK_Transaction" data-perm="transaction">บันทึกรายการตั้งสมาชิกเสียชีวิต</a></li>
+            <li class="menu-item-transaction"><a href="/DK_showTransaction" data-perm="transaction">แสดงรายการตั้งสมาชิกเสียชีวิต</a></li>
+            <li class="menu-item-movement"><a href="/DK_Movement" data-perm="movement">บันทึกรายการเก็บเงิน💰</a></li>
+            <li class="menu-item-movement"><a href="/DK_showMovement" data-perm="movement">แสดงบันทึกรายการเก็บเงิน</a></li>
           </ul>
 
-          <h2>APPS</h2>
-          <ul class="navbar">
-            <li><a href="/login">login</a></li>
-            <li><a href="/">ออกจากระบบ</a></li>
+          <h2 class="menu-group-header group-report" data-target="menuListReport" id="menuTitleReport">
+            <span class="group-title-content"><span class="group-icon">📊</span> รายงานฌาปนกิจสงเคราะห์</span>
+            <span class="group-arrow">▼</span>
+          </h2>
+          <ul class="navbar" id="menuListReport">
+            <li class="menu-item-viewCustomer"><a href="/DK_Viwecustomer" data-perm="view_customer">1. รายงานทะเบียนสมาชิก</a></li>
+            <li class="menu-item-viewEmployee"><a href="/DK_Viweemployee" data-perm="view_employee">2. รายงานทะเบียนพนักงาน</a></li>
+            <li class="menu-item-viewMovement"><a href="/DK_ViweMovement" data-perm="view_movement">3. รายงานการรับชำระเงิน</a></li>
+            <li class="menu-item-viewTransaction"><a href="/DK_ViweTransaction" data-perm="view_transaction">4. รายงานยอดค้างตามรายศพ</a></li>
+            <li class="menu-item-viewPerson"><a href="/DK_Viweperson" data-perm="view_person">5. รายงานข้อมูลบุคคล</a></li>
+          </ul>
+          
+          <h2 class="menu-group-header group-incexp" data-target="menuListIncExp" id="menuTitleIncExp">
+            <span class="group-title-content"><span class="group-icon">💵</span> ระบบรับจ่าย</span>
+            <span class="group-arrow">▼</span>
+          </h2>
+          <ul class="navbar" id="menuListIncExp">
+            <li class="menu-item-IETypeIncExp"><a href="/IE_TypeIncExp" data-perm="IETypeIncExp">ทะเบียนรับจ่าย</a></li>
+            <li class="menu-item-Incn"><a href="/IE_Incn" data-perm="Incn">บันทึกรายรับ</a></li>
+            <li class="menu-item-IncnShow"><a href="/IE_Incn" data-perm="Incn">แสดงรายการรับจ่าย</a></li>
+            <li class="menu-item-Exp"><a href="/IE_Exp" data-perm="Exp">บันทึกรายจ่าย</a></li>
+            <li class="menu-item-ExpShow"><a href="/IE_Exp" data-perm="Exp">แสดงรายการจ่าย</a></li>
+            <li class="menu-item-ReportIncExp"><a href="/IE_IncExp" data-perm="ReportIncExp">1.รายงานรับจ่าย</a></li>
+            
+
+            
+          </ul>
+          
+          <h2 class="menu-group-header group-account" data-target="menuListAccount" id="menuTitleAccount">
+            <span class="group-title-content"><span class="group-icon">💰</span> ระบบบัญชี</span>
+            <span class="group-arrow">▼</span>
+          </h2>
+          <ul class="navbar" id="menuListAccount">
+            <li class="menu-item-GL_Period"><a href="/GL_Period" data-perm="GLPeriod">รอบบัญชี</a></li>
+            <li class="menu-item-GLAccountChart"><a href="/GL_AccountChart" data-perm="GLAccountChart">ผังบัญชี</a></li>
+            <li class="menu-item-GLBook"><a href="/GL_Book" data-perm="GLBook">สมุดบัญชี</a></li>
+            <li class="menu-item-GLtran"><a href="/GL_tran" data-perm="GLtran">ข้อมูลรายวัน</a></li>
+            <li class="menu-item-GLtranEdit"><a href="/GL_tranEdit" data-perm="GLtranEdit">รายการบัญชี</a></li>
+            <li class="menu-item-GLPattern"><a href="/GL_Pattern" data-perm="GLPattern">รูปแบบบัญชี</a></li>
+          </ul>
+
+          <h2 class="menu-group-header group-system" data-target="menuListSystem" id="menuTitleSystem">
+            <span class="group-title-content"><span class="group-icon">🛡️</span> จัดการระบบ</span>
+            <span class="group-arrow">▼</span>
+          </h2>
+          <ul class="navbar" id="menuListSystem">
+            <li class="menu-item-permission"><a href="/DK_fromUserPermission" data-perm="permission">กำหนดสิทธิ์ผู้ใช้งาน</a></li>
+            <li><a href="/logout" onclick="sessionStorage.removeItem('dk_logged_user');">🚪 ออกจากระบบ</a></li>
           </ul>
         </nav>
       </div>
@@ -67,7 +126,203 @@
 
     </div>
 
+    <script>
+      (function applyPermissionControl() {
+        try {
+          const saved = sessionStorage.getItem("dk_logged_user");
+          const publicPaths = ["/login", "/select_system", "/"];
+          const currentPath = window.location.pathname.toLowerCase();
 
+          // 1. If not logged in, redirect to login
+          if (!saved) {
+            if (!publicPaths.includes(currentPath)) {
+              window.location.replace("/login");
+              return;
+            }
+            return;
+          }
+
+          const user = JSON.parse(saved);
+          const role = (user.role || "").toLowerCase();
+          const perms = Array.isArray(user.permissions) ? user.permissions : [];
+
+          // 2. Display User & Role Badge in Header
+          const elUser = document.getElementById("headerCurrentUser");
+          if (elUser && user.username) {
+            let roleBadge = "👤 user";
+            let roleBg = "#0284c7";
+            if (role === "admin") {
+              roleBadge = "👑 admin";
+              roleBg = "#dc2626";
+            } else if (role === "ceo") {
+              roleBadge = "👔 CEO";
+              roleBg = "#9333ea";
+            }
+            elUser.innerHTML = `${escapeHtml(user.username)} <span style="font-size:11px; font-weight:normal; background:${roleBg}; color:#fff; padding:2px 7px; border-radius:10px; margin-left:6px;">${roleBadge}</span>`;
+          }
+
+          // 3. Admin has full access to all menus & pages
+          if (role === "admin") {
+            return;
+          }
+
+          // 4. Non-Admin (CEO or user):
+          // HIDE "กำหนดสิทธิ์ผู้ใช้งาน" (Permission Management) from Sidebar
+          document.querySelectorAll(".menu-item-permission, [data-perm='permission']").forEach(el => {
+            const li = el.tagName === "LI" ? el : el.closest("li");
+            if (li) li.style.display = "none";
+          });
+
+          // 5. Role 'user' (or 'staff' / 'member'):
+          if (role === "user" || role === "staff" || role === "member") {
+            // HIDE "ค่าคงที่" (ชื่อสำนักงาน & ค่าคงที่/เลขที่เอกสาร)
+            document.querySelectorAll(".menu-item-running, [data-perm='running']").forEach(el => {
+              const li = el.tagName === "LI" ? el : el.closest("li");
+              if (li) li.style.display = "none";
+            });
+
+            // Filter other menu items based on user's granted permissions
+            document.querySelectorAll("[data-perm]").forEach(el => {
+              const reqPerm = el.getAttribute("data-perm");
+              if (reqPerm && reqPerm !== "running" && reqPerm !== "permission") {
+                if (!perms.includes(reqPerm)) {
+                  const li = el.tagName === "LI" ? el : el.closest("li");
+                  if (li) li.style.display = "none";
+                }
+              }
+            });
+          }
+
+          // 6. Direct Route Protection Guard
+          // Block non-admins from /DK_fromUserPermission
+          if (currentPath.includes("userpermission")) {
+            alert("⚠️ คุณไม่มีสิทธิ์เข้าถึงหน้ากำหนดสิทธิ์ผู้ใช้งาน (เฉพาะ Admin เท่านั้น)");
+            window.location.replace("/DK_Home");
+            return;
+          }
+
+          // Block users from /DK_Running and /DK_Constant (ค่าคงที่)
+          if ((currentPath.includes("running") || currentPath.includes("constant")) && (role === "user" || role === "staff" || role === "member")) {
+            if (!perms.includes("running")) {
+              alert("⚠️ คุณไม่มีสิทธิ์เข้าถึงหน้ากำหนดค่าคงที่ระบบ");
+              window.location.replace("/DK_Home");
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("Permission control error:", e);
+        }
+
+        function escapeHtml(text) {
+          return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+      })();
+
+      // Ensure constant cusid is cached in sessionStorage so all forms have instant access to cusid
+      (function preloadConstantCusid() {
+        if (!sessionStorage.getItem("dk_constant_cusid")) {
+          fetch("/api/constant")
+            .then(res => res.json())
+            .then(res => {
+              if (res && res.data) {
+                const c = (res.data.cusid || res.data.tax_id || "").trim();
+                if (c) sessionStorage.setItem("dk_constant_cusid", c);
+              }
+            })
+            .catch(() => {});
+        }
+      })();
+
+      // ==========================================
+      // ระบบหุบ/กางเมนู (Collapsible Sidebar & Accordion Groups)
+      // ==========================================
+      (function initCollapsibleMenu() {
+        const layout = document.querySelector(".layout");
+        const btnToggle = document.getElementById("btnToggleSidebar");
+
+        // 1. ตรวจสอบและซิงค์สถานะ Sidebar กับ localStorage
+        const savedSidebarState = localStorage.getItem("dk_sidebar_collapsed");
+        if (savedSidebarState === "1" && layout) {
+          layout.classList.add("sidebar-collapsed");
+        } else if (savedSidebarState === "0" && layout) {
+          layout.classList.remove("sidebar-collapsed");
+          document.documentElement.classList.remove("preload-sidebar-collapsed");
+        }
+
+        // 2. คลิกปุ่ม Toggle เพื่อหุบ/กาง Sidebar ทั้งแถบ
+        if (btnToggle && layout) {
+          btnToggle.addEventListener("click", function() {
+            const isCurrentlyCollapsed = layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("dk_sidebar_collapsed", isCurrentlyCollapsed ? "1" : "0");
+            if (!isCurrentlyCollapsed) {
+              document.documentElement.classList.remove("preload-sidebar-collapsed");
+            }
+          });
+        }
+
+        // 3. คีย์ลัด Ctrl + B เพื่อหุบ/กางแถบเมนู
+        document.addEventListener("keydown", function(e) {
+          if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) {
+            e.preventDefault();
+            if (btnToggle) btnToggle.click();
+          }
+        });
+
+        // 4. ระบบคลิกหัวข้อหมวดหมู่เพื่อหุบ/กางเมนูย่อย (Accordion)
+        let collapsedGroups = [];
+        try {
+          collapsedGroups = JSON.parse(localStorage.getItem("dk_collapsed_menu_groups") || "[]");
+        } catch(e) {
+          collapsedGroups = [];
+        }
+
+        document.querySelectorAll(".menu-group-header").forEach(header => {
+          const targetId = header.getAttribute("data-target");
+          const targetList = document.getElementById(targetId);
+
+          // ซิงค์สถานะที่เคยพับไว้
+          if (targetList && collapsedGroups.includes(targetId)) {
+            header.classList.add("collapsed");
+            targetList.classList.add("collapsed");
+          }
+
+          // เมื่อคลิกที่หัวข้อหมวดหมู่
+          header.addEventListener("click", function(e) {
+            if (!targetList) return;
+            const isNowCollapsed = targetList.classList.toggle("collapsed");
+            header.classList.toggle("collapsed", isNowCollapsed);
+
+            // บันทึกสถานะหมวดหมู่ที่พับไว้
+            try {
+              let saved = JSON.parse(localStorage.getItem("dk_collapsed_menu_groups") || "[]");
+              if (isNowCollapsed) {
+                if (!saved.includes(targetId)) saved.push(targetId);
+              } else {
+                saved = saved.filter(id => id !== targetId);
+              }
+              localStorage.setItem("dk_collapsed_menu_groups", JSON.stringify(saved));
+            } catch(err) {}
+          });
+        });
+
+        // 5. ไฮไลท์เมนูหน้าที่เปิดอยู่ (Active Menu Link)
+        try {
+          const currentPath = window.location.pathname.toLowerCase();
+          document.querySelectorAll(".sidebar nav a").forEach(link => {
+            const href = (link.getAttribute("href") || "").toLowerCase();
+            if (href && (currentPath === href || (href !== "/" && href !== "/dk_home" && currentPath.startsWith(href)))) {
+              link.classList.add("active");
+              const parentUl = link.closest("ul.navbar");
+              if (parentUl && parentUl.classList.contains("collapsed")) {
+                parentUl.classList.remove("collapsed");
+                const parentHeader = document.querySelector(`.menu-group-header[data-target="${parentUl.id}"]`);
+                if (parentHeader) parentHeader.classList.remove("collapsed");
+              }
+            }
+          });
+        } catch(e) {}
+      })();
+    </script>
   </body>
 </html>
 

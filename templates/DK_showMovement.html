@@ -16,44 +16,41 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
-
+<h2>Welcome to DK_showMovement!</h2>
+<p>Hello Flask layout!</p>
+<h3><a href="/DK_Home">HOME</a> / แสดงบันทึกรายการเก็บเงิน</h3>
 
 <div class="tran-page-wrapper">
-    <!-- Breadcrumb Navigation -->
-    <div class="tran-breadcrumb">
-        <a href="/DK_Home">HOME</a>
-        <span class="tran-breadcrumb-separator">/</span>
-        <span>บันทึกรายการเก็บเงิน</span>
-        <span class="tran-breadcrumb-separator">/</span>
-        <span>แสดงบันทึกรายการเก็บเงิน</span>
-    </div>
-
+  
     <!-- Main Container Card -->
     <div class="movement-main-card">
         <!-- Toolbar: Date Range + View All + Search + Add Payment -->
         <div class="movement-toolbar">
             <!-- Date Filter: จาก - ถึง - ดูรายการทั้งหมด -->
             <div class="date-filter-group">
-                <span style="font-weight: 600; color: #1e3c72; font-size: 14.5px;">📅 วันที่:</span>
+                <span style="font-weight: 600; color: #273B4A; font-size: 13px;">📅 วันที่:</span>
                 <input type="text" id="critFromDate" class="date-filter-input" placeholder="วว/ดด/ปปปป" title="เลือกวันที่เริ่มต้น">
-                <span style="color: #64748b; font-size: 14px; font-weight: 500;">ถึง</span>
+                <span style="color: #64748b; font-size: 12.5px; font-weight: 500;">ถึง</span>
                 <input type="text" id="critToDate" class="date-filter-input" placeholder="วว/ดด/ปปปป" title="เลือกวันที่สิ้นสุด">
+                <button type="button" id="btnToday" class="btn-view-all" style="background: #3b5366; color: #ffffff;" title="แสดงเฉพาะรายการของวันนี้">
+                    📅 วันนี้
+                </button>
                 <button type="button" id="btnViewAll" class="btn-view-all" title="ล้างตัวกรองวันที่เพื่อดูรายการทั้งหมด">
                     📋 ดูรายการทั้งหมด
                 </button>
             </div>
 
             <!-- Search Input & Add Button -->
-            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <div class="search-box" style="margin-bottom: 0;">
-                    <div class="search-wrapper" style="width: 320px;">
+                    <div class="search-wrapper">
                         <span class="search-icon">🔍</span>
                         <input type="text" class="search-input" placeholder="ค้นหาเลขที่เอกสาร, รหัสสมาชิก, ชื่อ-นามสกุล, เลขบัตร...">
                     </div>
                     <button type="button" class="search-button">ค้นหา</button>
                 </div>
-                <a href="/DK_Movement" class="btn-add-customer" style="padding: 9px 18px; font-size: 14px; border-radius: 8px;">
-                    <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <a href="/DK_Movement" class="btn-add-customer">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
@@ -66,30 +63,29 @@
         <table id="movementTable">
             <thead>
                 <tr>
-                    <th style="width: 85px; text-align: center;">ดูรายการ</th>
-                    <th style="width: 50px; text-align: center;">ลำดับ</th>
-                    <th style="width: 125px;">เลขที่เอกสาร</th>
-                    <th style="width: 115px; text-align: center;">วันที่รับเงิน</th>
-                    <th style="width: 110px;">รหัสสมาชิก</th>
-                    <th style="min-width: 170px;">ชื่อ - นามสกุลสมาชิก</th>
-                    <th style="width: 130px; text-align: center;">ช่องทางชำระ</th>
-                    <th style="width: 120px; text-align: right;">ยอดหนี้รวม</th>
-                    <th style="width: 130px; text-align: right;">ยอดรับชำระ</th>
-                    <th style="width: 115px; text-align: right;">คงเหลือ</th>
-                    <th style="width: 105px; text-align: center;">สถานะ</th>
-                    <th style="width: 180px; text-align: center;">จัดการ</th>
+                    <th style="width: 45px; text-align: center;">ลำดับ</th>
+                    <th style="width: 115px;">เลขที่เอกสาร</th>
+                    <th style="width: 100px; text-align: center;">วันที่รับเงิน</th>
+                    <th style="width: 95px;">รหัสสมาชิก</th>
+                    <th style="min-width: 150px;">ชื่อ - นามสกุลสมาชิก</th>
+                    <th style="width: 105px; text-align: center;">ช่องทางชำระ</th>
+                    <th style="width: 105px; text-align: right;">ยอดหนี้รวม</th>
+                    <th style="width: 110px; text-align: right;">ยอดรับชำระ</th>
+                    <th style="width: 100px; text-align: right;">คงเหลือ</th>
+                    <th style="width: 95px; text-align: center;">สถานะ</th>
+                    <th style="width: 160px; text-align: center;">จัดการ</th>
                 </tr>
             </thead>
             <tbody>
-                <tr><td colspan="12" style="text-align:center; padding: 35px; color:#888;">กำลังโหลดข้อมูลรายการรับเงิน...</td></tr>
+                <tr><td colspan="11" style="text-align:center; padding: 20px; color:#888;">กำลังโหลดข้อมูลรายการรับเงิน...</td></tr>
             </tbody>
         </table>
         
-        <hr class="my-box" style="margin: 20px 0;">
+        <hr class="my-box" style="margin: 14px 0;">
 
         <!-- Pagination & Page Info -->
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 4px 2px;">
-            <span id="pageInfo" style="font-size: 14.5px; color: #64748b; font-weight: 500;"></span>
+            <span id="pageInfo" style="font-size: 12.5px; color: #64748b; font-weight: 500;"></span>
             <div id="pagination" class="pagination" style="margin: 0;"></div>
         </div>
     </div>
@@ -133,9 +129,6 @@ let allData = [];
 let filteredData = [];
 let currentDocDetail = null;
 const docDetailsCache = new Map();
-
-let fromDateYMD = "";
-let toDateYMD = "";
 
 // ==========================================
 // Formatting Helpers
@@ -189,6 +182,12 @@ function changeToBuddhistYear(instance) {
     }, 1);
 }
 
+// กำหนดให้ตัวกรองเริ่มต้นแสดงรายการของวันที่ปัจจุบัน (วันนี้)
+const todayDate = new Date();
+const todayYMD = formatDateToYMD(todayDate);
+let fromDateYMD = todayYMD;
+let toDateYMD = todayYMD;
+
 // ==========================================
 // FLATPICKR INITIALIZATION
 // ==========================================
@@ -199,8 +198,12 @@ if (typeof flatpickr !== "undefined") {
     fpFrom = flatpickr("#critFromDate", {
         locale: "th",
         dateFormat: "d/m/Y",
+        defaultDate: todayDate,
         allowInput: false,
         onReady: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length) {
+                instance.input.value = formatThaiDateShort(selectedDates[0]);
+            }
             changeToBuddhistYear(instance);
         },
         onChange: function(selectedDates, dateStr, instance) {
@@ -223,8 +226,12 @@ if (typeof flatpickr !== "undefined") {
     fpTo = flatpickr("#critToDate", {
         locale: "th",
         dateFormat: "d/m/Y",
+        defaultDate: todayDate,
         allowInput: false,
         onReady: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length) {
+                instance.input.value = formatThaiDateShort(selectedDates[0]);
+            }
             changeToBuddhistYear(instance);
         },
         onChange: function(selectedDates, dateStr, instance) {
@@ -242,6 +249,32 @@ if (typeof flatpickr !== "undefined") {
         },
         onMonthChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); },
         onYearChange: function(selectedDates, dateStr, instance) { changeToBuddhistYear(instance); }
+    });
+}
+
+// Button "วันนี้"
+const btnToday = document.getElementById("btnToday");
+if (btnToday) {
+    btnToday.addEventListener("click", () => {
+        const now = new Date();
+        const nowYMD = formatDateToYMD(now);
+        fromDateYMD = nowYMD;
+        toDateYMD = nowYMD;
+        if (fpFrom) {
+            fpFrom.setDate(now, false);
+            fpFrom.set('maxDate', null);
+            const cFrom = document.getElementById("critFromDate");
+            if (cFrom) cFrom.value = formatThaiDateShort(now);
+            changeToBuddhistYear(fpFrom);
+        }
+        if (fpTo) {
+            fpTo.setDate(now, false);
+            fpTo.set('minDate', null);
+            const cTo = document.getElementById("critToDate");
+            if (cTo) cTo.value = formatThaiDateShort(now);
+            changeToBuddhistYear(fpTo);
+        }
+        applyFilterAndSearch();
     });
 }
 
@@ -282,6 +315,15 @@ function loadMovements() {
                 return;
             }
             allData = Array.isArray(data.results) ? data.results : [];
+            // เรียงลำดับข้อมูล: วันที่ล่าสุดขึ้นก่อน (ถ้าวันเดียวกัน ให้ดูเลขที่เอกสารล่าสุด)
+            allData.sort((a, b) => {
+                const dateA = a.date || "";
+                const dateB = b.date || "";
+                if (dateA !== dateB) {
+                    return dateB.localeCompare(dateA);
+                }
+                return (b.docidmove || "").localeCompare(a.docidmove || "");
+            });
             applyFilterAndSearch();
         })
         .catch(err => {
@@ -395,7 +437,11 @@ function renderTable() {
     tbody.innerHTML = "";
 
     if (!filteredData || filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 40px 20px; color: #888; font-size:15px;">🔍 ไม่พบข้อมูลรายการรับชำระเงินที่ค้นหา</td></tr>`;
+        let emptyMsg = "🔍 ไม่พบข้อมูลรายการรับชำระเงินที่ค้นหา";
+        if (fromDateYMD && toDateYMD && fromDateYMD === toDateYMD && fromDateYMD === formatDateToYMD(new Date())) {
+            emptyMsg = `🔍 ไม่พบรายการรับชำระเงินของวันนี้ (${formatThaiDateShort(new Date())})<br><span style="font-size:13.5px; color:#64748b; font-weight:normal; margin-top:8px; display:inline-block;">(สามารถคลิกปุ่ม <strong>"📋 ดูรายการทั้งหมด"</strong> ด้านบนเพื่อดูรายการย้อนหลังทั้งหมด)</span>`;
+        }
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 40px 20px; color: #888; font-size:15px; line-height: 1.6;">${emptyMsg}</td></tr>`;
         const pageInfo = document.getElementById("pageInfo");
         if (pageInfo) pageInfo.innerText = "ไม่พบรายการ";
         return;
@@ -457,35 +503,20 @@ function renderTable() {
         // Main Row
         const trMain = `
             <tr class="main-row ${isCanceled ? 'row-canceled' : ''}" id="row-${docid}">
-                <td style="text-align: center;">
-                    <button type="button" class="btn-expand-row" data-docid="${docid}" title="ขยายดูรายละเอียดรายการมรณะที่ชำระ">
-                        <span class="expand-icon">➕</span> ขยาย
-                    </button>
-                </td>
                 <td style="text-align: center; color: #64748b; font-weight: 500;">${rowNumber}</td>
-                <td><strong style="color: ${isCanceled ? '#64748b' : '#1e3c72'}; font-family: monospace; font-size: 15px;">${docid}</strong></td>
+                <td><strong style="color: ${isCanceled ? '#64748b' : '#273B4A'}; font-family: monospace; font-size: 13px;">${docid}</strong></td>
                 <td style="text-align: center; font-weight: 500;">${dateStr}</td>
-                <td><strong style="color: #475569; font-family: monospace; font-size: 14.5px;">${row.Idcustomer}</strong></td>
+                <td><strong style="color: #475569; font-family: monospace; font-size: 12.5px;">${row.Idcustomer}</strong></td>
                 <td>
-                    <strong style="font-size: 15px;">${row.prefix || ''}${row.name || ''} ${row.lastname || ''}</strong>
-                    ${row.Idcard ? `<div class="sub-idcard">เลขบัตร: ${row.Idcard}</div>` : ''}
+                    <strong style="font-size: 13px;">${row.prefix || ''}${row.name || ''} ${row.lastname || ''}</strong>
+                    ${row.Idcard ? `<div class="sub-idcard" style="font-size: 11px;">เลขบัตร: ${row.Idcard}</div>` : ''}
                 </td>
                 <td style="text-align: center;">${payTypeBadge}</td>
                 <td style="text-align: right; color: #64748b;">${formatCurrency(totalAmt)}</td>
-                <td style="text-align: right; font-weight: 700; color: ${isCanceled ? '#94a3b8; text-decoration: line-through;' : '#059669;'}; font-size: 15.5px;">${formatCurrency(payAmt)}</td>
+                <td style="text-align: right; font-weight: 700; color: ${isCanceled ? '#94a3b8; text-decoration: line-through;' : '#059669;'}; font-size: 13.5px;">${formatCurrency(payAmt)}</td>
                 <td style="text-align: right; color: ${remainAmt > 0 ? '#dc2626' : '#64748b'}; font-weight: ${remainAmt > 0 ? '700' : '500'};">${formatCurrency(remainAmt)}</td>
                 <td style="text-align: center;">${statusBadge}</td>
                 <td style="text-align: center;">${actionBtns}</td>
-            </tr>
-            <!-- Expandable Sub-Detail Row -->
-            <tr class="detail-row" id="detail-row-${docid}" style="display: none;">
-                <td colspan="12">
-                    <div id="detail-content-${docid}" style="padding: 6px 0;">
-                        <div style="text-align:center; padding: 20px; color: #64748b;">
-                            ⏳ กำลังโหลดรายละเอียดรายการมรณะที่ชำระ...
-                        </div>
-                    </div>
-                </td>
             </tr>
         `;
         tbody.insertAdjacentHTML("beforeend", trMain);
@@ -621,7 +652,7 @@ async function toggleRowDetail(docidmove, forceState = null) {
 
     // Fetch Details
     contentDiv.innerHTML = `
-        <div style="text-align:center; padding: 22px; color: #1e3c72;">
+        <div style="text-align:center; padding: 22px; color: #273B4A;">
             <div style="font-size: 24px; margin-bottom: 6px;">⏳</div>
             กำลังโหลดรายละเอียดรายการมรณะที่ชำระ (${docidmove})...
         </div>
@@ -651,21 +682,18 @@ function renderSubDetailCard(doc, container) {
     let detailRowsHtml = "";
 
     if (details.length === 0) {
-        detailRowsHtml = `<tr><td colspan="9" style="text-align:center; padding:18px; color:#888;">ไม่มีรายการมรณะแยกย่อย</td></tr>`;
+        detailRowsHtml = `<tr><td colspan="6" style="text-align:center; padding:18px; color:#888;">ไม่มีรายการมรณะแยกย่อย</td></tr>`;
     } else {
         details.forEach((item, idx) => {
             const dateStr = item.dateend ? formatThaiDateShort(item.dateend) : "-";
             detailRowsHtml += `
                 <tr>
                     <td style="text-align: center; color: #64748b;">${idx + 1}</td>
-                    <td><strong style="color: #1e3c72; font-family: monospace; font-size: 14px;">${item.docid || '-'}</strong></td>
                     <td><strong style="color: #1e293b;">${item.deceased_name || '-'}</strong></td>
                     <td style="text-align: center; color: #475569;">${dateStr}</td>
                     <td style="text-align: center; color: #475569;">${item.numberend || '-'}</td>
                     <td style="text-align: right; color: #64748b;">${formatCurrency(item.amount)}</td>
-                    <td style="text-align: right; color: #64748b;">${formatCurrency(item.paid_prev)}</td>
-                    <td style="text-align: right; font-weight: 700; color: #059669; font-size: 15px;">${formatCurrency(item.payamount)}</td>
-                    <td style="text-align: right; color: ${Number(item.remain) > 0 ? '#dc2626' : '#64748b'}; font-weight: ${Number(item.remain) > 0 ? '700' : 'normal'};">${formatCurrency(item.remain)}</td>
+                    <td style="text-align: right; font-weight: 700; color: #059669; font-size: 12.5px;">${formatCurrency(item.payamount)}</td>
                 </tr>
             `;
         });
@@ -676,8 +704,8 @@ function renderSubDetailCard(doc, container) {
             <div class="sub-detail-header">
                 <div class="sub-detail-title">
                     <span>📋 รายการมรณะที่ชำระในเอกสารนี้:</span>
-                    <strong style="font-family: monospace; color: #1e3c72; font-size: 16px;">${doc.docidmove}</strong>
-                    <span style="font-size: 13.5px; color: #0284c7; font-weight: 600;">(${details.length} รายการ)</span>
+                    <strong style="font-family: monospace; color: #273B4A; font-size: 13.5px;">${doc.docidmove}</strong>
+                    <span style="font-size: 12px; color: #3b5366; font-weight: 600;">(${details.length} รายการ)</span>
                 </div>
                 <div class="sub-detail-badges">
                     <span class="sub-meta-pill">👤 สมาชิก: <strong>${doc.Idcustomer} - ${doc.prefix || ''}${doc.name || ''} ${doc.lastname || ''}</strong></span>
@@ -692,14 +720,11 @@ function renderSubDetailCard(doc, container) {
                 <thead>
                     <tr>
                         <th style="width: 45px; text-align: center;">ลำดับ</th>
-                        <th style="width: 130px;">เลขที่เอกสารมรณะ</th>
                         <th>ชื่อผู้เสียชีวิต</th>
-                        <th style="width: 110px; text-align: center;">วันที่เสียชีวิต</th>
-                        <th style="width: 100px; text-align: center;">เลขที่มรณะ</th>
-                        <th style="width: 115px; text-align: right;">ยอดเรียกเก็บ</th>
-                        <th style="width: 110px; text-align: right;">ชำระก่อนหน้า</th>
-                        <th style="width: 125px; text-align: right;">ยอดชำระครั้งนี้</th>
-                        <th style="width: 115px; text-align: right;">หนี้คงเหลือ</th>
+                        <th style="width: 120px; text-align: center;">วันที่เสียชีวิต</th>
+                        <th style="width: 110px; text-align: center;">เลขที่มรณะ</th>
+                        <th style="width: 130px; text-align: right;">ยอดเรียกเก็บ</th>
+                        <th style="width: 140px; text-align: right;">ยอดชำระครั้งนี้</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -793,21 +818,18 @@ function renderReceiptContent(doc) {
 
     let detailsRowsHtml = "";
     if (details.length === 0) {
-        detailsRowsHtml = `<tr><td colspan="9" style="text-align:center; padding:20px; color:#888;">ไม่มีรายการแยกย่อย</td></tr>`;
+        detailsRowsHtml = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">ไม่มีรายการแยกย่อย</td></tr>`;
     } else {
         details.forEach((item, idx) => {
             const dateStr = item.dateend ? formatThaiDateShort(item.dateend) : "-";
             detailsRowsHtml += `
                 <tr>
                     <td style="text-align: center;">${idx + 1}</td>
-                    <td><strong style="color:#1e3c72; font-family: monospace;">${item.docid || '-'}</strong></td>
                     <td><strong>${item.deceased_name || '-'}</strong></td>
                     <td style="text-align: center;">${dateStr}</td>
                     <td style="text-align: center;">${item.numberend || '-'}</td>
                     <td style="text-align: right;">${formatCurrency(item.amount)}</td>
-                    <td style="text-align: right;">${formatCurrency(item.paid_prev)}</td>
                     <td style="text-align: right; font-weight:700; color:#059669;">${formatCurrency(item.payamount)}</td>
-                    <td style="text-align: right; color:#64748b;">${formatCurrency(item.remain)}</td>
                 </tr>
             `;
         });
@@ -817,8 +839,8 @@ function renderReceiptContent(doc) {
         <div class="receipt-paper" id="printableReceipt">
             <div class="receipt-header">
                 <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
-                <div style="font-size: 16px; font-weight: 600; color: #1e40af; margin-bottom: 4px;">ใบเสร็จรับเงิน / ใบรับชำระเงินสงเคราะห์</div>
-                <p>เลขที่เอกสาร: <strong style="font-family:monospace; font-size:15px; color:#1e3c72;">${doc.docidmove}</strong> | วันที่รับเงิน: <strong>${formatThaiDate(doc.date)}</strong></p>
+                <div style="font-size: 16px; font-weight: 600; color: #273B4A; margin-bottom: 4px;">ใบเสร็จรับเงิน / ใบรับชำระเงินสงเคราะห์</div>
+                <p>เลขที่เอกสาร: <strong style="font-family:monospace; font-size:15px; color:#273B4A;">${doc.docidmove}</strong> | วันที่รับเงิน: <strong>${formatThaiDate(doc.date)}</strong></p>
             </div>
 
             <div class="receipt-grid">
@@ -847,14 +869,11 @@ function renderReceiptContent(doc) {
                 <thead>
                     <tr>
                         <th style="width: 45px; text-align: center;">ลำดับ</th>
-                        <th style="width: 120px;">เลขที่เอกสารมรณะ</th>
                         <th>ชื่อผู้เสียชีวิต</th>
-                        <th style="width: 100px; text-align: center;">วันที่เสียชีวิต</th>
-                        <th style="width: 100px; text-align: center;">เลขที่มรณะ</th>
-                        <th style="width: 95px; text-align: right;">ยอดเรียกเก็บ</th>
-                        <th style="width: 95px; text-align: right;">ชำระก่อนหน้า</th>
-                        <th style="width: 110px; text-align: right;">ยอดชำระครั้งนี้</th>
-                        <th style="width: 95px; text-align: right;">หนี้คงเหลือ</th>
+                        <th style="width: 120px; text-align: center;">วันที่เสียชีวิต</th>
+                        <th style="width: 110px; text-align: center;">เลขที่มรณะ</th>
+                        <th style="width: 130px; text-align: right;">ยอดเรียกเก็บ</th>
+                        <th style="width: 140px; text-align: right;">ยอดชำระครั้งนี้</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -870,10 +889,6 @@ function renderReceiptContent(doc) {
                 <div class="receipt-total-item">
                     <strong>ยอดรับชำระในใบเสร็จนี้:</strong>
                     <span class="total-val">${formatCurrency(doc.payamount)} บาท</span>
-                </div>
-                <div class="receipt-total-item">
-                    <strong>หนี้คงเหลือสุทธิ:</strong>
-                    <span>${formatCurrency(doc.remain_amount)} บาท</span>
                 </div>
             </div>
 
@@ -903,14 +918,11 @@ function printReceiptDocument(doc) {
         detailsRows += `
             <tr>
                 <td style="text-align:center; padding:6px; border-bottom:1px solid #ddd;">${idx + 1}</td>
-                <td style="padding:6px; border-bottom:1px solid #ddd; font-family:monospace;">${item.docid || '-'}</td>
                 <td style="padding:6px; border-bottom:1px solid #ddd;">${item.deceased_name || '-'}</td>
                 <td style="text-align:center; padding:6px; border-bottom:1px solid #ddd;">${formatThaiDateShort(item.dateend)}</td>
                 <td style="text-align:center; padding:6px; border-bottom:1px solid #ddd;">${item.numberend || '-'}</td>
                 <td style="text-align:right; padding:6px; border-bottom:1px solid #ddd;">${formatCurrency(item.amount)}</td>
-                <td style="text-align:right; padding:6px; border-bottom:1px solid #ddd;">${formatCurrency(item.paid_prev)}</td>
                 <td style="text-align:right; padding:6px; border-bottom:1px solid #ddd; font-weight:bold;">${formatCurrency(item.payamount)}</td>
-                <td style="text-align:right; padding:6px; border-bottom:1px solid #ddd;">${formatCurrency(item.remain)}</td>
             </tr>
         `;
     });
@@ -965,14 +977,11 @@ function printReceiptDocument(doc) {
                 <thead>
                     <tr>
                         <th style="width:40px;">ลำดับ</th>
-                        <th style="width:110px;">เลขที่เอกสารมรณะ</th>
                         <th>ชื่อผู้เสียชีวิต</th>
-                        <th style="width:90px;">วันที่เสียชีวิต</th>
-                        <th style="width:90px;">เลขที่มรณะ</th>
-                        <th style="width:90px;">ยอดเรียกเก็บ</th>
-                        <th style="width:85px;">ชำระก่อนหน้า</th>
-                        <th style="width:95px;">ยอดชำระครั้งนี้</th>
-                        <th style="width:85px;">หนี้คงเหลือ</th>
+                        <th style="width:120px;">วันที่เสียชีวิต</th>
+                        <th style="width:120px;">เลขที่มรณะ</th>
+                        <th style="width:130px;">ยอดเรียกเก็บ</th>
+                        <th style="width:140px;">ยอดชำระครั้งนี้</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -989,10 +998,6 @@ function printReceiptDocument(doc) {
                     <tr style="font-weight:bold; font-size:15px;">
                         <td>ยอดรับชำระเงิน:</td>
                         <td style="text-align:right;">${formatCurrency(doc.payamount)} บาท</td>
-                    </tr>
-                    <tr>
-                        <td>ยอดหนี้คงเหลือ:</td>
-                        <td style="text-align:right;">${formatCurrency(doc.remain_amount)} บาท</td>
                     </tr>
                 </table>
             </div>
@@ -1032,17 +1037,9 @@ if (btnPrintReceiptInModal) {
     });
 }
 
-// Table Action & Expand Event Delegation
+// Table Action Event Delegation
 document.addEventListener("click", function(e) {
-    // 1. Expand / Collapse Row
-    const expandBtn = e.target.closest(".btn-expand-row");
-    if (expandBtn) {
-        const docid = expandBtn.dataset.docid;
-        if (docid) toggleRowDetail(docid);
-        return;
-    }
-
-    // 2. View Receipt Modal
+    // 1. View Receipt Modal
     const viewBtn = e.target.closest(".btn-view-doc");
     if (viewBtn) {
         const docid = viewBtn.dataset.docid;
@@ -1073,6 +1070,18 @@ document.addEventListener("click", function(e) {
         const origText = cancelBtn.innerHTML;
         cancelBtn.innerHTML = "⏳ รอ...";
 
+        const currentUser = (function() {
+            try {
+                const s = sessionStorage.getItem("dk_logged_user");
+                if (s) {
+                    const p = JSON.parse(s);
+                    return p.fullname || p.username || p.empid || "เจ้าหน้าที่";
+                }
+            } catch(e) {}
+            return "เจ้าหน้าที่";
+        })();
+        const constantCusid = sessionStorage.getItem("dk_constant_cusid") || "";
+
         fetch(`${API_BASE}/cancelmovement`, {
             method: "POST",
             headers: {
@@ -1080,8 +1089,9 @@ document.addEventListener("click", function(e) {
             },
             body: JSON.stringify({
                 docidmove: docid,
-                staff_name: "เจ้าหน้าที่",
-                remark: "ยกเลิกรายการรับเงิน"
+                staff_name: currentUser,
+                remark: "ยกเลิกรายการรับเงิน",
+                cusid: constantCusid
             })
         })
         .then(res => res.json())

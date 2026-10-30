@@ -19,9 +19,24 @@
       grid-template-areas:
         "header header"
         "sidebar main";
-      grid-template-columns: 250px 1fr;
+      grid-template-columns: 220px 1fr;
       grid-template-rows: 60px 1fr;
       height: 100vh;
+      transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .layout.sidebar-collapsed,
+    html.preload-sidebar-collapsed .layout {
+      grid-template-columns: 0px 1fr;
+    }
+
+    html.preload-sidebar-collapsed .layout .sidebar {
+      padding: 0 !important;
+      width: 0 !important;
+      border-right: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
 
      .header {
@@ -32,8 +47,36 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 2 30px;
+      padding: 0 20px;
     }
+
+    .sidebar-toggle-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      transition: all 0.2s ease;
+      padding: 0;
+    }
+
+    .sidebar-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+      border-color: rgba(255, 255, 255, 0.45);
+      transform: scale(1.05);
+    }
+
+    .sidebar-toggle-btn:active {
+      transform: scale(0.95);
+    }
+
    /* ===== Layout หลักให้เต็มหน้าจอ ===== */
 
 
@@ -42,45 +85,183 @@
 .sidebar {
   grid-area: sidebar;
   background: linear-gradient(to bottom, #dde1e4);
-  border-right: 1px solid #eee;
-  padding: 15px; /* เดิม 25px → ลดให้ชิดลง */
+  border-right: 1px solid #cbd5e1;
+  padding: 10px 12px;
   color: rgb(71, 53, 53);
   font-family: 'Sarabun', sans-serif;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease, opacity 0.25s ease;
+  white-space: nowrap;
 }
 
-/* เมนู */
+.layout.sidebar-collapsed .sidebar {
+  padding: 0;
+  width: 0;
+  border-right: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== Modern Prominent Menu Group Headers (หัวเมนูเด่นชัด) ===== */
+.sidebar-top-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  padding: 4px 6px 8px 6px;
+  border-bottom: 2px dashed #cbd5e1;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ปุ่มแดชบอร์ดด้านบนสุดของ Sidebar */
+.sidebar-home-link {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  background: #273B4A !important;
+  color: #ffffff !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  margin-bottom: 8px !important;
+  text-decoration: none;
+  transition: all 0.15s ease !important;
+}
+
+.sidebar-home-link:hover {
+  background: #1e293b !important;
+}
+
+/* หัวเมนูแต่ละกลุ่ม - เรียบหรู สะอาดตา */
+.menu-group-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin: 8px 0 3px 0;
+  padding: 7px 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 3.5px solid #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s ease;
+}
+
+.menu-group-header:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  border-left-color: #0284c7;
+}
+
+.menu-group-header .group-title-content {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.menu-group-header .group-icon {
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.menu-group-header .group-arrow {
+  font-size: 9px;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.menu-group-header:hover .group-arrow {
+  color: #475569;
+}
+
+.menu-group-header.collapsed .group-arrow {
+  transform: rotate(-90deg);
+}
+
+.menu-group-header.collapsed {
+  background: #f8fafc;
+  color: #64748b;
+  border-left-color: #cbd5e1;
+}
+
+.sidebar h2:not(.menu-group-header) {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 12px 0 5px 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* เมนูย่อย */
 ul.navbar {
   list-style: none;
-  padding: 0;
+  padding: 2px 0 6px 4px;
   margin: 0;
+  max-height: 800px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease, margin 0.2s ease;
+}
+
+ul.navbar.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  pointer-events: none;
 }
 
 ul.navbar li {
-  margin-bottom: 4px;   /* เดิม 8px → ลดช่องไฟระหว่างเมนู */
+  margin-bottom: 2px;
 }
 
 ul.navbar li a {
-  display: block;
-  padding: 5px 8px;      /* เดิม 8px 12px → ลดช่องไฟในปุ่ม */
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
   text-decoration: none;
   text-align: left;
-  color: rgb(41, 36, 36);
-  font-family: 'Kanit', sans-serif;
-  font-size: 14px;       /* เดิม 15px → ให้ดูแน่นและชิด */
-  border-radius: 4px;    /* เดิม 6px → ลดความนูนให้ดูคอมแพค */
-  transition: 0.3s;
+  color: #475569;
+  font-family: 'Kanit', 'Sarabun', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  border-radius: 5px;
+  transition: all 0.15s ease;
 }
 
 /* Hover */
 ul.navbar li a:hover {
-  background-color: #ee6f1a;
-  color: white;
+  background-color: #f97316;
+  color: #ffffff;
+  transform: translateX(3px);
+  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.25);
 }
 
 /* Active */
 ul.navbar li a.active {
-  background-color: #333;
-  color: white;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(234, 88, 12, 0.35);
 }
   
    /* ปิดเมนูรอง */

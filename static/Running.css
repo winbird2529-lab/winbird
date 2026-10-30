@@ -1,597 +1,562 @@
-﻿/* ===================================================
-   Running.css - Styles for DK_Running (เลขที่เอกสาร & ตั้งค่ายอดเงิน)
+/* ===================================================
+   Running.css - Simple Clean Blocks (สไตล์บล็อคเรียบง่าย สบายตา)
+   สำหรับ DK_Running (เลขที่เอกสาร & ตั้งค่ายอดเงินระบบ)
+   ปรับขนาดให้อ่านง่าย สบายตา สมส่วน
    =================================================== */
 
-/* Container & Header */
-.running-container {
-    max-width: 1100px;
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&family=Sarabun:wght@400;500;600&display=swap');
+
+/* Base Container */
+.dk-running-page {
+    font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 10px 14px 28px;
 }
 
-/* Button Group (Top Action Bar) */
-.button-group {
+/* Breadcrumb */
+.page-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+.page-breadcrumb a {
+    color: #273B4A;
+    text-decoration: none;
+}
+
+.page-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.page-breadcrumb .sep {
+    color: #cbd5e1;
+}
+
+.page-breadcrumb .current {
+    color: #334155;
+    font-weight: 600;
+}
+
+/* Action Toolbar - เรียบแบน สบายตา */
+.action-toolbar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.button-group-right {
-    display: flex;
-    align-items: center;
     gap: 10px;
-}
-
-/* Mode Status Badge */
-.mode-badge {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13.5px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-}
-
-.mode-badge.view-mode {
-    background: #f1f5f9;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
-}
-
-.mode-badge.edit-mode {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fcd34d;
-    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
-}
-
-/* ปุ่มบันทึก (Save Button) */
-.submit-btnsave {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    padding: 10px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
-}
-
-.submit-btnsave:hover:not(:disabled) {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
-}
-
-.submit-btnsave:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.submit-btnsave:disabled {
-    background: #e2e8f0;
-    color: #94a3b8;
-    box-shadow: none;
-    cursor: not-allowed;
-    transform: none;
-    opacity: 0.75;
-}
-
-/* ปุ่มแก้ไข (Edit Button) */
-.btn-edit {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: #ffffff;
-    padding: 10px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
-}
-
-.btn-edit:hover {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
-}
-
-.btn-edit:active {
-    transform: translateY(0);
-}
-
-/* ปุ่มยกเลิก (Cancel Button) */
-.btn-cancel {
-    background: #64748b;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-}
-
-.btn-cancel:hover {
-    background: #475569;
-    transform: translateY(-1px);
-}
-
-/* Tabs */
-.tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 24px;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.tab-btn {
-    padding: 12px 24px;
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 15.5px;
-    font-weight: 600;
-    color: #64748b;
-    border-radius: 8px 8px 0 0;
-    transition: all 0.2s ease;
-}
-
-.tab-btn:hover {
-    color: #1e3c72;
-    background: #f1f5f9;
-}
-
-.tab-btn.active {
-    color: #1e3c72;
-    border-bottom: 3px solid #1e3c72;
-    background: #eff6ff;
-}
-
-.tab-content {
-    display: none;
-    animation: fadeIn 0.25s ease;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Main Form Card */
-.form-group1 {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 28px 32px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-}
-
-/* Grid Layout for Running Cards */
-.running-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
-
-.money-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-@media (max-width: 900px) {
-    .money-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .running-grid {
-        grid-template-columns: 1fr;
-    }
-    .form-group1 {
-        padding: 20px 16px;
-    }
-    .button-group {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .button-group-right {
-        justify-content: flex-end;
-    }
-}
-
-/* Individual Section Card */
-.running-card {
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 20px 22px;
-    transition: all 0.2s ease;
-}
-
-.running-card:hover {
-    border-color: #cbd5e1;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-.running-card-title {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #1e3c72;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-bottom: 10px;
-    border-bottom: 1.5px solid #e2e8f0;
-}
-
-.running-fields {
-    display: grid;
-    grid-template-columns: 1fr 1.6fr;
-    gap: 14px;
-}
-
-.field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.field-label {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: #475569;
-}
-
-/* Input Fields (ช่องกรอกข้อมูล) */
-.running-input {
-    width: 100%;
-    height: 44px;
-    padding: 8px 14px;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 15px;
-    font-family: inherit;
-    color: #1e293b;
-    background-color: #ffffff;
-    outline: none;
-    box-sizing: border-box;
-    transition: all 0.2s ease;
-}
-
-.running-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
-}
-
-.running-input:disabled {
-    background-color: #f1f5f9;
-    color: #64748b;
-    border-color: #e2e8f0;
-    cursor: not-allowed;
-}
-
-/* Monospace styling for Code / Prefix / Running Number */
-.running-input.code-input {
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: #1e3c72;
-}
-
-/* Money Input styling */
-.running-input.money-input {
-    font-size: 16px;
-    font-weight: 700;
-    color: #059669;
-    text-align: right;
-}
-
-/* Highlight input when active for editing */
-.running-input.editable-active {
-    background-color: #ffffff !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.money-unit-addon {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.money-unit-addon input {
-    padding-right: 50px;
-}
-
-.money-unit-addon .unit-text {
-    position: absolute;
-    right: 14px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #64748b;
-    pointer-events: none;
-}
-
-/* Mode Selection Radios in Running Card */
-.mode-select-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 8px 12px;
     margin-bottom: 14px;
 }
 
-.mode-radios {
+.toolbar-left {
     display: flex;
-    gap: 12px;
+    align-items: center;
+    gap: 8px;
 }
 
-.mode-radio {
+.status-indicator-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: #475569;
-    cursor: pointer;
-}
-
-.mode-radio input[type="radio"] {
-    accent-color: #1e3c72;
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-}
-
-.mode-radio input[type="radio"]:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.mode-badge-card {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    transition: all 0.2s ease;
-}
-
-.mode-badge-card.auto {
-    background: #dbeafe;
-    color: #1d4ed8;
-    border: 1px solid #bfdbfe;
-}
-
-.mode-badge-card.manual {
-    background: #fef3c7;
-    color: #b45309;
-    border: 1px solid #fde68a;
-}
-
-/* Document Mode Pill Toggle (Used in Form headers/labels) */
-.doc-mode-toggle {
-    display: inline-flex;
-    background: #f1f5f9;
-    padding: 2px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-    vertical-align: middle;
-}
-
-.btn-mode-pill {
-    padding: 3px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    border: none;
-    background: transparent;
-    color: #64748b;
+    padding: 4px 10px;
     border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    line-height: 1.4;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
 }
 
-.btn-mode-pill:hover {
+.status-indicator-badge.edit-mode {
+    background: #fffbeb;
+    color: #b45309;
+    border-color: #fde68a;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Action Buttons */
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease;
+    line-height: 1.35;
+}
+
+.btn-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-save-primary {
+    background: #16a34a;
+    color: #ffffff;
+}
+.btn-save-primary:hover:not(:disabled) {
+    background: #15803d;
+}
+
+.btn-edit-warning,
+.btn-edit {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #b45309;
+    font-weight: 600;
+}
+.btn-edit-warning:hover:not(:disabled),
+.btn-edit:hover:not(:disabled) {
+    background: #fde68a;
+    color: #92400e;
+}
+
+.btn-cancel-neutral {
+    background: #ffffff;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+.btn-cancel-neutral:hover:not(:disabled) {
+    background: #f1f5f9;
+}
+
+/* Tabs */
+.tabs-navigation {
+    display: flex;
+    gap: 6px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 14px;
+}
+
+.nav-tab-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -2px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 14px;
+    color: #64748b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.nav-tab-btn:hover {
     color: #1e293b;
 }
 
-.btn-mode-pill.active {
-    background: #ffffff;
-    color: #1e3c72;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.btn-mode-pill.active.mode-manual {
-    background: #fef3c7;
-    color: #b45309;
-}
-
-.running-input.manual-active {
-    background-color: #ffffff !important;
-    border-color: #f59e0b !important;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15) !important;
-    color: #b45309 !important;
+.nav-tab-btn.active {
+    color: #273B4A;
+    border-bottom-color: #273B4A;
     font-weight: 600;
 }
 
-/* ==============================================
-   Row-by-Row Layout (เรียงยาวทีละ Row)
-   ============================================== */
-.running-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.tab-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
 }
 
-.running-row-item {
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px 22px;
+.nav-tab-btn.active .tab-badge {
+    background: #273B4A;
+    color: #ffffff;
+}
+
+/* Panels */
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* ===================================================
+   Grid of Simple Blocks (บล็อคเรียบง่าย แยกรายการ)
+   =================================================== */
+.running-blocks-grid {
     display: grid;
-    grid-template-columns: 230px 1.4fr 130px 180px;
-    gap: 16px;
-    align-items: center;
-    transition: all 0.2s ease;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
 }
 
-.running-row-item:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+@media (max-width: 800px) {
+    .running-blocks-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
-.row-title-col {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.row-title-col h4 {
-    margin: 0;
-    font-size: 15.5px;
-    font-weight: 700;
-    color: #1e3c72;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-}
-
-.row-mode-col {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.simple-block {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 8px 14px;
-}
-
-.row-field-col {
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    justify-content: space-between;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.row-field-col .field-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #475569;
-    white-space: nowrap;
+.simple-block:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
-/* Money Row Item (เรียงยาวทีละ Row ใน Tab เงิน) */
-.money-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.money-row-item {
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 18px 24px;
+/* Block Header */
+.block-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    transition: all 0.2s ease;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
 }
 
-.money-row-item:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-}
-
-.money-row-item .row-title-col h4 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #1e3c72;
+.block-title-group {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.money-field-wrapper {
+.block-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.block-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.block-tag {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: normal;
+}
+
+.block-actions {
     display: flex;
     align-items: center;
-    gap: 16px;
-    width: 340px;
+    gap: 6px;
 }
 
-.money-field-wrapper .field-label {
-    font-size: 14px;
+/* Mode Buttons */
+.mode-toggle-group {
+    display: inline-flex;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.mode-btn {
+    border: none;
+    background: #f8fafc;
+    padding: 3px 9px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    line-height: 1.3;
+}
+
+.mode-btn:disabled {
+    cursor: default;
+}
+
+.mode-btn.active.auto {
+    background: #273B4A;
+    color: #ffffff;
     font-weight: 600;
+}
+
+.mode-btn.active.manual {
+    background: #d97706;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Block Fields */
+.block-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.field-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.field-item label {
+    font-size: 12.5px;
     color: #475569;
-    white-space: nowrap;
+    font-weight: 500;
 }
 
-@media (max-width: 1040px) {
-    .running-row-item {
-        grid-template-columns: 200px 1fr 110px 160px;
-        gap: 12px;
+.block-input {
+    width: 100%;
+    height: 36px;
+    padding: 5px 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1e293b;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    outline: none;
+}
+
+.block-input:disabled {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #334155;
+    cursor: default;
+}
+
+.block-input.mono-code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.block-input.editable-active {
+    background: #ffffff !important;
+    border-color: #273B4A !important;
+}
+
+.block-input.editable-active:focus {
+    box-shadow: 0 0 0 2px rgba(39, 59, 74, 0.2);
+}
+
+/* Block Footer (ตัวอย่างเลขถัดไป) */
+.block-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 7px;
+    font-size: 12.5px;
+    color: #64748b;
+}
+
+.preview-val {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-weight: 600;
+    color: #273B4A;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+}
+
+.preview-val.manual {
+    color: #d97706;
+    font-family: inherit;
+    font-size: 12.5px;
+}
+
+/* Mini Delete Button */
+.btn-del-mini {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-del-mini:hover {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+/* ===================================================
+   Tab 2: Money Blocks (บล็อคยอดเงิน)
+   =================================================== */
+.money-blocks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 900px) {
+    .money-blocks-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 860px) {
-    .running-row-item {
-        grid-template-columns: 1fr 1fr;
+@media (max-width: 580px) {
+    .money-blocks-grid {
+        grid-template-columns: 1fr;
     }
-    .row-title-col {
-        grid-column: 1 / -1;
-    }
-    .row-mode-col {
-        grid-column: 1 / -1;
-    }
-    .money-row-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .money-field-wrapper {
-        width: 100%;
-    }
+}
+
+.money-block {
+    min-height: 120px;
+}
+
+.money-desc-text {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 10px;
+    line-height: 1.35;
+}
+
+.money-view-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+.money-big-num {
+    font-size: 19px;
+    font-weight: 600;
+    color: #059669;
+}
+
+.money-unit {
+    font-size: 12.5px;
+    color: #64748b;
+}
+
+.money-edit-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.money-edit-wrapper .money-input {
+    flex: 1;
+    height: 36px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 15px;
+    color: #059669;
+}
+
+/* Simple Footer Note */
+.simple-note {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 10px;
+    padding-left: 2px;
+}
+
+/* Modal Simple */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #ffffff;
+    border-radius: 6px;
+    width: 90%;
+    max-width: 440px;
+    padding: 18px 22px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.form-field-modal {
+    margin-bottom: 12px;
+}
+
+.form-field-modal label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 4px;
+}
+
+.form-field-modal select, 
+.form-field-modal input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 13px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 12px;
+}
+
+.loading-indicator {
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+    font-size: 13px;
 }

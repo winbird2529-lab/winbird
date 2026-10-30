@@ -1,0 +1,259 @@
+.form-group1 {
+    padding: 18px 22px !important;
+    margin: 10px auto !important;
+}
+
+.header-action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.status-filter-pills {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.pill-btn {
+    padding: 4px 10px;
+    border-radius: 14px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: inherit;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.pill-btn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+}
+
+.pill-btn.active {
+    background: #273B4A;
+    color: #ffffff;
+    border-color: #273B4A;
+    box-shadow: 0 2px 6px rgba(39, 59, 74, 0.2);
+}
+
+.pill-btn.pill-partial.active {
+    background: #d97706;
+    border-color: #d97706;
+    color: #ffffff;
+}
+
+.pill-btn.pill-unpaid.active {
+    background: #64748b;
+    border-color: #64748b;
+    color: #ffffff;
+}
+
+.pill-btn.pill-paid.active {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #ffffff;
+}
+
+.pill-btn.pill-cancelled.active {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+}
+
+.pill-count {
+    padding: 1px 5px;
+    border-radius: 8px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.07);
+}
+
+.pill-btn.active .pill-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+/* Badges แสดงสถานะ */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2.5px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.badge-partial {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+    box-shadow: 0 1px 2px rgba(245, 158, 11, 0.12);
+}
+
+.badge-paid {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+    box-shadow: 0 1px 2px rgba(34, 197, 94, 0.12);
+}
+
+.badge-unpaid {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.badge-cancelled {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+.status-progress-info {
+    font-size: 10.5px;
+    color: #b45309;
+    margin-top: 2px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.mini-progress-bar {
+    width: 100%;
+    max-width: 100px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 3px auto 0 auto;
+}
+
+.mini-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    transition: width 0.3s ease;
+}
+
+/* ตารางขนาดคอมแพค */
+#customerTable {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+}
+
+#customerTable th {
+    padding: 8px 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#customerTable td {
+    padding: 5px 6px;
+    font-size: 12.5px;
+    line-height: 1.35;
+}
+
+.action-col {
+    white-space: nowrap;
+    text-align: center;
+}
+
+.action-col .btn-viwe,
+.action-col .btn-edit,
+.action-col .btn-cancel {
+    padding: 3px 8px;
+    font-size: 11.5px;
+    border-radius: 5px;
+    margin: 0 1px;
+}
+
+.btn-cancel {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    cursor: pointer;
+    font-weight: 500;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-cancel:hover {
+    background: #fecaca;
+    color: #991b1b;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(185, 28, 28, 0.15);
+}
+
+.btn-cancel:active {
+    transform: translateY(0);
+}
+
+/* ตารางและไฮไลต์แถว */
+#customerTable tr.row-partial {
+    background-color: #fffdf5;
+}
+
+#customerTable tr.row-partial:hover td {
+    background-color: #fef9c3 !important;
+}
+
+#customerTable tr.row-cancelled td {
+    color: #94a3b8;
+}
+
+#customerTable tr.row-cancelled td strong {
+    color: #94a3b8 !important;
+}
+
+#customerTable tr.row-cancelled:hover td {
+    background-color: #fee2e2 !important;
+}
+
+.toolbar-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.toolbar-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.pagination {
+    margin-top: 14px;
+    gap: 4px;
+}
+
+.pagination button {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+}

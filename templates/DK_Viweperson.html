@@ -1,0 +1,1886 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}รายงานข้อมูลบุคคล (ตรวจสอบภาระหนี้ค้างรายศพ){% endblock %}
+
+{% block content %}
+<!-- External Libraries & CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='csstran.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='popup.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Movement.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* Scoped Styling for DK_Viweperson */
+.person-page-wrapper {
+    padding: 10px 14px 40px 14px;
+    font-family: 'Prompt', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+}
+
+.person-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+.person-breadcrumb a {
+    color: #1e3c72;
+    text-decoration: none;
+    font-weight: 500;
+}
+.person-breadcrumb-sep {
+    color: #cbd5e1;
+}
+
+/* Page Header Card */
+.person-header-card {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    border-radius: 12px;
+    padding: 18px 22px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 14px rgba(30, 60, 114, 0.18);
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+.person-header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.person-header-title h1 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+.person-header-title p {
+    margin: 3px 0 0 0;
+    font-size: 13px;
+    color: #e2e8f0;
+}
+.person-header-badge {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* 4 KPI Summary Chips */
+.person-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+@media (max-width: 1024px) {
+    .person-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .person-kpi-grid { grid-template-columns: 1fr; }
+}
+
+.person-kpi-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.person-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+.person-kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.icon-members { background: #e0f2fe; color: #0284c7; }
+.icon-unpaid-cases { background: #fee2e2; color: #dc2626; }
+.icon-unpaid-money { background: #fef3c7; color: #d97706; }
+.icon-paid-cases { background: #dcfce7; color: #16a34a; }
+
+.person-kpi-info {
+    flex: 1;
+    min-width: 0;
+}
+.person-kpi-label {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+}
+.person-kpi-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2px;
+    font-family: 'Prompt', monospace, sans-serif;
+}
+.person-kpi-sub {
+    font-size: 11.5px;
+    color: #94a3b8;
+    margin-top: 1px;
+}
+
+/* Toolbar Card */
+.person-toolbar-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.person-filter-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.person-pill-btn {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+.person-pill-btn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+.person-pill-btn.active {
+    background: #1e3c72;
+    border-color: #1e3c72;
+    color: #ffffff;
+}
+.person-pill-btn.pill-unpaid.active {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+}
+.person-pill-btn.pill-paid.active {
+    background: #059669;
+    border-color: #059669;
+    color: #ffffff;
+}
+.pill-count {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+.person-pill-btn.active .pill-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.person-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.person-search-icon {
+    position: absolute;
+    left: 10px;
+    color: #94a3b8;
+    pointer-events: none;
+    font-size: 13px;
+}
+.person-search-input {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 12px 7px 32px;
+    font-size: 13px;
+    width: 250px;
+    outline: none;
+    transition: all 0.2s;
+}
+.person-search-input:focus {
+    width: 290px;
+    border-color: #1e3c72;
+    box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+}
+
+/* Main Table Card */
+.person-table-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.person-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+.person-data-table th {
+    background: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+.person-data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.person-data-table tr:hover {
+    background: #f8fafc;
+}
+.person-data-table tfoot td {
+    background: #f8fafc;
+    border-top: 2px solid #cbd5e1;
+    font-weight: 700;
+    padding: 10px 14px;
+}
+
+/* Badges */
+.badge-unpaid-cases {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.badge-paid-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-zero-cases {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* Row Action Buttons */
+.btn-view-member-debt {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: #1e3c72;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-view-member-debt:hover {
+    background: #2a5298;
+    transform: translateY(-1px);
+}
+.btn-print-member-debt {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-print-member-debt:hover {
+    background: #15803d;
+    color: #ffffff;
+}
+
+/* Table Footer / Pagination */
+.person-table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    background: #fafafa;
+    border-top: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* ========================================================
+   MODAL: รายละเอียดหนี้รายศพของสมาชิก (Detail Modal)
+   ======================================================== */
+.person-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: 16px;
+}
+.person-modal-box {
+    background: #ffffff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 980px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.96) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.person-modal-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: #ffffff;
+    padding: 16px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.person-modal-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+}
+.person-modal-close {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+}
+.person-modal-close:hover { opacity: 1; }
+
+.person-modal-body {
+    padding: 18px 22px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Member Info Strip */
+.member-info-strip {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+@media (max-width: 768px) {
+    .member-info-strip { grid-template-columns: repeat(2, 1fr); }
+}
+.member-info-item {
+    display: flex;
+    flex-direction: column;
+}
+.member-info-item .info-label {
+    font-size: 11.5px;
+    color: #64748b;
+    font-weight: 500;
+}
+.member-info-item .info-val {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 2px;
+}
+
+/* Modal KPI Chips */
+.modal-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+@media (max-width: 640px) {
+    .modal-kpi-row { grid-template-columns: repeat(2, 1fr); }
+}
+.modal-kpi-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #ffffff;
+    text-align: center;
+}
+.modal-kpi-box .m-label {
+    font-size: 11.5px;
+    color: #64748b;
+    font-weight: 500;
+}
+.modal-kpi-box .m-val {
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 3px;
+    font-family: 'Prompt', monospace;
+}
+.val-red { color: #dc2626; }
+.val-green { color: #059669; }
+.val-blue { color: #0284c7; }
+
+/* Modal Footer Toolbar */
+.person-modal-footer {
+    padding: 12px 22px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+</style>
+
+<div class="person-page-wrapper">
+    <!-- Breadcrumb -->
+    <div class="person-breadcrumb">
+        <a href="/DK_Home">HOME</a>
+        <span class="person-breadcrumb-sep">/</span>
+        <span>รายงาน</span>
+        <span class="person-breadcrumb-sep">/</span>
+        <span style="color: #0f172a; font-weight: 600;">5. รายงานข้อมูลบุคคล (ตรวจสอบภาระหนี้ค้างรายศพ)</span>
+    </div>
+
+    <!-- Page Header Banner -->
+    <div class="person-header-card">
+        <div class="person-header-title">
+            <span style="font-size: 26px;">👤</span>
+            <div>
+                <h1>รายงานข้อมูลบุคคล: ตรวจสอบภาระหนี้เงินสงเคราะห์</h1>
+                <p>ตรวจสอบและพิมพ์รายงานระบุรายชื่อสมาชิกว่า <strong>"คนนี้ค้างกี่ศพ"</strong> พร้อมแจกแจงรายการศพที่ค้างชำระทั้งหมด</p>
+            </div>
+        </div>
+        <div class="person-header-badge" id="badgeTotalSummary">
+            สมาชิกทั้งหมด: <strong id="valHeaderTotalMembers">0</strong> คน
+        </div>
+    </div>
+
+    <!-- 4 Top KPI Chips -->
+    <div class="person-kpi-grid">
+        <div class="person-kpi-card">
+            <div class="person-kpi-icon icon-members">👥</div>
+            <div class="person-kpi-info">
+                <div class="person-kpi-label">สมาชิกทั้งหมดในระบบ</div>
+                <div class="person-kpi-value"><span id="kpiMembersTotal">0</span> <span style="font-size: 13px; font-weight: 400; color:#64748b;">คน</span></div>
+                <div class="person-kpi-sub">ทะเบียนสมาชิกทั้งหมด</div>
+            </div>
+        </div>
+        <div class="person-kpi-card">
+            <div class="person-kpi-icon icon-unpaid-cases">⚠️</div>
+            <div class="person-kpi-info">
+                <div class="person-kpi-label">สมาชิกที่มีหนี้ค้างชำระ</div>
+                <div class="person-kpi-value" style="color: #dc2626;"><span id="kpiMembersWithDebt">0</span> <span style="font-size: 13px; font-weight: 400; color:#dc2626;">คน</span></div>
+                <div class="person-kpi-sub">มีภาระค้างชำระตั้งแต่ 1 ศพขึ้นไป</div>
+            </div>
+        </div>
+        <div class="person-kpi-card">
+            <div class="person-kpi-icon icon-unpaid-money">💸</div>
+            <div class="person-kpi-info">
+                <div class="person-kpi-label">ยอดเงินค้างชำระรวมทั้งสิ้น</div>
+                <div class="person-kpi-value" style="color: #d97706;"><span id="kpiTotalDebtAmount">0.00</span> <span style="font-size: 13px; font-weight: 400; color:#64748b;">บาท</span></div>
+                <div class="person-kpi-sub">รวม <strong id="kpiTotalUnpaidCasesSum">0</strong> ศพที่ยังไม่ได้ชำระ</div>
+            </div>
+        </div>
+        <div class="person-kpi-card">
+            <div class="person-kpi-icon icon-paid-cases">✅</div>
+            <div class="person-kpi-info">
+                <div class="person-kpi-label">สมาชิกที่ปลอดหนี้ (ครบทุกศพ)</div>
+                <div class="person-kpi-value" style="color: #059669;"><span id="kpiMembersPaidAll">0</span> <span style="font-size: 13px; font-weight: 400; color:#059669;">คน</span></div>
+                <div class="person-kpi-sub">ไม่มีภาระหนี้สงเคราะห์ค้างชำระ</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="person-toolbar-card">
+        <div class="person-filter-pills">
+            <button type="button" class="person-pill-btn active" id="pillFilterAll" onclick="setMemberFilter('all')">
+                <span>📋 สมาชิกทั้งหมด</span>
+                <span class="pill-count" id="countFilterAll">0</span>
+            </button>
+            <button type="button" class="person-pill-btn pill-unpaid" id="pillFilterUnpaid" onclick="setMemberFilter('unpaid')">
+                <span>⚠️ เฉพาะผู้ที่ค้างชำระ (ค้างศพ)</span>
+                <span class="pill-count" id="countFilterUnpaid">0</span>
+            </button>
+            <button type="button" class="person-pill-btn pill-paid" id="pillFilterPaid" onclick="setMemberFilter('paid')">
+                <span>✅ ปลอดหนี้ (ครบทุกศพ)</span>
+                <span class="pill-count" id="countFilterPaid">0</span>
+            </button>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="person-search-box">
+                <span class="person-search-icon">🔍</span>
+                <input type="text" id="inputPersonSearch" class="person-search-input" placeholder="ค้นหารหัส, ชื่อ-สกุล, เลขบัตร, เบอร์โทร...">
+            </div>
+            <button type="button" class="btn-print-official" onclick="printAllMembersDebtSummary()" style="padding: 7px 14px; font-size: 13px;" title="พิมพ์รายงานสรุปภาระหนี้ของสมาชิกทั้งหมด">
+                🖨️ พิมพ์รายงานสรุปภาพรวม
+            </button>
+            <button type="button" class="btn-preview-official" onclick="exportMembersSummaryCSV()" style="padding: 7px 14px; font-size: 13px; color: #059669; border-color: #86efac;" title="ส่งออกไฟล์ Excel">
+                📥 ส่งออก Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Member Overview Table -->
+    <div class="person-table-card">
+        <div class="table-responsive">
+            <table class="person-data-table" id="tablePersonSummary">
+                <thead>
+                    <tr>
+                        <th style="width: 45px; text-align: center;">ลำดับ</th>
+                        <th style="width: 105px; text-align: center;">รหัสสมาชิก</th>
+                        <th style="min-width: 180px;">ชื่อ - นามสกุล สมาชิก</th>
+                        <th style="width: 115px; text-align: center;">เบอร์โทรศัพท์</th>
+                        <th style="width: 100px; text-align: right;">เรียกเก็บ (ศพ)</th>
+                        <th style="width: 100px; text-align: right; color: #059669;">ชำระแล้ว (ศพ)</th>
+                        <th style="width: 135px; text-align: center; color: #dc2626; font-weight: 700;">ค้างชำระ (กี่ศพ) ⚠️</th>
+                        <th style="width: 125px; text-align: right; color: #dc2626;">ยอดเงินค้าง (บาท)</th>
+                        <th style="width: 170px; text-align: center;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyTablePersonSummary">
+                    <tr><td colspan="9" style="text-align: center; padding: 40px; color: #64748b;">⏳ กำลังโหลดและประมวลผลข้อมูลหนี้สงเคราะห์รายบุคคล...</td></tr>
+                </tbody>
+                <tfoot id="footTablePersonSummary">
+                    <tr>
+                        <td colspan="4" style="text-align: right;">รวมทั้งสิ้น:</td>
+                        <td style="text-align: right;" id="sumFooterTotalCases">0</td>
+                        <td style="text-align: right; color: #059669;" id="sumFooterPaidCases">0</td>
+                        <td style="text-align: center; color: #dc2626;" id="sumFooterUnpaidCases">0 ศพ</td>
+                        <td style="text-align: right; color: #dc2626;" id="sumFooterRemainAmount">0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="person-table-footer">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="labelPaginationInfo" style="font-size: 13px; color: #64748b;">แสดง 0 - 0 จากทั้งหมด 0 คน</span>
+                <select id="selectRowsPerPage" class="crit-input" style="width: 95px; height: 30px; font-size: 12px; padding: 2px 6px;">
+                    <option value="20" selected>20 คน</option>
+                    <option value="50">50 คน</option>
+                    <option value="100">100 คน</option>
+                    <option value="all">ทั้งหมด</option>
+                </select>
+            </div>
+            <div id="paginationPerson" class="tran-pagination"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================
+     MODAL: รายละเอียดหนี้รายศพของสมาชิกรายบุคคล
+     ======================================================== -->
+<div class="person-modal-overlay" id="modalMemberDebt" onclick="if(event.target===this) closeMemberDebtModal()">
+    <div class="person-modal-box">
+        <div class="person-modal-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">📋</span>
+                <div>
+                    <h3 id="modalMemberTitle">รายละเอียดภาระหนี้เงินสงเคราะห์: สมาชิก</h3>
+                    <div style="font-size: 12px; opacity: 0.9;" id="modalMemberSubTitle">รหัสสมาชิก: -</div>
+                </div>
+            </div>
+            <button type="button" class="person-modal-close" onclick="closeMemberDebtModal()" title="ปิดหน้าต่าง">&times;</button>
+        </div>
+
+        <div class="person-modal-body">
+            <!-- Member Profile Info Strip -->
+            <div class="member-info-strip">
+                <div class="member-info-item">
+                    <span class="info-label">รหัสสมาชิก:</span>
+                    <strong class="info-val" id="stripMemberId" style="font-family: monospace; color:#1e3c72;">-</strong>
+                </div>
+                <div class="member-info-item">
+                    <span class="info-label">ชื่อ - นามสกุล:</span>
+                    <strong class="info-val" id="stripMemberName">-</strong>
+                </div>
+                <div class="member-info-item">
+                    <span class="info-label">เลขประจำตัวประชาชน:</span>
+                    <strong class="info-val" id="stripMemberIdcard" style="font-family: monospace;">-</strong>
+                </div>
+                <div class="member-info-item">
+                    <span class="info-label">เบอร์โทรศัพท์:</span>
+                    <strong class="info-val" id="stripMemberTel">-</strong>
+                </div>
+            </div>
+
+            <!-- 4 KPI Chips of this Member -->
+            <div class="modal-kpi-row">
+                <div class="modal-kpi-box">
+                    <div class="m-label">เรียกเก็บทั้งหมด</div>
+                    <div class="m-val val-blue"><span id="mKpiTotalCases">0</span> <span style="font-size: 12px; font-weight: normal;">ศพ</span></div>
+                    <div style="font-size: 11.5px; color: #64748b; margin-top: 1px;"><span id="mKpiTotalAmount">0.00</span> บาท</div>
+                </div>
+                <div class="modal-kpi-box">
+                    <div class="m-label">ชำระแล้ว</div>
+                    <div class="m-val val-green"><span id="mKpiPaidCases">0</span> <span style="font-size: 12px; font-weight: normal;">ศพ</span></div>
+                    <div style="font-size: 11.5px; color: #059669; margin-top: 1px;"><span id="mKpiPaidAmount">0.00</span> บาท</div>
+                </div>
+                <div class="modal-kpi-box" style="border-color: #fecaca; background: #fff5f5;">
+                    <div class="m-label" style="color: #dc2626; font-weight: 700;">ค้างชำระ (กี่ศพ) ⚠️</div>
+                    <div class="m-val val-red"><span id="mKpiUnpaidCases">0</span> <span style="font-size: 13px; font-weight: 700;">ศพ</span></div>
+                    <div style="font-size: 11.5px; color: #dc2626; font-weight: 700; margin-top: 1px;"><span id="mKpiRemainAmount">0.00</span> บาท</div>
+                </div>
+                <div class="modal-kpi-box">
+                    <div class="m-label">สถานะภาพรวม</div>
+                    <div class="m-val" id="mKpiOverallBadge" style="font-size: 13.5px; margin-top: 6px;">-</div>
+                </div>
+            </div>
+
+            <!-- Toolbar in Modal -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div class="person-filter-pills">
+                    <button type="button" class="person-pill-btn active" id="modalPillAll" onclick="setModalCaseFilter('all')">
+                        <span>📄 ทุกรายการศพ</span>
+                        <span class="pill-count" id="modalCountAll">0</span>
+                    </button>
+                    <button type="button" class="person-pill-btn pill-unpaid" id="modalPillUnpaid" onclick="setModalCaseFilter('unpaid')">
+                        <span>⚠️ เฉพาะศพที่ค้างชำระ</span>
+                        <span class="pill-count" id="modalCountUnpaid">0</span>
+                    </button>
+                    <button type="button" class="person-pill-btn pill-paid" id="modalPillPaid" onclick="setModalCaseFilter('paid')">
+                        <span>✅ ศพที่ชำระแล้ว</span>
+                        <span class="pill-count" id="modalCountPaid">0</span>
+                    </button>
+                </div>
+                <div style="font-size: 12.5px; color: #64748b;">
+                    รายการศพที่สมาชิกคนนี้ถูกเรียกเก็บ
+                </div>
+            </div>
+
+            <!-- Modal Deceased Cases Table -->
+            <div class="table-responsive" style="max-height: 380px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table class="person-data-table">
+                    <thead style="position: sticky; top: 0; z-index: 2;">
+                        <tr>
+                            <th style="width: 45px; text-align: center;">ลำดับ</th>
+                            <th style="width: 100px; text-align: center;">เลขที่เอกสาร</th>
+                            <th style="width: 95px; text-align: center;">ใบมรณะ</th>
+                            <th style="width: 90px; text-align: center;">วันที่เสียชีวิต</th>
+                            <th style="min-width: 160px;">ชื่อผู้เสียชีวิต</th>
+                            <th style="width: 95px; text-align: right;">เรียกเก็บ</th>
+                            <th style="width: 95px; text-align: right; color: #059669;">ชำระแล้ว</th>
+                            <th style="width: 95px; text-align: right; color: #dc2626;">คงเหลือ</th>
+                            <th style="width: 100px; text-align: center;">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyModalCaseList">
+                        <tr><td colspan="9" style="text-align: center; padding: 25px; color: #64748b;">กำลังโหลดรายการศพ...</td></tr>
+                    </tbody>
+                    <tfoot style="position: sticky; bottom: 0; z-index: 2;">
+                        <tr>
+                            <td colspan="5" style="text-align: right;">รวมยอด (รายการที่แสดง):</td>
+                            <td style="text-align: right;" id="modalSumBilled">0.00</td>
+                            <td style="text-align: right; color: #059669;" id="modalSumPaid">0.00</td>
+                            <td style="text-align: right; color: #dc2626;" id="modalSumRemain">0.00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="person-modal-footer">
+            <button type="button" class="btn-preview-official" onclick="closeMemberDebtModal()" style="padding: 7px 16px;">
+                ✕ ปิดหน้าต่าง
+            </button>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn-preview-official" onclick="previewCurrentMemberReport()" style="padding: 7px 16px; color: #1e3c72; border-color: #93c5fd;">
+                    👁️ ดูตัวอย่างรายงาน
+                </button>
+                <button type="button" class="btn-print-official" onclick="printCurrentMemberReport()" style="padding: 7px 16px;">
+                    🖨️ พิมพ์รายงานบุคคล
+                </button>
+                <button type="button" class="btn-preview-official" onclick="exportCurrentMemberCSV()" style="padding: 7px 16px; color: #059669; border-color: #86efac;">
+                    📥 ส่งออก Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// Global Variables & State
+// ==========================================
+let allMembersSummary = [];
+let filteredMembers = [];
+let currentMemberFilter = "all"; // 'all', 'unpaid', 'paid'
+let memberSearchTerm = "";
+let memberCurrentPage = 1;
+let memberRowsPerPage = 20;
+
+let activeDetailedMember = null;
+let activeMemberCases = [];
+let modalCaseFilter = "all"; // 'all', 'unpaid', 'paid'
+
+let associationName = "สมาคมฌาปนกิจสงเคราะห์";
+const API_BASE = "http://127.0.0.1:8000";
+
+// URL Parameter Handling (?idcustomer=...)
+const urlParams = new URLSearchParams(window.location.search);
+const initialCustomerId = urlParams.get("idcustomer") || urlParams.get("id") || urlParams.get("Idcustomer") || "{{ selected_idcustomer or '' }}";
+
+// Number & Date Formatting
+function formatCurrency(num) {
+    const val = Number(num);
+    if (isNaN(val)) return "0.00";
+    return val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatThaiDate(dateInput) {
+    if (!dateInput) return "-";
+    try {
+        const d = new Date(dateInput);
+        if (isNaN(d.getTime())) return String(dateInput);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear() + 543;
+        return `${day}/${month}/${year}`;
+    } catch {
+        return String(dateInput);
+    }
+}
+
+// ==========================================
+// Initialization & Data Loading
+// ==========================================
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadAssociationName();
+    await loadMembersDebtData();
+
+    if (initialCustomerId) {
+        setTimeout(() => openMemberDebtModal(initialCustomerId), 400);
+    }
+});
+
+async function loadAssociationName() {
+    try {
+        let res = await fetch(`${API_BASE}/constant`).catch(() => null);
+        if (!res || !res.ok) res = await fetch(`/api/constant`).catch(() => null);
+        if (res && res.ok) {
+            const data = await res.json().catch(() => null);
+            if (data && data.data && (data.data.office_name || data.data.name)) {
+                associationName = (data.data.office_name || data.data.name).trim();
+            }
+        }
+    } catch (e) {
+        console.warn("Could not load association name:", e);
+    }
+}
+
+// Load Summary Data: Try /api/person_debt_summary, fallback to client synthesis if needed
+async function loadMembersDebtData() {
+    const tbody = document.getElementById("bodyTablePersonSummary");
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 40px; color: #64748b;">⏳ กำลังโหลดและประมวลผลข้อมูลหนี้สงเคราะห์รายบุคคล...</td></tr>`;
+
+    try {
+        // 1. Try Flask API /api/person_debt_summary
+        let res = await fetch(`/api/person_debt_summary`).catch(() => null);
+        if (res && res.ok) {
+            const json = await res.json().catch(() => null);
+            if (json && json.results && Array.isArray(json.results)) {
+                allMembersSummary = json.results;
+                applyMemberFilters();
+                return;
+            }
+        }
+
+        // 2. Fallback: Synthesize from /customer and /api/transaction
+        console.info("Using client-side synthesis for member debt data...");
+        await synthesizeMembersDebtData();
+    } catch (e) {
+        console.error("Error loading member debt data:", e);
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 30px; color: #dc2626;">❌ เกิดข้อผิดพลาดในการโหลดข้อมูล: ${e.message}</td></tr>`;
+    }
+}
+
+// Fallback Synthesis: Combine /customer with all deceased transactions
+async function synthesizeMembersDebtData() {
+    let custRes = await fetch(`${API_BASE}/customer`).catch(() => null);
+    if (!custRes || !custRes.ok) custRes = await fetch(`/api/customer`).catch(() => null);
+    if (!custRes || !custRes.ok) custRes = await fetch(`/customer`).catch(() => null);
+    const custJson = custRes && custRes.ok ? await custRes.json().catch(() => null) : null;
+    const customers = (custJson && (custJson.results || custJson.data || custJson)) || [];
+
+    let tranRes = await fetch(`/api/transaction`).catch(() => null);
+    if (!tranRes || !tranRes.ok) tranRes = await fetch(`${API_BASE}/transaction`).catch(() => null);
+    const tranJson = tranRes && tranRes.ok ? await tranRes.json().catch(() => null) : null;
+    const transactions = (tranJson && (tranJson.results || tranJson.data || tranJson)) || [];
+
+    // Map each customer
+    const memberMap = {};
+    customers.forEach(c => {
+        const cid = String(c.Idcustomer || "").trim();
+        if (!cid) return;
+        memberMap[cid] = {
+            Idcustomer: cid,
+            prefix: c.prefix || "",
+            name: c.name || "",
+            lastname: c.lastname || "",
+            fullname: `${c.prefix || ''}${c.name || ''} ${c.lastname || ''}`.trim() || "-",
+            Idcard: c.Idcard || "",
+            Tel: c.Tel || "",
+            register_date: c.date ? c.date.slice(0, 10) : "",
+            member_status: Number(c.status) || 1,
+            total_cases: 0,
+            count_paid_cases: 0,
+            count_unpaid_cases: 0,
+            total_amount: 0.0,
+            total_paid: 0.0,
+            total_remain: 0.0
+        };
+    });
+
+    // Fetch details for active transactions (non-canceled)
+    const validTrans = transactions.filter(t => Number(t.status) !== 2);
+    for (const t of validTrans) {
+        const docid = t.docid || t.docId;
+        if (!docid) continue;
+        try {
+            let dRes = await fetch(`/api/transaction1/${docid}`).catch(() => null);
+            if (!dRes || !dRes.ok) dRes = await fetch(`${API_BASE}/transaction1/${docid}`).catch(() => null);
+            if (dRes && dRes.ok) {
+                const dJson = await dRes.json().catch(() => null);
+                const dData = dJson && (dJson.results || dJson.data || dJson);
+                const details = (dData && dData.details) || [];
+                const defaultFee = Number(t.fee_per_member || t.amount) || 0;
+
+                details.forEach(d => {
+                    const cid = String(d.Idcustomer || "").trim();
+                    if (!cid) return;
+                    if (!memberMap[cid]) {
+                        memberMap[cid] = {
+                            Idcustomer: cid,
+                            prefix: d.prefix || "",
+                            name: d.name || "",
+                            lastname: d.lastname || "",
+                            fullname: `${d.prefix || ''}${d.name || ''} ${d.lastname || ''}`.trim() || "-",
+                            Idcard: "",
+                            Tel: "",
+                            register_date: "",
+                            member_status: 1,
+                            total_cases: 0,
+                            count_paid_cases: 0,
+                            count_unpaid_cases: 0,
+                            total_amount: 0.0,
+                            total_paid: 0.0,
+                            total_remain: 0.0
+                        };
+                    }
+                    const amt = Number(d.amount) || defaultFee;
+                    const paid = Number(d.payamount) || 0;
+                    const remain = Math.max(0, amt - paid);
+                    const isPaid = (remain <= 0);
+
+                    memberMap[cid].total_cases += 1;
+                    memberMap[cid].total_amount += amt;
+                    memberMap[cid].total_paid += paid;
+                    memberMap[cid].total_remain += remain;
+                    if (isPaid) {
+                        memberMap[cid].count_paid_cases += 1;
+                    } else {
+                        memberMap[cid].count_unpaid_cases += 1;
+                    }
+                });
+            }
+        } catch (err) {
+            console.warn(`Error fetching transaction detail for ${docid}:`, err);
+        }
+    }
+
+    allMembersSummary = Object.values(memberMap).sort((a, b) => b.count_unpaid_cases - a.count_unpaid_cases || a.Idcustomer.localeCompare(b.Idcustomer));
+    applyMemberFilters();
+}
+
+// ==========================================
+// Filtering & Rendering Overview Table
+// ==========================================
+function setMemberFilter(status) {
+    currentMemberFilter = status;
+    document.querySelectorAll(".person-filter-pills .person-pill-btn").forEach(btn => btn.classList.remove("active"));
+    if (status === 'all') document.getElementById("pillFilterAll")?.classList.add("active");
+    if (status === 'unpaid') document.getElementById("pillFilterUnpaid")?.classList.add("active");
+    if (status === 'paid') document.getElementById("pillFilterPaid")?.classList.add("active");
+
+    memberCurrentPage = 1;
+    applyMemberFilters();
+}
+window.setMemberFilter = setMemberFilter;
+
+document.getElementById("inputPersonSearch")?.addEventListener("input", (e) => {
+    memberSearchTerm = e.target.value.trim().toLowerCase();
+    memberCurrentPage = 1;
+    applyMemberFilters();
+});
+
+document.getElementById("selectRowsPerPage")?.addEventListener("change", (e) => {
+    memberRowsPerPage = e.target.value;
+    memberCurrentPage = 1;
+    renderMemberSummaryTable();
+});
+
+function applyMemberFilters() {
+    let countAll = allMembersSummary.length;
+    let countUnpaid = 0;
+    let countPaid = 0;
+    let sumTotalDebtMoney = 0;
+    let sumTotalUnpaidCases = 0;
+
+    allMembersSummary.forEach(m => {
+        const unp = Number(m.count_unpaid_cases) || 0;
+        const rem = Number(m.total_remain) || 0;
+        if (unp > 0) {
+            countUnpaid++;
+            sumTotalDebtMoney += rem;
+            sumTotalUnpaidCases += unp;
+        } else {
+            countPaid++;
+        }
+    });
+
+    // Update KPI Card Displays
+    document.getElementById("kpiMembersTotal").textContent = countAll.toLocaleString();
+    document.getElementById("valHeaderTotalMembers").textContent = countAll.toLocaleString();
+    document.getElementById("kpiMembersWithDebt").textContent = countUnpaid.toLocaleString();
+    document.getElementById("kpiTotalDebtAmount").textContent = formatCurrency(sumTotalDebtMoney);
+    document.getElementById("kpiTotalUnpaidCasesSum").textContent = sumTotalUnpaidCases.toLocaleString();
+    document.getElementById("kpiMembersPaidAll").textContent = countPaid.toLocaleString();
+
+    // Update Pill Badges
+    document.getElementById("countFilterAll").textContent = countAll.toLocaleString();
+    document.getElementById("countFilterUnpaid").textContent = countUnpaid.toLocaleString();
+    document.getElementById("countFilterPaid").textContent = countPaid.toLocaleString();
+
+    // Filter List
+    filteredMembers = allMembersSummary.filter(m => {
+        const unp = Number(m.count_unpaid_cases) || 0;
+        if (currentMemberFilter === "unpaid" && unp <= 0) return false;
+        if (currentMemberFilter === "paid" && unp > 0) return false;
+
+        if (memberSearchTerm) {
+            const combined = `${m.Idcustomer || ''} ${m.fullname || ''} ${m.Idcard || ''} ${m.Tel || ''}`.toLowerCase();
+            if (!combined.includes(memberSearchTerm)) return false;
+        }
+        return true;
+    });
+
+    renderMemberSummaryTable();
+}
+
+function renderMemberSummaryTable() {
+    const tbody = document.getElementById("bodyTablePersonSummary");
+    if (!filteredMembers || filteredMembers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 35px; color: #94a3b8;">🔍 ไม่พบข้อมูลสมาชิกตามเงื่อนไขที่เลือก</td></tr>`;
+        document.getElementById("sumFooterTotalCases").textContent = "0";
+        document.getElementById("sumFooterPaidCases").textContent = "0";
+        document.getElementById("sumFooterUnpaidCases").textContent = "0 ศพ";
+        document.getElementById("sumFooterRemainAmount").textContent = "0.00";
+        renderMemberPagination(0);
+        return;
+    }
+
+    // Totals for filtered list
+    let sumCases = 0, sumPaid = 0, sumUnpaid = 0, sumRemain = 0;
+    filteredMembers.forEach(m => {
+        sumCases += Number(m.total_cases) || 0;
+        sumPaid += Number(m.count_paid_cases) || 0;
+        sumUnpaid += Number(m.count_unpaid_cases) || 0;
+        sumRemain += Number(m.total_remain) || 0;
+    });
+
+    document.getElementById("sumFooterTotalCases").textContent = sumCases.toLocaleString();
+    document.getElementById("sumFooterPaidCases").textContent = sumPaid.toLocaleString();
+    document.getElementById("sumFooterUnpaidCases").textContent = `${sumUnpaid.toLocaleString()} ศพ`;
+    document.getElementById("sumFooterRemainAmount").textContent = formatCurrency(sumRemain);
+
+    // Pagination
+    let pageItems = filteredMembers;
+    if (memberRowsPerPage !== "all") {
+        const perPage = parseInt(memberRowsPerPage, 10) || 20;
+        const totalPages = Math.ceil(filteredMembers.length / perPage) || 1;
+        if (memberCurrentPage > totalPages) memberCurrentPage = totalPages;
+        if (memberCurrentPage < 1) memberCurrentPage = 1;
+
+        const start = (memberCurrentPage - 1) * perPage;
+        const end = start + perPage;
+        pageItems = filteredMembers.slice(start, end);
+    }
+
+    const perPageNum = memberRowsPerPage === "all" ? filteredMembers.length : (parseInt(memberRowsPerPage, 10) || 20);
+    const startOffset = memberRowsPerPage === "all" ? 0 : (memberCurrentPage - 1) * perPageNum;
+
+    let rowsHtml = "";
+    pageItems.forEach((m, idx) => {
+        const rowNum = startOffset + idx + 1;
+        const unpaidCount = Number(m.count_unpaid_cases) || 0;
+        const paidCount = Number(m.count_paid_cases) || 0;
+        const totalCases = Number(m.total_cases) || 0;
+        const remainMoney = Number(m.total_remain) || 0;
+
+        let badgeDebt = "";
+        if (unpaidCount > 0) {
+            badgeDebt = `<span class="badge-unpaid-cases">⚠️ ค้าง ${unpaidCount.toLocaleString()} ศพ</span>`;
+        } else if (totalCases > 0) {
+            badgeDebt = `<span class="badge-paid-all">✅ ครบทุกศพ</span>`;
+        } else {
+            badgeDebt = `<span class="badge-zero-cases">ยังไม่มีรายการ</span>`;
+        }
+
+        const cidSafe = escapeHtml(m.Idcustomer || '');
+
+        rowsHtml += `
+            <tr>
+                <td style="text-align: center; color: #64748b;">${rowNum}</td>
+                <td style="text-align: center; font-family: monospace; font-weight: 600; color: #1e3c72;">${cidSafe || '-'}</td>
+                <td style="font-weight: 500; white-space: nowrap;">${escapeHtml(m.fullname || '-')}</td>
+                <td style="text-align: center; color: #475569;">${escapeHtml(m.Tel || '-')}</td>
+                <td style="text-align: right; color: #334155;">${totalCases.toLocaleString()}</td>
+                <td style="text-align: right; color: #059669; font-weight: 600;">${paidCount.toLocaleString()}</td>
+                <td style="text-align: center;">${badgeDebt}</td>
+                <td style="text-align: right; font-weight: 700; color: ${remainMoney > 0 ? '#dc2626' : '#94a3b8'};">
+                    ${formatCurrency(remainMoney)}
+                </td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <div style="display: flex; gap: 6px; justify-content: center;">
+                        <button type="button" class="btn-view-member-debt" onclick="openMemberDebtModal('${cidSafe}')" title="ดูรายการศพที่ค้างของสมาชิกคนนี้">
+                            🔍 ตรวจสอบหนี้
+                        </button>
+                        <button type="button" class="btn-print-member-debt" onclick="quickPrintMemberDebt('${cidSafe}')" title="สั่งพิมพ์รายงานสมาชิกคนนี้">
+                            🖨️ พิมพ์
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = rowsHtml;
+    renderMemberPagination(filteredMembers.length);
+}
+
+function renderMemberPagination(totalRows) {
+    const pagDiv = document.getElementById("paginationPerson");
+    const infoSpan = document.getElementById("labelPaginationInfo");
+    if (!pagDiv || !infoSpan) return;
+
+    if (memberRowsPerPage === "all") {
+        infoSpan.textContent = `แสดงทั้งหมด ${totalRows.toLocaleString()} คน`;
+        pagDiv.innerHTML = "";
+        return;
+    }
+
+    const perPage = parseInt(memberRowsPerPage, 10) || 20;
+    const totalPages = Math.ceil(totalRows / perPage) || 1;
+    if (memberCurrentPage > totalPages) memberCurrentPage = totalPages;
+    if (memberCurrentPage < 1) memberCurrentPage = 1;
+
+    const startIdx = totalRows === 0 ? 0 : (memberCurrentPage - 1) * perPage + 1;
+    const endIdx = Math.min(memberCurrentPage * perPage, totalRows);
+    infoSpan.textContent = `แสดง ${startIdx} - ${endIdx} จากทั้งหมด ${totalRows.toLocaleString()} คน`;
+
+    if (totalPages <= 1) {
+        pagDiv.innerHTML = "";
+        return;
+    }
+
+    let html = "";
+    html += `<button type="button" class="tran-pag-btn" ${memberCurrentPage === 1 ? 'disabled' : ''} onclick="changeMemberPage(1)">&laquo;</button>`;
+    html += `<button type="button" class="tran-pag-btn" ${memberCurrentPage === 1 ? 'disabled' : ''} onclick="changeMemberPage(${memberCurrentPage - 1})">&lsaquo;</button>`;
+
+    const delta = 2;
+    for (let p = 1; p <= totalPages; p++) {
+        if (p === 1 || p === totalPages || (p >= memberCurrentPage - delta && p <= memberCurrentPage + delta)) {
+            html += `<button type="button" class="tran-pag-btn ${p === memberCurrentPage ? 'active' : ''}" onclick="changeMemberPage(${p})">${p}</button>`;
+        } else if (p === memberCurrentPage - delta - 1 || p === memberCurrentPage + delta + 1) {
+            html += `<span style="padding: 0 4px; color: #94a3b8;">...</span>`;
+        }
+    }
+
+    html += `<button type="button" class="tran-pag-btn" ${memberCurrentPage === totalPages ? 'disabled' : ''} onclick="changeMemberPage(${memberCurrentPage + 1})">&rsaquo;</button>`;
+    html += `<button type="button" class="tran-pag-btn" ${memberCurrentPage === totalPages ? 'disabled' : ''} onclick="changeMemberPage(${totalPages})">&raquo;</button>`;
+    pagDiv.innerHTML = html;
+}
+
+window.changeMemberPage = function(p) {
+    memberCurrentPage = p;
+    renderMemberSummaryTable();
+};
+
+// ==========================================
+// Drilldown Modal: Member Deceased Debt Detail
+// ==========================================
+async function openMemberDebtModal(idcustomer) {
+    const modal = document.getElementById("modalMemberDebt");
+    modal.style.display = "flex";
+
+    document.getElementById("modalMemberTitle").textContent = "กำลังโหลดข้อมูล...";
+    document.getElementById("modalMemberSubTitle").textContent = `รหัสสมาชิก: ${idcustomer}`;
+    document.getElementById("bodyModalCaseList").innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 25px; color: #64748b;">⏳ กำลังโหลดรายการศพ...</td></tr>`;
+
+    try {
+        // 1. Try /api/person_debt_detail/<idcustomer>
+        let res = await fetch(`/api/person_debt_detail/${encodeURIComponent(idcustomer)}`).catch(() => null);
+        if (res && res.ok) {
+            const json = await res.json().catch(() => null);
+            if (json && json.customer && json.cases) {
+                activeDetailedMember = json.customer;
+                activeMemberCases = json.cases;
+                displayMemberDebtDetails(json.customer, json.summary, json.cases);
+                return;
+            }
+        }
+
+        // 2. Fallback: Lookup member from allMembersSummary and fetch transactions
+        const found = allMembersSummary.find(m => String(m.Idcustomer).toLowerCase() === String(idcustomer).toLowerCase());
+        activeDetailedMember = found || { Idcustomer: idcustomer, fullname: "สมาชิก" };
+        await fetchMemberCasesFallback(idcustomer);
+    } catch (e) {
+        console.error("Error opening member debt modal:", e);
+        document.getElementById("bodyModalCaseList").innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 20px; color: #dc2626;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+    }
+}
+window.openMemberDebtModal = openMemberDebtModal;
+
+function closeMemberDebtModal() {
+    document.getElementById("modalMemberDebt").style.display = "none";
+}
+window.closeMemberDebtModal = closeMemberDebtModal;
+
+async function fetchMemberCasesFallback(idcustomer) {
+    let tranRes = await fetch(`/api/transaction`).catch(() => null);
+    if (!tranRes || !tranRes.ok) tranRes = await fetch(`${API_BASE}/transaction`).catch(() => null);
+    const tranJson = tranRes && tranRes.ok ? await tranRes.json().catch(() => null) : null;
+    const transactions = (tranJson && (tranJson.results || tranJson.data || tranJson)) || [];
+    const validTrans = transactions.filter(t => Number(t.status) !== 2);
+
+    const cases = [];
+    let totAmt = 0, totPaid = 0, totRemain = 0;
+    let cntPaid = 0, cntUnpaid = 0;
+
+    for (const t of validTrans) {
+        const docid = t.docid || t.docId;
+        if (!docid) continue;
+        try {
+            let dRes = await fetch(`/api/transaction1/${docid}`).catch(() => null);
+            if (!dRes || !dRes.ok) dRes = await fetch(`${API_BASE}/transaction1/${docid}`).catch(() => null);
+            if (dRes && dRes.ok) {
+                const dJson = await dRes.json().catch(() => null);
+                const dData = dJson && (dJson.results || dJson.data || dJson);
+                const details = (dData && dData.details) || [];
+                const match = details.find(d => String(d.Idcustomer).toLowerCase() === String(idcustomer).toLowerCase());
+                if (match) {
+                    const amt = Number(match.amount) || Number(t.amount) || 0;
+                    const paid = Number(match.payamount) || 0;
+                    const remain = Math.max(0, amt - paid);
+                    const isPaid = (remain <= 0);
+                    const isPartial = (paid > 0 && remain > 0);
+
+                    totAmt += amt;
+                    totPaid += paid;
+                    totRemain += remain;
+                    if (isPaid) cntPaid++; else cntUnpaid++;
+
+                    cases.push({
+                        docid: docid,
+                        doc_date: t.doc_date || t.date || "",
+                        numberend: t.numberend || match.numberend || "-",
+                        dateend: t.dateend || "",
+                        deceased_id: t.Idcustomer || "",
+                        deceased_name: `${t.prefix || ''}${t.name || ''} ${t.lastname || ''}`.trim() || "-",
+                        amount: amt,
+                        payamount: paid,
+                        remain: remain,
+                        status_code: isPaid ? 'paid' : (isPartial ? 'partial' : 'unpaid'),
+                        status_name: isPaid ? 'ชำระแล้ว' : (isPartial ? 'ชำระบางส่วน' : 'ค้างชำระ')
+                    });
+                }
+            }
+        } catch (err) {}
+    }
+
+    activeMemberCases = cases;
+    const summary = {
+        total_cases: cases.length,
+        count_paid_cases: cntPaid,
+        count_unpaid_cases: cntUnpaid,
+        total_amount: totAmt,
+        total_paid: totPaid,
+        total_remain: totRemain
+    };
+    displayMemberDebtDetails(activeDetailedMember, summary, cases);
+}
+
+function displayMemberDebtDetails(customer, summary, cases) {
+    document.getElementById("modalMemberTitle").textContent = `ภาระหนี้เงินสงเคราะห์: ${customer.fullname || '-'}`;
+    document.getElementById("modalMemberSubTitle").textContent = `รหัสสมาชิก: ${customer.Idcustomer || '-'} | สถานะ: ${customer.count_unpaid_cases > 0 ? `ค้าง ${customer.count_unpaid_cases} ศพ` : 'ปลอดหนี้'}`;
+
+    document.getElementById("stripMemberId").textContent = customer.Idcustomer || '-';
+    document.getElementById("stripMemberName").textContent = customer.fullname || '-';
+    document.getElementById("stripMemberIdcard").textContent = customer.Idcard || '-';
+    document.getElementById("stripMemberTel").textContent = customer.Tel || '-';
+
+    document.getElementById("mKpiTotalCases").textContent = (summary.total_cases || 0).toLocaleString();
+    document.getElementById("mKpiTotalAmount").textContent = formatCurrency(summary.total_amount || 0);
+
+    document.getElementById("mKpiPaidCases").textContent = (summary.count_paid_cases || 0).toLocaleString();
+    document.getElementById("mKpiPaidAmount").textContent = formatCurrency(summary.total_paid || 0);
+
+    document.getElementById("mKpiUnpaidCases").textContent = (summary.count_unpaid_cases || 0).toLocaleString();
+    document.getElementById("mKpiRemainAmount").textContent = formatCurrency(summary.total_remain || 0);
+
+    const unpaidCount = Number(summary.count_unpaid_cases) || 0;
+    const badgeBox = document.getElementById("mKpiOverallBadge");
+    if (unpaidCount > 0) {
+        badgeBox.innerHTML = `<span class="badge-unpaid-cases" style="font-size: 13.5px;">⚠️ ค้าง ${unpaidCount.toLocaleString()} ศพ</span>`;
+    } else if (summary.total_cases > 0) {
+        badgeBox.innerHTML = `<span class="badge-paid-all" style="font-size: 13.5px;">✅ ครบทุกศพ</span>`;
+    } else {
+        badgeBox.innerHTML = `<span class="badge-zero-cases">ไม่มีรายการ</span>`;
+    }
+
+    // Modal Pill Counts
+    document.getElementById("modalCountAll").textContent = (cases.length || 0).toLocaleString();
+    document.getElementById("modalCountUnpaid").textContent = unpaidCount.toLocaleString();
+    document.getElementById("modalCountPaid").textContent = ((summary.count_paid_cases || 0)).toLocaleString();
+
+    modalCaseFilter = "all";
+    renderModalCasesList();
+}
+
+function setModalCaseFilter(filter) {
+    modalCaseFilter = filter;
+    document.querySelectorAll(".person-modal-body .person-pill-btn").forEach(btn => btn.classList.remove("active"));
+    if (filter === 'all') document.getElementById("modalPillAll")?.classList.add("active");
+    if (filter === 'unpaid') document.getElementById("modalPillUnpaid")?.classList.add("active");
+    if (filter === 'paid') document.getElementById("modalPillPaid")?.classList.add("active");
+    renderModalCasesList();
+}
+window.setModalCaseFilter = setModalCaseFilter;
+
+function getFilteredMemberCases() {
+    return activeMemberCases.filter(c => {
+        const isPaid = (c.remain <= 0);
+        if (modalCaseFilter === "unpaid" && isPaid) return false;
+        if (modalCaseFilter === "paid" && !isPaid) return false;
+        return true;
+    });
+}
+
+function renderModalCasesList() {
+    const tbody = document.getElementById("bodyModalCaseList");
+    const filtered = getFilteredMemberCases();
+
+    if (!filtered || filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 25px; color: #94a3b8;">🔍 ไม่พบรายการศพตามเงื่อนไขที่เลือก</td></tr>`;
+        document.getElementById("modalSumBilled").textContent = "0.00";
+        document.getElementById("modalSumPaid").textContent = "0.00";
+        document.getElementById("modalSumRemain").textContent = "0.00";
+        return;
+    }
+
+    let sumBilled = 0, sumPaid = 0, sumRemain = 0;
+    let html = "";
+    filtered.forEach((c, idx) => {
+        sumBilled += Number(c.amount) || 0;
+        sumPaid += Number(c.payamount) || 0;
+        sumRemain += Number(c.remain) || 0;
+
+        let stBadge = "";
+        if (c.remain <= 0) {
+            stBadge = `<span class="badge-status badge-paid">✅ ชำระแล้ว</span>`;
+        } else if (c.payamount > 0) {
+            stBadge = `<span class="badge-status badge-partial">⏳ ชำระบางส่วน</span>`;
+        } else {
+            stBadge = `<span class="badge-status badge-unpaid">⚠️ ค้างชำระ</span>`;
+        }
+
+        html += `
+            <tr>
+                <td style="text-align: center; color: #64748b;">${idx + 1}</td>
+                <td style="text-align: center; font-family: monospace; font-weight: 600; color: #1e3c72;">${escapeHtml(c.docid || '-')}</td>
+                <td style="text-align: center; font-weight: 600;">${escapeHtml(c.numberend || '-')}</td>
+                <td style="text-align: center; color: #475569;">${formatThaiDate(c.dateend)}</td>
+                <td style="font-weight: 500; white-space: nowrap;">${escapeHtml(c.deceased_name || '-')}</td>
+                <td style="text-align: right; color: #334155;">${formatCurrency(c.amount)}</td>
+                <td style="text-align: right; color: #059669; font-weight: 600;">${formatCurrency(c.payamount)}</td>
+                <td style="text-align: right; color: ${c.remain > 0 ? '#dc2626' : '#94a3b8'}; font-weight: 700;">${formatCurrency(c.remain)}</td>
+                <td style="text-align: center; white-space: nowrap;">${stBadge}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+    document.getElementById("modalSumBilled").textContent = formatCurrency(sumBilled);
+    document.getElementById("modalSumPaid").textContent = formatCurrency(sumPaid);
+    document.getElementById("modalSumRemain").textContent = formatCurrency(sumRemain);
+}
+
+// ==========================================
+// Official Printable Report for a Single Member
+// ==========================================
+function buildSingleMemberOfficialReport(customer, cases, autoPrint = false) {
+    const feeDefault = 0;
+    let sumBilled = 0;
+    let sumPaid = 0;
+    let sumRemain = 0;
+    let countPaidCases = 0;
+    let countUnpaidCases = 0;
+
+    let filterTag = "";
+    let filterStatusText = "ทุกรายการศพ";
+    if (modalCaseFilter === "unpaid") {
+        filterTag = ` <span style="color: #dc2626;">(เฉพาะศพที่ค้างชำระ)</span>`;
+        filterStatusText = "เฉพาะศพที่ค้างชำระ";
+    } else if (modalCaseFilter === "paid") {
+        filterTag = ` <span style="color: #059669;">(เฉพาะศพที่ชำระครบแล้ว)</span>`;
+        filterStatusText = "เฉพาะศพที่ชำระครบแล้ว";
+    }
+
+    let rowsHtml = "";
+    cases.forEach((c, idx) => {
+        const amt = Number(c.amount) || feeDefault;
+        const paid = Number(c.payamount) || 0;
+        const remain = Math.max(0, amt - paid);
+        const isPaid = (remain <= 0);
+
+        sumBilled += amt;
+        sumPaid += paid;
+        sumRemain += remain;
+        if (isPaid) countPaidCases++; else countUnpaidCases++;
+
+        const stText = isPaid ? "ชำระแล้ว" : (paid > 0 ? "ชำระบางส่วน" : "ค้างชำระ");
+        const stStyle = isPaid ? "color: #047857; font-weight: 600;" : "color: #dc2626; font-weight: 700;";
+
+        rowsHtml += `
+            <tr>
+                <td style="text-align: center;">${idx + 1}</td>
+                <td style="text-align: center; font-family: monospace; font-weight: 600;">${escapeHtml(c.docid || '-')}</td>
+                <td style="text-align: center; font-weight: 600;">${escapeHtml(c.numberend || '-')}</td>
+                <td style="text-align: center;">${formatThaiDate(c.dateend)}</td>
+                <td style="white-space: nowrap;">${escapeHtml(c.deceased_name || '-')}</td>
+                <td style="text-align: right;">${formatCurrency(amt)}</td>
+                <td style="text-align: right; color: #047857;">${formatCurrency(paid)}</td>
+                <td style="text-align: right; color: ${remain > 0 ? '#dc2626' : '#94a3b8'}; font-weight: 700;">${formatCurrency(remain)}</td>
+                <td style="text-align: center; ${stStyle}">${stText}</td>
+            </tr>
+        `;
+    });
+
+    if (!rowsHtml) {
+        rowsHtml = `<tr><td colspan="9" style="text-align: center; padding: 25px; color: #64748b;">ไม่พบรายการศพตามเงื่อนไขที่เลือก</td></tr>`;
+    }
+
+    const printScript = autoPrint ? `
+        <script>
+            function triggerPrint() {
+                setTimeout(function() {
+                    window.focus();
+                    window.print();
+                }, 300);
+            }
+            if (document.readyState === 'complete') {
+                triggerPrint();
+            } else {
+                window.addEventListener('load', triggerPrint);
+            }
+        <\/script>
+    ` : "";
+
+    return `
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <title>รายงานภาระหนี้เงินสงเคราะห์รายบุคคล - ${escapeHtml(customer.fullname || customer.Idcustomer)} - ${associationName}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                @page {
+                    size: A4 portrait;
+                    margin: 10mm 12mm;
+                }
+                body {
+                    font-family: 'Sarabun', 'Prompt', sans-serif;
+                    color: #000;
+                    margin: 0;
+                    padding: 12px;
+                    font-size: 13px;
+                    background: #fff;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                    margin-bottom: 14px;
+                }
+                thead { display: table-header-group; }
+                tbody { display: table-row-group; }
+                tfoot { display: table-footer-group; page-break-inside: avoid; break-inside: avoid; }
+                tr { page-break-inside: avoid; break-inside: avoid; }
+
+                .report-title-cell {
+                    background: transparent !important;
+                    border: none !important;
+                    padding: 0 0 10px 0 !important;
+                    font-weight: normal;
+                    text-align: center;
+                }
+                .report-header {
+                    text-align: center;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 8px;
+                    margin-bottom: 8px;
+                }
+                .report-header h2 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: #000; }
+                .report-header h3 { margin: 0 0 4px 0; font-size: 14.5px; font-weight: 600; color: #000; }
+                .report-header p { margin: 0; font-size: 12px; color: #333; }
+
+                th {
+                    background: #f1f5f9;
+                    border: 1px solid #000;
+                    padding: 6px 6px;
+                    text-align: center;
+                    font-weight: 600;
+                }
+                td {
+                    border: 1px solid #000;
+                    padding: 5px 6px;
+                    vertical-align: middle;
+                }
+                tfoot td {
+                    background: #f8fafc;
+                    border: 1px solid #000;
+                }
+
+                .summary-box {
+                    font-size: 12.5px;
+                    font-weight: 600;
+                    margin-bottom: 20px;
+                    padding: 10px 14px;
+                    border: 1px dashed #000;
+                    display: flex;
+                    justify-content: space-around;
+                    flex-wrap: wrap;
+                    gap: 8px 16px;
+                    background: #fafafa;
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+                .signatures-grid {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 36px;
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+                .sign-box {
+                    text-align: center;
+                    width: 250px;
+                    font-size: 12.5px;
+                }
+
+                @media print {
+                    .no-print { display: none !important; }
+                    thead { display: table-header-group !important; }
+                    tfoot { display: table-footer-group !important; }
+                    tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Prompt', sans-serif; margin: -12px -12px 14px -12px;">
+                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">📋 รายงานภาระหนี้สงเคราะห์: ${escapeHtml(customer.fullname || customer.Idcustomer)} (${cases.length} รายการศพ)</div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="window.print()" style="padding: 7px 18px; background: #059669; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">🖨️ สั่งพิมพ์เอกสาร</button>
+                    <button onclick="window.close()" style="padding: 7px 18px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">❌ ปิดหน้าต่าง</button>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="9" class="report-title-cell">
+                            <div class="report-header">
+                                <h2>${associationName}</h2>
+                                <h3>รายงานสรุปภาระหนี้เงินสงเคราะห์รายบุคคล (รายสมาชิก)${filterTag}</h3>
+                                <p><strong>รหัสสมาชิก: ${escapeHtml(customer.Idcustomer || '-')}</strong> | ชื่อ-สกุล: <strong>${escapeHtml(customer.fullname || '-')}</strong> | บัตรประชาชน: <strong>${escapeHtml(customer.Idcard || '-')}</strong> | โทร: <strong>${escapeHtml(customer.Tel || '-')}</strong></p>
+                                <p style="font-size: 11.5px; margin-top: 3px; color: #475569;">
+                                    สถานะหนี้: <strong style="color:${countUnpaidCases > 0 ? '#dc2626' : '#059669'};">${countUnpaidCases > 0 ? `ค้างชำระ ${countUnpaidCases} ศพ` : 'ปลอดหนี้ (ชำระครบทุกศพ)'}</strong> | รายการที่แสดง: <strong>${filterStatusText}</strong> | วันที่พิมพ์: <strong>${formatThaiDate(new Date().toISOString())}</strong>
+                                </p>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th style="width: 45px;">ลำดับ</th>
+                        <th style="width: 100px;">เลขที่เอกสาร</th>
+                        <th style="width: 95px;">ใบมรณะ</th>
+                        <th style="width: 90px;">วันที่เสียชีวิต</th>
+                        <th style="text-align: left; min-width: 160px; white-space: nowrap;">ชื่อผู้เสียชีวิต</th>
+                        <th style="width: 95px; text-align: right;">เรียกเก็บ (บาท)</th>
+                        <th style="width: 95px; text-align: right;">ชำระแล้ว (บาท)</th>
+                        <th style="width: 95px; text-align: right;">คงเหลือ (บาท)</th>
+                        <th style="width: 90px; text-align: center;">สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000;">
+                        <td colspan="5" style="text-align: right; padding: 6px 8px; font-weight: 700;">รวมทั้งสิ้น (${cases.length} รายการศพ - ${filterStatusText}):</td>
+                        <td style="text-align: right; padding: 6px 8px;">${formatCurrency(sumBilled)}</td>
+                        <td style="text-align: right; padding: 6px 8px; color: #047857;">${formatCurrency(sumPaid)}</td>
+                        <td style="text-align: right; padding: 6px 8px; color: #dc2626; font-size: 13px; font-weight: 700;">${formatCurrency(sumRemain)}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="summary-box">
+                <span>จำนวนศพที่เรียกเก็บ: <strong>${cases.length.toLocaleString()}</strong> ศพ</span>
+                <span>ชำระครบแล้ว: <strong style="color:#047857;">${countPaidCases.toLocaleString()}</strong> ศพ</span>
+                <span>ค้างชำระ: <strong style="color:#dc2626; font-size: 13.5px;">${countUnpaidCases.toLocaleString()}</strong> ศพ</span>
+                <span>ยอดเรียกเก็บรวม: <strong>${formatCurrency(sumBilled)} บาท</strong></span>
+                <span>รับชำระแล้ว: <strong style="color:#047857;">${formatCurrency(sumPaid)} บาท</strong></span>
+                <span>ยอดเงินค้างชำระสุทธิ: <strong style="color:#dc2626; font-size: 14px;">${formatCurrency(sumRemain)} บาท</strong></span>
+            </div>
+
+            <!-- กล่องลงชื่อ วางเจ้าหน้าที่ไว้ล่างสุดตามมาตรฐานทางการ -->
+            <div class="signatures-grid">
+                <div class="sign-box">
+                    <p style="margin: 0 0 45px 0;">ลงชื่อ.......................................................</p>
+                    <p style="margin: 0 0 6px 0;">(.......................................................)</p>
+                    <p style="margin: 0; font-weight: 500;">สมาชิกผู้ถูกเรียกเก็บ / ผู้รับทราบยอดหนี้</p>
+                </div>
+                <div class="sign-box">
+                    <p style="margin: 0 0 45px 0;">ลงชื่อ.......................................................</p>
+                    <p style="margin: 0 0 6px 0;">(.......................................................)</p>
+                    <p style="margin: 0; font-weight: 500;">เจ้าหน้าที่การเงิน / ผู้จัดทำรายงาน</p>
+                </div>
+            </div>
+
+            ${printScript}
+        </body>
+        </html>
+    `;
+}
+
+// Print / Preview triggers for single member
+function previewCurrentMemberReport() {
+    if (!activeDetailedMember) return;
+    const filteredCases = getFilteredMemberCases();
+    const html = buildSingleMemberOfficialReport(activeDetailedMember, filteredCases, false);
+    openReportInNewWindow(html, false);
+}
+window.previewCurrentMemberReport = previewCurrentMemberReport;
+
+function printCurrentMemberReport() {
+    if (!activeDetailedMember) return;
+    const filteredCases = getFilteredMemberCases();
+    const html = buildSingleMemberOfficialReport(activeDetailedMember, filteredCases, true);
+    openReportInNewWindow(html, true);
+}
+window.printCurrentMemberReport = printCurrentMemberReport;
+
+function quickPrintMemberDebt(idcustomer) {
+    openMemberDebtModal(idcustomer).then(() => {
+        setTimeout(printCurrentMemberReport, 500);
+    });
+}
+window.quickPrintMemberDebt = quickPrintMemberDebt;
+
+// Export Current Member Cases to Excel (CSV)
+function exportCurrentMemberCSV() {
+    if (!activeDetailedMember || !activeMemberCases) return;
+    const filtered = getFilteredMemberCases();
+    const headers = ["ลำดับ", "เลขที่เอกสาร", "ใบมรณะ", "วันที่เสียชีวิต", "ชื่อผู้เสียชีวิต", "ยอดเรียกเก็บ(บาท)", "ชำระแล้ว(บาท)", "คงเหลือ(บาท)", "สถานะ"];
+    const rows = filtered.map((c, idx) => [
+        idx + 1,
+        `"${c.docid || ''}"`,
+        `"${c.numberend || ''}"`,
+        `"${formatThaiDate(c.dateend)}"`,
+        `"${c.deceased_name || ''}"`,
+        c.amount || 0,
+        c.payamount || 0,
+        c.remain || 0,
+        `"${c.status_name || ''}"`
+    ]);
+
+    const filterSuffix = modalCaseFilter === 'unpaid' ? '_เฉพาะค้างชำระ' : (modalCaseFilter === 'paid' ? '_เฉพาะชำระแล้ว' : '');
+    const csv = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `รายงานหนี้_${activeDetailedMember.Idcustomer || 'member'}${filterSuffix}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+window.exportCurrentMemberCSV = exportCurrentMemberCSV;
+
+// ==========================================
+// All Members Overview Report & Export
+// ==========================================
+function printAllMembersDebtSummary() {
+    if (!filteredMembers || filteredMembers.length === 0) {
+        alert("ไม่พบข้อมูลที่จะพิมพ์");
+        return;
+    }
+    let filterTitle = currentMemberFilter === 'unpaid' ? " (เฉพาะผู้ที่ค้างชำระ)" : (currentMemberFilter === 'paid' ? " (เฉพาะผู้ที่ปลอดหนี้)" : "");
+
+    let sumCases = 0, sumPaid = 0, sumUnpaid = 0, sumRemain = 0;
+    let rowsHtml = "";
+    filteredMembers.forEach((m, idx) => {
+        const cCases = Number(m.total_cases) || 0;
+        const cPaid = Number(m.count_paid_cases) || 0;
+        const cUnpaid = Number(m.count_unpaid_cases) || 0;
+        const cRemain = Number(m.total_remain) || 0;
+
+        sumCases += cCases;
+        sumPaid += cPaid;
+        sumUnpaid += cUnpaid;
+        sumRemain += cRemain;
+
+        const stText = cUnpaid > 0 ? `ค้าง ${cUnpaid} ศพ` : (cCases > 0 ? "ครบทุกศพ" : "ไม่มีรายการ");
+        const stStyle = cUnpaid > 0 ? "color: #dc2626; font-weight: 700;" : "color: #047857;";
+
+        rowsHtml += `
+            <tr>
+                <td style="text-align: center;">${idx + 1}</td>
+                <td style="text-align: center; font-family: monospace;">${escapeHtml(m.Idcustomer || '-')}</td>
+                <td style="white-space: nowrap;">${escapeHtml(m.fullname || '-')}</td>
+                <td style="text-align: center;">${escapeHtml(m.Tel || '-')}</td>
+                <td style="text-align: right;">${cCases.toLocaleString()}</td>
+                <td style="text-align: right; color: #047857;">${cPaid.toLocaleString()}</td>
+                <td style="text-align: center; ${stStyle}">${stText}</td>
+                <td style="text-align: right; color: ${cRemain > 0 ? '#dc2626' : '#94a3b8'}; font-weight: 700;">${formatCurrency(cRemain)}</td>
+            </tr>
+        `;
+    });
+
+    const html = `
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <title>รายงานสรุปภาระหนี้เงินสงเคราะห์ของสมาชิก - ${associationName}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                @page { size: A4 landscape; margin: 8mm 10mm; }
+                body { font-family: 'Sarabun', 'Prompt', sans-serif; margin: 0; padding: 12px; font-size: 13px; color: #000; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px; }
+                thead { display: table-header-group; }
+                tbody { display: table-row-group; }
+                tfoot { display: table-footer-group; page-break-inside: avoid; }
+                tr { page-break-inside: avoid; }
+                .report-title-cell { background: transparent !important; border: none !important; padding: 0 0 10px 0 !important; font-weight: normal; text-align: center; }
+                .report-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
+                .report-header h2 { margin: 0 0 4px 0; font-size: 19px; font-weight: 700; }
+                .report-header h3 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; }
+                th { background: #f1f5f9; border: 1px solid #000; padding: 6px 6px; text-align: center; font-weight: 600; }
+                td { border: 1px solid #000; padding: 5px 6px; vertical-align: middle; }
+                tfoot td { background: #f8fafc; border: 1px solid #000; font-weight: 700; }
+                .summary-box { font-size: 12.5px; font-weight: 600; margin-bottom: 20px; padding: 10px 14px; border: 1px dashed #000; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 8px 16px; background: #fafafa; }
+                .signatures-grid { display: flex; justify-content: space-between; margin-top: 36px; page-break-inside: avoid; }
+                .sign-box { text-align: center; width: 260px; font-size: 12.5px; }
+                @media print { .no-print { display: none !important; } thead { display: table-header-group !important; } }
+            </style>
+        </head>
+        <body>
+            <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; margin: -12px -12px 14px -12px;">
+                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">📋 รายงานสรุปภาระหนี้ของสมาชิก (${filteredMembers.length} คน)</div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="window.print()" style="padding: 7px 18px; background: #059669; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px;">🖨️ สั่งพิมพ์เอกสาร</button>
+                    <button onclick="window.close()" style="padding: 7px 18px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px;">❌ ปิดหน้าต่าง</button>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="8" class="report-title-cell">
+                            <div class="report-header">
+                                <h2>${associationName}</h2>
+                                <h3>รายงานสรุปภาระหนี้เงินสงเคราะห์ของสมาชิก (ภาพรวม)${filterTitle}</h3>
+                                <p>วันที่พิมพ์: <strong>${formatThaiDate(new Date().toISOString())}</strong> | จำนวนสมาชิกในรายงาน: <strong>${filteredMembers.length.toLocaleString()} คน</strong></p>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th style="width: 45px;">ลำดับ</th>
+                        <th style="width: 105px;">รหัสสมาชิก</th>
+                        <th style="text-align: left; min-width: 170px;">ชื่อ - นามสกุล สมาชิก</th>
+                        <th style="width: 110px;">เบอร์โทรศัพท์</th>
+                        <th style="width: 95px; text-align: right;">เรียกเก็บ (ศพ)</th>
+                        <th style="width: 95px; text-align: right;">ชำระแล้ว (ศพ)</th>
+                        <th style="width: 130px; text-align: center;">ค้างชำระ (กี่ศพ) ⚠️</th>
+                        <th style="width: 120px; text-align: right;">ยอดเงินค้าง (บาท)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" style="text-align: right; padding: 6px 8px;">รวมทั้งสิ้น (${filteredMembers.length.toLocaleString()} คน):</td>
+                        <td style="text-align: right; padding: 6px 8px;">${sumCases.toLocaleString()}</td>
+                        <td style="text-align: right; padding: 6px 8px; color: #047857;">${sumPaid.toLocaleString()}</td>
+                        <td style="text-align: center; padding: 6px 8px; color: #dc2626;">${sumUnpaid.toLocaleString()} ศพ</td>
+                        <td style="text-align: right; padding: 6px 8px; color: #dc2626;">${formatCurrency(sumRemain)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="summary-box">
+                <span>จำนวนสมาชิกในรายงาน: <strong>${filteredMembers.length.toLocaleString()}</strong> คน</span>
+                <span>รวมศพที่ถูกเรียกเก็บ: <strong>${sumCases.toLocaleString()}</strong> ศพ</span>
+                <span>ชำระแล้ว: <strong style="color:#047857;">${sumPaid.toLocaleString()}</strong> ศพ</span>
+                <span>ค้างชำระรวม: <strong style="color:#dc2626; font-size: 14px;">${sumUnpaid.toLocaleString()}</strong> ศพ</span>
+                <span>ยอดเงินค้างชำระรวมทั้งสิ้น: <strong style="color:#dc2626; font-size: 14px;">${formatCurrency(sumRemain)} บาท</strong></span>
+            </div>
+
+            <!-- กล่องลงชื่อ วางเจ้าหน้าที่ไว้ล่างสุดตามมาตรฐานทางการ -->
+            <div class="signatures-grid">
+                <div class="sign-box">
+                    <p style="margin: 0 0 45px 0;">ลงชื่อ.......................................................</p>
+                    <p style="margin: 0 0 6px 0;">(.......................................................)</p>
+                    <p style="margin: 0; font-weight: 500;">เจ้าหน้าที่ผู้จัดทำรายงาน</p>
+                </div>
+                <div class="sign-box">
+                    <p style="margin: 0 0 45px 0;">ลงชื่อ.......................................................</p>
+                    <p style="margin: 0 0 6px 0;">(.......................................................)</p>
+                    <p style="margin: 0; font-weight: 500;">เหรัญญิก / ผู้ตรวจสอบการเงิน</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+    openReportInNewWindow(html, true);
+}
+window.printAllMembersDebtSummary = printAllMembersDebtSummary;
+
+function exportMembersSummaryCSV() {
+    if (!filteredMembers || filteredMembers.length === 0) return;
+    const headers = ["ลำดับ", "รหัสสมาชิก", "ชื่อ - นามสกุล", "เบอร์โทร", "เรียกเก็บ(ศพ)", "ชำระแล้ว(ศพ)", "ค้างชำระ(ศพ)", "ยอดเงินค้างชำระ(บาท)"];
+    const rows = filteredMembers.map((m, idx) => [
+        idx + 1,
+        `"${m.Idcustomer || ''}"`,
+        `"${m.fullname || ''}"`,
+        `"${m.Tel || ''}"`,
+        m.total_cases || 0,
+        m.count_paid_cases || 0,
+        m.count_unpaid_cases || 0,
+        m.total_remain || 0
+    ]);
+    const filterSuffix = currentMemberFilter === 'unpaid' ? '_เฉพาะผู้ค้างชำระ' : (currentMemberFilter === 'paid' ? '_เฉพาะปลอดหนี้' : '');
+    const csv = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `รายงานสรุปภาระหนี้สมาชิก${filterSuffix}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+window.exportMembersSummaryCSV = exportMembersSummaryCSV;
+
+function openReportInNewWindow(htmlContent, autoPrint = false) {
+    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(blob);
+    const win = window.open(blobUrl, "_blank");
+    if (win) {
+        win.opener = null;
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 120000);
+    } else {
+        alert("กรุณาอนุญาตให้เปิดหน้าต่าง Pop-up บนเบราว์เซอร์เพื่อดูรายงาน");
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return "";
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+</script>
+{% endblock %}

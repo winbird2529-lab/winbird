@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='permission.css') }}">
 <p>Hello Flask layout!</p>
 <h3><a href="/DK_Home">HOME</a> \ ทะเบียนสมาชิก</h3>
 <div class="main">
@@ -30,7 +31,7 @@
             </div>
 
             <!-- Search Box & Add Button -->
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                 <div class="search-box" style="margin-bottom: 0;">
                     <div class="search-wrapper">
                         <span class="search-icon">🔍</span>
@@ -40,7 +41,7 @@
                 </div>
 
                 <a href="/DK_fromcustomer" class="btn-add-customer">
-                    <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
@@ -62,7 +63,8 @@
                     <th>นามสกุล</th>
                     <th>วันที่สมัครสมาชิก</th>
                     <th>สถานะ</th>
-                    <th>จัดการ</th>
+                    <th>บันทึกโดย</th>
+                    <th style="width: 220px; white-space:nowrap; text-align:center;">จัดการ</th>
                 </tr>
             </thead>
             <tbody> </tbody>
@@ -238,7 +240,7 @@
         tbody.innerHTML = "";
 
         if (filteredData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 25px; color: #888;">ไม่พบข้อมูลสมาชิกที่ค้นหา</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 25px; color: #888;">ไม่พบข้อมูลสมาชิกที่ค้นหา</td></tr>`;
             if (summary) summary.innerText = `แสดง 0 จากทั้งหมด ${allData.length} รายการ`;
             return;
         }
@@ -252,6 +254,27 @@
         }
 
         pageData.forEach((emp, index) => {
+            const isLocked = (emp.status == 4 || emp.status == "4" || emp.status == 3 || emp.status == "3" || emp.is_locked == 1 || emp.is_locked == "1" || (emp.count_ben_billed && Number(emp.count_ben_billed) > 0));
+            let deleteBtnHtml = "";
+            if (isLocked) {
+                let lockMsg = "สมาชิกหรือผู้รับผลประโยชน์อยู่ในรายการตั้งหนี้ ไม่สามารถลบได้";
+                if (emp.status == 4 || emp.status == "4") lockMsg = "สมาชิกอยู่ในรายการตั้งหนี้ ไม่สามารถลบได้";
+                else if (emp.status == 3 || emp.status == "3") lockMsg = "สมาชิกเสียชีวิต ไม่สามารถลบได้";
+                else if (emp.count_ben_billed && Number(emp.count_ben_billed) > 0) lockMsg = "ผู้รับผลประโยชน์ของสมาชิกอยู่ในรายการตั้งหนี้ ไม่สามารถลบได้";
+
+                deleteBtnHtml = `
+                    <button type="button" class="btn-delete btn-disabled" data-id="${emp.Idcustomer}" data-locked="1" title="${lockMsg}" style="opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1;">
+                        🔒 ล็อก
+                    </button>
+                `;
+            } else {
+                deleteBtnHtml = `
+                    <button type="button" class="btn-delete" data-id="${emp.Idcustomer}" data-locked="0" title="ลบข้อมูลสมาชิกและผู้รับผลประโยชน์">
+                        🗑️ ลบ
+                    </button>
+                `;
+            }
+
             const row = `
                 <tr class="${
                     emp.status == 3
@@ -267,16 +290,17 @@
                     <td>${emp.lastname || ''}</td>
                     <td>${formatThaiDate(emp.date)}</td>
                     <td>${emp.status_name || ''}</td>
-                    <td class="action-col">
-                        <button class="btn-viwe" data-id="${emp.Idcustomer}">
-                            ดูข้อมูล
-                        </button>
-                        <button class="btn-edit" data-id="${emp.Idcustomer}">
-                            แก้ไข
-                        </button>
-                        <button class="btn-delete" data-id="${emp.Idcustomer}">
-                            ลบ
-                        </button>
+                    <td><span class="badge-audit badge-userid" style="font-size:12px;">${emp.userid || '-'}</span></td>
+                    <td class="action-col" style="white-space:nowrap; text-align:center;">
+                        <div class="action-buttons" style="display:inline-flex; align-items:center; gap:5px; white-space:nowrap;">
+                            <button type="button" class="btn-viwe" data-id="${emp.Idcustomer}" title="ดูรายละเอียดข้อมูลสมาชิก">
+                                👁️ ดูข้อมูล
+                            </button>
+                            <button type="button" class="btn-edit" data-id="${emp.Idcustomer}" title="แก้ไขข้อมูลสมาชิก">
+                                ✏️ แก้ไข
+                            </button>
+                            ${deleteBtnHtml}
+                        </div>
                     </td>
                 </tr>
             `;
@@ -339,38 +363,59 @@
 // ปุ่มviwe
 // เมื่อกดปุ่มดูข้อมูล
 document.addEventListener("click", function (e) {
-  if (e.target.classList.contains("btn-viwe")) {
-    const id = e.target.dataset.id;
+  const btn = e.target.closest(".btn-viwe");
+  if (btn) {
+    const id = btn.dataset.id;
     window.location.href = `/DK_Viwecustomer?id=${id}`;
   }
 });
 // ✅ ปุ่มแก้ไข
 document.addEventListener("click", function (e) {
-  if (e.target.classList.contains("btn-edit")) {
-    const id = e.target.dataset.id;
+  const btn = e.target.closest(".btn-edit");
+  if (btn) {
+    const id = btn.dataset.id;
     // ส่ง id ไปหน้าแก้ไขแบบ query string
     window.location.href = `/DK_Editcustomer?id=${id}`;
   }
 });
 
-
-
-//ปุ่มลบ
+// ปุ่มลบสมาชิก (ตรวจสอบการทำธุรกรรมและรายการตั้งหนี้ก่อนลบ)
 document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("btn-delete")) {
-    const id = e.target.dataset.id;
+  const btn = e.target.closest(".btn-delete");
+  if (btn) {
+    if (btn.dataset.locked === "1" || btn.disabled || btn.classList.contains("btn-disabled")) {
+      alert("❌ ไม่สามารถลบสมาชิกรายนี้ได้ เนื่องจากสมาชิกหรือผู้รับผลประโยชน์อยู่ในรายการตั้งหนี้สงเคราะห์มรณะ");
+      return;
+    }
+    const id = btn.dataset.id;
 
-    if (!confirm(`ต้องการลบพนักงาน ${id} ใช่หรือไม่?`)) return;
+    if (!confirm(`ยืนยันการลบสมาชิก ${id} หรือไม่?\n\n*หมายเหตุ: ระบบจะลบข้อมูลสมาชิกและผู้รับผลประโยชน์ทั้งหมด (สมาชิกและผู้รับผลประโยชน์ต้องไม่ได้อยู่ในรายการตั้งหนี้)`)) return;
 
-    const res = await fetch(`${API_BASE}/delete_customer/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      let res = null;
+      try {
+        res = await fetch(`${API_BASE}/delete_customer/${id}`, {
+          method: "DELETE",
+        });
+        if (!res || !res.ok) throw new Error(`API error: ${res ? res.status : 'No response'}`);
+      } catch (errApi) {
+        // Fallback ไปยัง host ปัจจุบัน (Flask port 5000)
+        res = await fetch(`/delete_customer/${id}`, {
+          method: "DELETE",
+        });
+      }
 
-    const result = await res.json();
-    alert(result.message);
+      if (!res) throw new Error("ไม่ได้รับการตอบกลับจากเซิร์ฟเวอร์");
 
-    if (result.error === "0") {
-      location.reload();
+      const result = await res.json();
+      if (result.error === "0") {
+        alert(result.message || "✅ ลบข้อมูลสมาชิกและผู้รับผลประโยชน์เรียบร้อยแล้ว");
+        location.reload();
+      } else {
+        alert(result.message || "❌ ไม่สามารถลบข้อมูลสมาชิกได้");
+      }
+    } catch (err) {
+      alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อ: " + err.message);
     }
   }
 });

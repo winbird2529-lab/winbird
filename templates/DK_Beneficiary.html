@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='Deceased.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='Beneficiary.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='permission.css') }}">
 
 
 
@@ -37,7 +38,7 @@
             </div>
 
             <!-- Search Box & Member Registry Button -->
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                 <div class="search-box" style="margin-bottom: 0;">
                     <div class="search-wrapper">
                         <span class="search-icon">🔍</span>
@@ -47,7 +48,7 @@
                 </div>
 
                 <a href="/DK_customer" class="btn-add-customer" title="ไปที่ทะเบียนสมาชิกเพื่อจัดการข้อมูล">
-                    <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="9" cy="7" r="4"></circle>
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -74,12 +75,13 @@
                     <th>สมาชิกเจ้าของ</th>
                     <th style="width: 140px;">เลขบัตรประชาชน</th>
                     <th style="width: 120px;">สถานะ</th>
-                    <th style="width: 160px;">จัดการ</th>
+                    <th>บันทึกโดย</th>
+                    <th style="width: 120px; white-space:nowrap; text-align:center;">จัดการ</th>
                 </tr>
             </thead>
             <tbody id="beneficiaryTableBody">
                 <tr>
-                    <td colspan="10" style="text-align: center; padding: 35px; color: #64748b;">
+                    <td colspan="11" style="text-align: center; padding: 35px; color: #64748b;">
                         กำลังโหลดข้อมูลผู้รับผลประโยชน์...
                     </td>
                 </tr>
@@ -240,7 +242,7 @@ function renderTable() {
     if (filteredBeneficiaries.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="10" style="text-align: center; padding: 40px; color: #888;">
+                <td colspan="11" style="text-align: center; padding: 40px; color: #888;">
                     🔍 ไม่พบข้อมูลผู้รับผลประโยชน์ตามเงื่อนไขที่ระบุ
                 </td>
             </tr>
@@ -292,15 +294,13 @@ function renderTable() {
                 </td>
                 <td><span class="idcard-text">${item.Idcard || "-"}</span></td>
                 <td>${statusBadge}</td>
-                <td>
-                    
-                      <div class="action-buttons">
-                        
+                <td><span class="badge-audit badge-userid" style="font-size:12px;">${item.userid || '-'}</span></td>
+                <td style="white-space:nowrap; text-align:center;">
+                    <div class="action-buttons" style="display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
                         <a href="/DK_Editcustomer?id=${encodeURIComponent(custId)}" class="btn-owner-edit" title="แก้ไขข้อมูลสมาชิกและผู้รับผลประโยชน์">
                         ✏️ แก้ไข
                         </a>
                     </div>
-                    
                 </td>
             </tr>
         `;

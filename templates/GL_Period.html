@@ -1,0 +1,886 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}รอบบัญชี (GL Period){% endblock %}
+
+{% block content %}
+<!-- Flatpickr CSS (จาก DK_fromcustomer) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='GL.css') }}">
+
+<div class="gl-period-container">
+    <!-- 1. Top Windows-Form Style Toolbar -->
+    <div class="gl-toolbar">
+        <div class="gl-toolbar-actions">
+            <button type="button" class="btn-gl-tool btn-gl-edit" id="btnEditPeriod" title="คลิกเพื่อเปิดแก้ไขข้อมูลรอบบัญชี">
+                <span>✏️</span>
+                <span>แก้ไข</span>
+            </button>
+            <button type="button" class="btn-gl-tool btn-gl-save" id="btnSavePeriod" disabled title="บันทึกข้อมูลลงในฐานข้อมูล gl_period">
+                <span>💾</span>
+                <span>บันทึก</span>
+            </button>
+            
+        </div>
+        
+    </div>
+
+    <!-- 2. Main Box Container -->
+    <div class="gl-main-card">
+        <!-- Fieldset 1: ค่าคงที่สำหรับประมวลผล (กลุ่มบัญชี, เลขที่บัญชีกำไรขาดทุน / กำไรประจำงวด, เลขที่บัญชีกำไรสะสม) -->
+        <div class="gl-fieldset" style="margin-bottom: 22px;">
+            <div class="gl-fieldset-legend">
+                <span>ค่าคงที่</span>
+            </div>
+
+            <div class="gl-constants-row">
+                <!-- 1. กลุ่มบัญชี -->
+                <div class="gl-const-col">
+                    <label class="gl-const-lbl" for="inputAccGroup">กลุ่มบัญชี</label>
+                    <div class="gl-code-input-wrap">
+                        <input type="text" id="inputAccGroup" class="gl-input-code" value="{{ acc_group or (row and (row.DepId or row.acc_group)) or '' }}" placeholder="01" style="width: 65px;" disabled title="กลุ่มบัญชี (DepId) เช่น 01">
+                        <button type="button" class="btn-browse-dots" onclick="window.openChartModal('acc_group')" disabled title="เลือกกลุ่มบัญชี">...</button>
+                    </div>
+                </div>
+
+                <!-- 2. เลขที่บัญชีกำไรขาดทุน (กำไรประจำงวด) -->
+                <div class="gl-const-col">
+                    <label class="gl-const-lbl" for="inputProfitLossAcc">เลขที่บัญชีกำไรขาดทุน</label>
+                    <div class="gl-code-input-wrap">
+                        <input type="text" id="inputProfitLossAcc" class="gl-input-code" value="{{ profit_loss_acc or (row and (row.AC_ProfitLose or row.profit_loss_acc)) or '' }}" placeholder="3800" style="width: 80px;" disabled title="เลขที่บัญชีกำไรขาดทุน / กำไรประจำงวด (AC_ProfitLose)">
+                        <button type="button" class="btn-browse-dots" onclick="window.openChartModal('profit_loss')" disabled title="ค้นหา/เลือกผังบัญชีกำไรขาดทุนประจำงวด">...</button>
+                    </div>
+                </div>
+
+                <!-- 3. เลขที่บัญชีกำไรสะสม -->
+                <div class="gl-const-col">
+                    <label class="gl-const-lbl" for="inputRetainedAcc">เลขที่บัญชีกำไรสะสม</label>
+                    <div class="gl-code-input-wrap">
+                        <input type="text" id="inputRetainedAcc" class="gl-input-code" value="{{ retained_earnings_acc or (row and (row.AC_ProfitACC or row.retained_earnings_acc)) or '' }}" placeholder="3700" style="width: 80px;" disabled title="เลขที่บัญชีกำไรสะสม (AC_ProfitACC)">
+                        <button type="button" class="btn-browse-dots" onclick="window.openChartModal('retained')" disabled title="ค้นหา/เลือกผังบัญชีกำไรสะสม">...</button>
+                        <span id="nameRetainedAcc" class="gl-account-name-badge" title="ชื่อบัญชีกำไรสะสม">{{ retained_earnings_name or (row and row.retained_earnings_name) or '' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fieldset 2: ระยะเวลาสิ้นสุดของปี (โครงสร้างตามรูปตัวอย่าง) -->
+        <div class="gl-fieldset">
+            <div class="gl-fieldset-legend">
+                <span>ระยะเวลาสิ้นสุดของปี</span>
+            </div>
+
+            <!-- Header Controls: จำนวนงวดต่อปี (ซ้าย ตรงกับงวด 1) + ปีปัจจุบัน (ขวา ตรงกับงวด 2 พิมพ์เองได้โดยตรง) -->
+            <div class="gl-controls-row">
+                <div class="gl-control-group">
+                    <label for="inputTotalPeriods" style="min-width: 90px;">จำนวนงวดต่อปี</label>
+                    <input type="text" id="inputTotalPeriods" class="gl-input-number" style="width: 55px;" value="{{ total_periods or (row and (row.PeriodPerYear or row.total_periods)) or '' }}" placeholder="12" disabled title="ระบบมาตรฐาน 12 งวดต่อปี (PeriodPerYear)">
+                </div>
+
+                <div class="gl-control-group">
+                    <label for="inputCurrentYear" style="min-width: 65px;">ปีปัจจุบัน</label>
+                    <input type="text" id="inputCurrentYear" class="gl-input-number" style="width: 80px; font-weight: 700; font-size: 14px; color: #0284c7;" value="{{ year or (row and (row.CurentYear or row.year_be or row.year)) or '' }}" maxlength="4" placeholder="2569" disabled title="พิมพ์ปี พ.ศ. ได้เองโดยตรง เช่น 2569 (CurentYear)">
+                </div>
+            </div>
+
+            <!-- Form วันที่ ทั้ง 12 งวด (จัด 2 คอลัมน์ กว้างเท่ากันทุกงวด) -->
+            <div class="gl-periods-grid" id="periodsContainer">
+                {% for p in periods %}
+                <div class="period-item-card">
+                    <div class="period-header-bar">
+                        <span class="period-label-title">📅 งวดที่ {{ p.period_no }} ({{ p.month_name }})</span>
+                        <label class="period-checkbox-label is-disabled" title="เปิด/ปิด สิทธิ์แก้ไขงวดที่ {{ p.period_no }}">
+                            <input type="checkbox" 
+                                   id="can_edit_{{ p.period_no }}" 
+                                   class="period-checkbox-input" 
+                                   data-period="{{ p.period_no }}" 
+                                   disabled
+                                   {% if p.can_edit %}checked{% endif %}>
+                            <span>แก้ไขได้</span>
+                        </label>
+                    </div>
+                    <div class="form-field" style="margin-bottom: 0;">
+                        <div style="position: relative;">
+                            <input type="text" 
+                                   id="thai_date_{{ p.period_no }}" 
+                                   name="thai_date_{{ p.period_no }}" 
+                                   class="period-flatpickr-input" 
+                                   data-period="{{ p.period_no }}" 
+                                   data-ad-date="{{ p.ad_date or '' }}"
+                                   data-thai-date="{{ p.thai_date or '' }}"
+                                   value="{{ p.thai_date or '' }}" 
+                                   placeholder="เลือกวันที่"
+                                   readonly
+                                   disabled
+                                   style="cursor: not-allowed; background: #f1f5f9; padding-right: 32px;"
+                                   title="คลิกเพื่อเลือกวันที่จากปฏิทิน">
+                            <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #0284c7; font-size: 15px;">📅</span>
+                        </div>
+                        <input type="hidden" 
+                                id="ad_date_{{ p.period_no }}" 
+                                name="ad_date_{{ p.period_no }}" 
+                                class="period-ad-date-input" 
+                                data-period="{{ p.period_no }}" 
+                                value="{{ p.ad_date or '' }}">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Legend Notes at bottom -->
+            <div class="gl-notes-footer">
+                <span class="note-tag">หมายเหตุ</span>
+                <span class="note-item">
+                    <input type="checkbox" checked disabled style="width: 13px; height: 13px;">
+                    <span>หมายถึง แก้ไขข้อมูลในงวดนั้นได้</span>
+                </span>
+                <span class="note-item">
+                    <input type="checkbox" disabled style="width: 13px; height: 13px;">
+                    <span>หมายถึง แก้ไขข้อมูลในงวดนั้นไม่ได้</span>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast element -->
+<div id="glToast" class="gl-toast"></div>
+
+<!-- Modal สำหรับเลือกผังบัญชี (Chart of Accounts) -->
+<div id="modalChartAccounts" class="chart-modal-overlay">
+    <div class="chart-modal-box">
+        <div class="chart-modal-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span>📖</span>
+                <span id="modalChartTitle" style="font-weight:700; font-size:15px; color:#ffffff;">เลือกผังบัญชี</span>
+            </div>
+            <button type="button" class="btn-modal-close" onclick="window.closeChartModal()" title="ปิด">✕</button>
+        </div>
+        <div class="chart-modal-body">
+            <!-- Search & Filter bar -->
+            <div class="chart-search-row">
+                <input type="text" id="inputChartSearch" placeholder="🔍 ค้นหารหัส หรือ ชื่อบัญชี..." class="chart-search-input">
+                <select id="selectChartTypeFilter" class="chart-filter-select">
+                    <option value="">ทุกหมวดบัญชี</option>
+                    <option value="ทุน">หมวด 3: ทุน</option>
+                    <option value="สินทรัพย์">หมวด 1: สินทรัพย์</option>
+                    <option value="หนี้สิน">หมวด 2: หนี้สิน</option>
+                    <option value="รายได้">หมวด 4: รายได้</option>
+                    <option value="ค่าใช้จ่าย">หมวด 5: ค่าใช้จ่าย</option>
+                </select>
+            </div>
+            <!-- Accounts List Table -->
+            <div class="chart-table-wrap">
+                <table class="chart-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 110px;">รหัสบัญชี</th>
+                            <th>ชื่อบัญชี</th>
+                            <th style="width: 100px;">หมวด</th>
+                            <th style="width: 75px; text-align:center;">เลือก</th>
+                        </tr>
+                    </thead>
+                    <tbody id="chartTableBody">
+                        <!-- Populated dynamically by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="chart-modal-footer">
+            <button type="button" class="btn-gl-tool btn-gl-exit" onclick="window.closeChartModal()" style="padding:6px 16px;">ปิด</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Flatpickr Scripts (จาก DK_fromcustomer) -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<script>
+(function() {
+    let chartAccountsCache = [];
+    let currentModalTarget = null;
+    let isEditMode = false;
+
+    function showToast(msg, type = "success") {
+        const toast = document.getElementById("glToast");
+        if (!toast) return;
+        toast.className = `gl-toast ${type} show`;
+        toast.innerHTML = (type === "success" ? "✅ " : "❌ ") + msg;
+        setTimeout(() => {
+            toast.className = "gl-toast";
+        }, 3000);
+    }
+
+    // ฟังก์ชันเปิด/ปิดช่องกรอกข้อมูลทั้งหมดในหน้า GL_Period
+    function setFormEditable(editable) {
+        isEditMode = Boolean(editable);
+
+        const fieldIds = [
+            "inputAccGroup",
+            "inputProfitLossAcc",
+            "inputRetainedAcc",
+            "inputTotalPeriods",
+            "inputCurrentYear"
+        ];
+        fieldIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = !isEditMode;
+        });
+
+        document.querySelectorAll(".btn-browse-dots").forEach(btn => {
+            btn.disabled = !isEditMode;
+        });
+
+        for (let i = 1; i <= 12; i++) {
+            const chkEl = document.getElementById(`can_edit_${i}`);
+            if (chkEl) {
+                chkEl.disabled = !isEditMode;
+                const lbl = chkEl.closest(".period-checkbox-label");
+                if (lbl) lbl.classList.toggle("is-disabled", !isEditMode);
+            }
+
+            const dateInputEl = document.getElementById(`thai_date_${i}`);
+            if (dateInputEl) {
+                dateInputEl.disabled = !isEditMode;
+                dateInputEl.style.cursor = isEditMode ? "pointer" : "not-allowed";
+                dateInputEl.style.background = isEditMode ? "#ffffff" : "#f1f5f9";
+            }
+
+            if (flatpickrInstances[i]) {
+                flatpickrInstances[i].set("clickOpens", isEditMode);
+                if (!isEditMode) {
+                    flatpickrInstances[i].close();
+                }
+            }
+        }
+
+        const btnEdit = document.getElementById("btnEditPeriod");
+        const btnSave = document.getElementById("btnSavePeriod");
+        if (btnEdit) {
+            btnEdit.disabled = isEditMode;
+            btnEdit.style.opacity = isEditMode ? "0.5" : "1";
+        }
+        if (btnSave) {
+            btnSave.disabled = !isEditMode;
+            btnSave.style.opacity = isEditMode ? "1" : "0.5";
+        }
+    }
+
+    // Modal สำหรับเลือกผังบัญชี
+    window.openChartModal = function(targetField) {
+        if (!isEditMode) return;
+        currentModalTarget = targetField;
+        const modal = document.getElementById("modalChartAccounts");
+        const titleEl = document.getElementById("modalChartTitle");
+        const filterTypeEl = document.getElementById("selectChartTypeFilter");
+        const searchInput = document.getElementById("inputChartSearch");
+
+        if (searchInput) searchInput.value = "";
+
+        if (targetField === "profit_loss") {
+            titleEl.textContent = "เลือกผังบัญชีกำไรขาดทุน (กำไรประจำงวด)";
+            if (filterTypeEl) filterTypeEl.value = "ทุน";
+        } else if (targetField === "retained") {
+            titleEl.textContent = "เลือกผังบัญชีกำไรสะสม";
+            if (filterTypeEl) filterTypeEl.value = "ทุน";
+        } else if (targetField === "acc_group") {
+            titleEl.textContent = "เลือกกลุ่มบัญชี";
+            if (filterTypeEl) filterTypeEl.value = "";
+        } else {
+            titleEl.textContent = "เลือกผังบัญชี";
+            if (filterTypeEl) filterTypeEl.value = "";
+        }
+
+        renderChartModalTable("", filterTypeEl ? filterTypeEl.value : "");
+        if (modal) modal.classList.add("active");
+        if (searchInput) searchInput.focus();
+    };
+
+    window.closeChartModal = function() {
+        const modal = document.getElementById("modalChartAccounts");
+        if (modal) modal.classList.remove("active");
+    };
+
+    function renderChartModalTable(filterKw = "", filterType = "") {
+        const tbody = document.getElementById("chartTableBody");
+        if (!tbody) return;
+
+        const kw = (filterKw || "").toLowerCase().trim();
+        let list = chartAccountsCache;
+
+        if (kw) {
+            list = list.filter(item => 
+                (item.acc_code && item.acc_code.toLowerCase().includes(kw)) ||
+                (item.acc_name && item.acc_name.toLowerCase().includes(kw))
+            );
+        }
+        if (filterType) {
+            list = list.filter(item => item.acc_type === filterType);
+        }
+
+        if (list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:18px; color:#94a3b8;">ไม่พบข้อมูลผังบัญชีที่ค้นหา</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = list.map(item => `
+            <tr onclick="window.selectChartAccount('${escapeAttr(item.acc_code)}', '${escapeAttr(item.acc_name)}', '${escapeAttr(item.acc_group || '01')}')">
+                <td style="font-weight:600; color:#0284c7;">${escapeHtml(item.acc_code)}</td>
+                <td style="font-weight:500;">${escapeHtml(item.acc_name)}</td>
+                <td><span style="font-size:11.5px; background:#f1f5f9; padding:2px 6px; border-radius:4px; color:#475569;">${escapeHtml(item.acc_type || '-')}</span></td>
+                <td style="text-align:center;">
+                    <button type="button" class="btn-select-acc">เลือก</button>
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    function escapeHtml(str) {
+        if (!str) return "";
+        return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+    }
+
+    function escapeAttr(str) {
+        if (!str) return "";
+        return String(str).replace(/'/g, "\\'");
+    }
+
+    window.selectChartAccount = function(code, name, group) {
+        if (currentModalTarget === "profit_loss") {
+            const inputPL = document.getElementById("inputProfitLossAcc");
+            if (inputPL) inputPL.value = code;
+        } else if (currentModalTarget === "retained") {
+            const inputRet = document.getElementById("inputRetainedAcc");
+            const badgeRet = document.getElementById("nameRetainedAcc");
+            if (inputRet) inputRet.value = code;
+            if (badgeRet) badgeRet.textContent = name;
+        } else if (currentModalTarget === "acc_group") {
+            const inputGrp = document.getElementById("inputAccGroup");
+            if (inputGrp) inputGrp.value = group || code;
+        }
+        closeChartModal();
+    };
+
+    async function loadChartAccounts() {
+        try {
+            const res = await fetch("/api/gl_chart");
+            const data = await res.json();
+            if (data.error === "0" && Array.isArray(data.results)) {
+                chartAccountsCache = data.results;
+            }
+        } catch (e) {
+            console.warn("Chart accounts error:", e);
+        }
+    }
+
+    // ============================================
+    // FLATPICKR CALENDAR & BUDDHIST YEAR (พ.ศ.) LOGIC
+    // ============================================
+    function getFallbackBeYear() {
+        const yrInput = document.getElementById("inputCurrentYear");
+        const raw = yrInput ? parseInt(yrInput.value, 10) : NaN;
+        if (!isNaN(raw)) {
+            if (raw >= 2450 && raw <= 2700) return raw;
+            if (raw >= 1950 && raw <= 2150) return raw + 543;
+        }
+        return new Date().getFullYear() + 543;
+    }
+
+    function isValidYearValue(yr) {
+        const y = parseInt(yr, 10);
+        if (isNaN(y)) return false;
+        return (y >= 1950 && y <= 2150) || (y >= 2450 && y <= 2700);
+    }
+
+    function toBeYear(yr, fallbackBe) {
+        const fb = fallbackBe || getFallbackBeYear();
+        const y = parseInt(yr, 10);
+        if (isNaN(y)) return fb;
+        if (y >= 2450 && y <= 2700) return y;
+        if (y >= 1950 && y <= 2150) return y + 543;
+        return fb;
+    }
+
+    function toCeYear(yr, fallbackBe) {
+        return toBeYear(yr, fallbackBe) - 543;
+    }
+
+    function getMaxDaysInMonth(month, beYear) {
+        const ceYear = toCeYear(beYear);
+        const m = parseInt(month, 10);
+        if (m === 2) {
+            const isLeap = (ceYear % 4 === 0 && ceYear % 100 !== 0) || (ceYear % 400 === 0);
+            return isLeap ? 29 : 28;
+        }
+        if ([4, 6, 9, 11].includes(m)) {
+            return 30;
+        }
+        return 31;
+    }
+
+    // ตรวจสอบและซ่อมแซมวันที่ของแต่ละงวดให้เป็นปี พ.ศ. ที่ถูกต้องเสมอ (ป้องกันปี 1086 / 1629 หรือวันล้นเดือน)
+    function normalizePeriodDateObj(periodNo, rawAdDate, rawThaiDate, fallbackBeYear) {
+        const fbBe = toBeYear(fallbackBeYear);
+        let d = null, mo = null, beYr = null;
+        let corrupted = false;
+
+        if (rawThaiDate && String(rawThaiDate).trim()) {
+            const m = String(rawThaiDate).trim().match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+            if (m) {
+                const parsedD = parseInt(m[1], 10);
+                const parsedMo = parseInt(m[2], 10);
+                const parsedYr = parseInt(m[3], 10);
+                if (isValidYearValue(parsedYr)) {
+                    beYr = toBeYear(parsedYr, fbBe);
+                    mo = parsedMo;
+                    d = parsedD;
+                } else {
+                    corrupted = true;
+                }
+            }
+        }
+
+        if ((d === null || mo === null || beYr === null) && !corrupted && rawAdDate && String(rawAdDate).includes("-")) {
+            const parts = String(rawAdDate).trim().split("-");
+            if (parts.length >= 3) {
+                const parsedYr = parseInt(parts[0], 10);
+                const parsedMo = parseInt(parts[1], 10);
+                const parsedD = parseInt(parts[2], 10);
+                if (isValidYearValue(parsedYr)) {
+                    beYr = toBeYear(parsedYr, fbBe);
+                    mo = parsedMo;
+                    d = parsedD;
+                } else {
+                    corrupted = true;
+                }
+            }
+        }
+
+        if (corrupted || d === null || mo === null || beYr === null) {
+            beYr = fbBe;
+            mo = periodNo;
+            d = getMaxDaysInMonth(periodNo, fbBe);
+        } else {
+            mo = Math.max(1, Math.min(12, mo));
+            const maxD = getMaxDaysInMonth(mo, beYr);
+            if (d > maxD || d < 1) {
+                d = maxD;
+                corrupted = true;
+            }
+        }
+
+        const ceYr = beYr - 543;
+        const thaiDateStr = `${String(d).padStart(2, '0')}/${String(mo).padStart(2, '0')}/${beYr}`;
+        const adDateStr = `${String(ceYr).padStart(4, '0')}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const jsDate = new Date(ceYr, mo - 1, d);
+
+        return {
+            day: d,
+            month: mo,
+            beYear: beYr,
+            ceYear: ceYr,
+            thaiDate: thaiDateStr,
+            adDate: adDateStr,
+            jsDate: jsDate,
+            wasCorrupted: corrupted
+        };
+    }
+
+    function changeToBuddhistYear(instance) {
+        setTimeout(() => {
+            const yearElement = instance.currentYearElement;
+            if (yearElement) {
+                const rawYear = parseInt(yearElement.value, 10);
+                if (!isNaN(rawYear)) {
+                    yearElement.value = toBeYear(rawYear);
+                }
+            }
+        }, 1);
+    }
+
+    function formatThaiDate(date) {
+        if (!date) return "";
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = toBeYear(date.getFullYear());
+        return `${day}/${month}/${year}`;
+    }
+
+    function updateHiddenDate(periodNo, date) {
+        const adInput = document.getElementById(`ad_date_${periodNo}`);
+        if (!adInput) return;
+        if (!date) {
+            adInput.value = "";
+            return;
+        }
+        const yyyy = toCeYear(date.getFullYear());
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        adInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    const flatpickrInstances = {};
+
+    // ผูก Flatpickr ให้ครบทั้ง 12 งวด เหมือนใน DK_fromcustomer
+    function initFlatpickrPeriods() {
+        const fbBe = getFallbackBeYear();
+        for (let i = 1; i <= 12; i++) {
+            const inputEl = document.getElementById(`thai_date_${i}`);
+            if (!inputEl) continue;
+
+            const adVal = inputEl.getAttribute("data-ad-date") || "";
+            const thaiVal = inputEl.getAttribute("data-thai-date") || inputEl.value || "";
+
+            let initialDate = null;
+            if (adVal || thaiVal) {
+                const norm = normalizePeriodDateObj(i, adVal, thaiVal, fbBe);
+                initialDate = norm.jsDate;
+                inputEl.value = norm.thaiDate;
+                inputEl.setAttribute("data-thai-date", norm.thaiDate);
+                inputEl.setAttribute("data-ad-date", norm.adDate);
+                const hiddenEl = document.getElementById(`ad_date_${i}`);
+                if (hiddenEl) hiddenEl.value = norm.adDate;
+            }
+
+            flatpickrInstances[i] = flatpickr(inputEl, {
+                locale: "th",
+                dateFormat: "d/m/Y",
+                defaultDate: initialDate || undefined,
+                allowInput: false,
+                clickOpens: false,
+                formatDate: function(date, format, locale) {
+                    return formatThaiDate(date);
+                },
+                parseDate: function(dateStr, format) {
+                    if (!dateStr) return undefined;
+                    if (dateStr instanceof Date) {
+                        const ceYr = toCeYear(dateStr.getFullYear());
+                        return new Date(ceYr, dateStr.getMonth(), dateStr.getDate());
+                    }
+                    const s = String(dateStr).trim();
+                    const m = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+                    if (m) {
+                        const norm = normalizePeriodDateObj(i, "", s, getFallbackBeYear());
+                        return norm.jsDate;
+                    }
+                    const mIso = s.match(/^(\d{4})\-(\d{1,2})\-(\d{1,2})/);
+                    if (mIso) {
+                        const norm = normalizePeriodDateObj(i, s, "", getFallbackBeYear());
+                        return norm.jsDate;
+                    }
+                    return new Date(dateStr);
+                },
+                onReady: function(selectedDates, dateStr, instance) {
+                    changeToBuddhistYear(instance);
+                    if (selectedDates && selectedDates.length > 0) {
+                        instance.input.value = formatThaiDate(selectedDates[0]);
+                        updateHiddenDate(i, selectedDates[0]);
+                    }
+                },
+                onOpen: function(selectedDates, dateStr, instance) {
+                    changeToBuddhistYear(instance);
+                },
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates && selectedDates.length > 0) {
+                        const date = selectedDates[0];
+                        instance.input.value = formatThaiDate(date);
+                        updateHiddenDate(i, date);
+                        changeToBuddhistYear(instance);
+                    }
+                },
+                onMonthChange: function(selectedDates, dateStr, instance) {
+                    changeToBuddhistYear(instance);
+                },
+                onYearChange: function(selectedDates, dateStr, instance) {
+                    changeToBuddhistYear(instance);
+                }
+            });
+        }
+    }
+
+    function clearFormToEmpty() {
+        const elGrp = document.getElementById("inputAccGroup");
+        if (elGrp) elGrp.value = "";
+        const elPL = document.getElementById("inputProfitLossAcc");
+        if (elPL) elPL.value = "";
+        const elRet = document.getElementById("inputRetainedAcc");
+        if (elRet) elRet.value = "";
+        const elName = document.getElementById("nameRetainedAcc");
+        if (elName) elName.textContent = "";
+        const elPpy = document.getElementById("inputTotalPeriods");
+        if (elPpy) elPpy.value = "";
+        const elYear = document.getElementById("inputCurrentYear");
+        if (elYear) elYear.value = "";
+
+        for (let i = 1; i <= 12; i++) {
+            const inputEl = document.getElementById(`thai_date_${i}`);
+            const hiddenEl = document.getElementById(`ad_date_${i}`);
+            const chkEl = document.getElementById(`can_edit_${i}`);
+            if (inputEl) {
+                inputEl.value = "";
+                inputEl.removeAttribute("data-thai-date");
+                inputEl.removeAttribute("data-ad-date");
+            }
+            if (hiddenEl) hiddenEl.value = "";
+            if (chkEl) chkEl.checked = false;
+            if (flatpickrInstances[i]) flatpickrInstances[i].clear();
+        }
+    }
+
+    async function loadPeriodFromDatabase() {
+        try {
+            const res = await fetch("/api/gl_period");
+            if (!res.ok) {
+                clearFormToEmpty();
+                return;
+            }
+            const data = await res.json();
+            if (data.error === "0") {
+                if (!data.exists) {
+                    // ถ้ายังไม่มีข้อมูลในฐาน ต้องแสดง form เปล่า ก่อน
+                    clearFormToEmpty();
+                    return;
+                }
+
+                const depVal = data.DepId || data.depid || data.acc_group;
+                const elGrp = document.getElementById("inputAccGroup");
+                if (elGrp) elGrp.value = depVal || "";
+
+                const plVal = data.AC_ProfitLose || data.ac_profitlose || data.profit_loss_acc;
+                const elPL = document.getElementById("inputProfitLossAcc");
+                if (elPL) elPL.value = plVal || "";
+
+                const retVal = data.AC_ProfitACC || data.ac_profitacc || data.retained_earnings_acc;
+                const elRet = document.getElementById("inputRetainedAcc");
+                if (elRet) elRet.value = retVal || "";
+
+                const elName = document.getElementById("nameRetainedAcc");
+                if (elName) elName.textContent = data.retained_earnings_name || "";
+
+                const ppyVal = data.PeriodPerYear || data.periodperyear || data.total_periods;
+                const elPpy = document.getElementById("inputTotalPeriods");
+                if (elPpy) elPpy.value = ppyVal || "";
+
+                const rawYrVal = data.CurentYear || data.curentyear || data.year || data.db_year;
+                const cleanBeYear = rawYrVal ? toBeYear(rawYrVal, 2569) : 2569;
+                const elYear = document.getElementById("inputCurrentYear");
+                if (elYear) elYear.value = rawYrVal ? String(cleanBeYear) : "";
+
+                let hadCorruptedDates = false;
+                if (Array.isArray(data.periods)) {
+                    data.periods.forEach(p => {
+                        const pNo = p.period_no;
+                        const inputEl = document.getElementById(`thai_date_${pNo}`);
+                        const hiddenEl = document.getElementById(`ad_date_${pNo}`);
+                        const chkEl = document.getElementById(`can_edit_${pNo}`);
+
+                        if (chkEl) chkEl.checked = Boolean(p.can_edit);
+
+                        if (inputEl) {
+                            if (p.thai_date || p.ad_date) {
+                                const norm = normalizePeriodDateObj(pNo, p.ad_date, p.thai_date, cleanBeYear);
+                                if (norm.wasCorrupted) hadCorruptedDates = true;
+
+                                if (hiddenEl) hiddenEl.value = norm.adDate;
+                                inputEl.setAttribute("data-thai-date", norm.thaiDate);
+                                inputEl.setAttribute("data-ad-date", norm.adDate);
+                                inputEl.value = norm.thaiDate;
+
+                                if (flatpickrInstances[pNo]) {
+                                    flatpickrInstances[pNo].setDate(norm.jsDate, false);
+                                    inputEl.value = norm.thaiDate;
+                                }
+                            } else {
+                                if (hiddenEl) hiddenEl.value = "";
+                                inputEl.value = "";
+                                inputEl.removeAttribute("data-thai-date");
+                                inputEl.removeAttribute("data-ad-date");
+                                if (flatpickrInstances[pNo]) flatpickrInstances[pNo].clear();
+                            }
+                        }
+                    });
+                }
+
+                // หากพบว่าในฐานข้อมูลมีปีที่เพี้ยน (เช่น 1086, 1629) ให้บันทึกค่าปี พ.ศ. ที่ซ่อมแล้วกลับลงฐานข้อมูลทันที
+                if (hadCorruptedDates) {
+                    await savePeriodPayloadToDb(true);
+                }
+            } else {
+                clearFormToEmpty();
+            }
+        } catch (e) {
+            console.warn("loadPeriodFromDatabase warning:", e);
+            clearFormToEmpty();
+        }
+    }
+
+    async function savePeriodPayloadToDb(silent = false) {
+        const beYear = toBeYear(document.getElementById("inputCurrentYear")?.value, 2569);
+        const totalPeriods = parseInt(document.getElementById("inputTotalPeriods")?.value, 10) || 12;
+        const cusid = sessionStorage.getItem("dk_constant_cusid") || "00001";
+
+        const accGroup = (document.getElementById("inputAccGroup")?.value || "01").trim();
+        const plAcc = (document.getElementById("inputProfitLossAcc")?.value || "3800").trim();
+        const retAcc = (document.getElementById("inputRetainedAcc")?.value || "3700").trim();
+        const retName = (document.getElementById("nameRetainedAcc")?.textContent || "กำไรสะสม").trim();
+
+        const thaiMonthsNames = [
+            "", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
+
+        const payloadPeriods = [];
+        for (let i = 1; i <= 12; i++) {
+            const thaiInput = document.getElementById(`thai_date_${i}`);
+            const adInput = document.getElementById(`ad_date_${i}`);
+            const chkEdit = document.getElementById(`can_edit_${i}`);
+
+            const thaiVal = thaiInput ? thaiInput.value.trim() : "";
+            const adVal = adInput ? adInput.value.trim() : "";
+            const norm = normalizePeriodDateObj(i, adVal, thaiVal, beYear);
+
+            if (thaiInput) thaiInput.value = norm.thaiDate;
+            if (adInput) adInput.value = norm.adDate;
+
+            const canEdit = chkEdit ? chkEdit.checked : true;
+
+            payloadPeriods.push({
+                period_no: i,
+                day: norm.day,
+                month: norm.month,
+                month_name: thaiMonthsNames[i] || "",
+                year: norm.beYear,
+                date: norm.adDate,
+                can_edit: canEdit ? 1 : 0
+            });
+        }
+
+        const bodyData = {
+            DepId: accGroup,
+            AC_ProfitLose: plAcc,
+            AC_ProfitACC: retAcc,
+            PeriodPerYear: totalPeriods,
+            CurentYear: String(beYear),
+            year: beYear,
+            year_be: beYear,
+            total_periods: totalPeriods,
+            cusid: cusid,
+            acc_group: accGroup,
+            profit_loss_acc: plAcc,
+            retained_earnings_acc: retAcc,
+            retained_earnings_name: retName,
+            periods: payloadPeriods,
+            date1: payloadPeriods[0]?.date || "",
+            date: payloadPeriods[0]?.date || "",
+            day1: payloadPeriods[0]?.day || 31,
+            month1: payloadPeriods[0]?.month || 1,
+            year1: payloadPeriods[0]?.year || beYear
+        };
+
+        // กำหนด Period_1..Period_12 และ ST1..ST12 ตรงตามตารางฐานข้อมูล gl_period
+        payloadPeriods.forEach(p => {
+            bodyData[`Period_${p.period_no}`] = `${p.date} 00:00:00`;
+            bodyData[`ST${p.period_no}`] = p.can_edit;
+        });
+
+        const response = await fetch("/api/gl_period/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyData)
+        });
+
+        return await response.json();
+    }
+
+    // นำรายการทั้ง 12 งวดไปบันทึกในฐานข้อมูล (แถวเดิม 1 Row)
+    async function updatePeriodData() {
+        if (!isEditMode) return;
+
+        const btnEdit = document.getElementById("btnEditPeriod");
+        const btnSave = document.getElementById("btnSavePeriod");
+
+        if (btnEdit) {
+            btnEdit.disabled = true;
+            btnEdit.style.opacity = "0.5";
+        }
+        if (btnSave) {
+            btnSave.disabled = true;
+            btnSave.style.opacity = "0.7";
+            btnSave.innerHTML = `<span>⏳</span><span>กำลังบันทึก...</span>`;
+        }
+
+        let saveSuccess = false;
+        try {
+            const result = await savePeriodPayloadToDb(false);
+            if (result.error === "0") {
+                saveSuccess = true;
+                showToast("บันทึกข้อมูลทั้ง 12 งวดลงในฐานข้อมูลเรียบร้อยแล้ว", "success");
+                await loadPeriodFromDatabase();
+            } else {
+                showToast(`เกิดข้อผิดพลาด: ${result.message || 'บันทึกไม่สำเร็จ'}`, "error");
+            }
+        } catch (e) {
+            console.error("Update error:", e);
+            showToast(`ข้อผิดพลาดในการเชื่อมต่อ: ${e.message}`, "error");
+        } finally {
+            if (btnEdit) {
+                btnEdit.innerHTML = `<span>✏️</span><span>แก้ไข</span>`;
+            }
+            if (btnSave) {
+                btnSave.innerHTML = `<span>💾</span><span>บันทึก</span>`;
+            }
+            // หากบันทึกสำเร็จให้ปิดช่องกรอกข้อมูลกลับมาเป็นโหมดอ่านอย่างเดียว
+            setFormEditable(!saveSuccess);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        loadChartAccounts();
+        initFlatpickrPeriods();
+        setFormEditable(false); // โหลดหน้ามาให้ปิดช่องทั้งหมดไว้ก่อน
+        await loadPeriodFromDatabase(); // ดึงข้อมูลวันที่ทั้ง 12 งวด และค่าคงที่จากฐานข้อมูล gl_period
+        setFormEditable(false);
+
+        const btnEdit = document.getElementById("btnEditPeriod");
+        if (btnEdit) {
+            btnEdit.addEventListener("click", () => {
+                setFormEditable(true);
+                const firstInput = document.getElementById("inputAccGroup");
+                if (firstInput) firstInput.focus();
+            });
+        }
+
+        const btnSave = document.getElementById("btnSavePeriod");
+        if (btnSave) {
+            btnSave.addEventListener("click", updatePeriodData);
+        }
+
+        const btnExit = document.getElementById("btnExitPeriod");
+        if (btnExit) {
+            btnExit.addEventListener("click", () => {
+                window.location.href = "/DK_Home";
+            });
+        }
+
+        const searchInput = document.getElementById("inputChartSearch");
+        const filterSelect = document.getElementById("selectChartTypeFilter");
+        if (searchInput) {
+            searchInput.addEventListener("input", () => {
+                renderChartModalTable(searchInput.value, filterSelect ? filterSelect.value : "");
+            });
+        }
+        if (filterSelect) {
+            filterSelect.addEventListener("change", () => {
+                renderChartModalTable(searchInput ? searchInput.value : "", filterSelect.value);
+            });
+        }
+    });
+})();
+</script>
+
+{% endblock %}

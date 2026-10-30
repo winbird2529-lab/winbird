@@ -296,6 +296,17 @@ document.getElementById("customerForm")
 .addEventListener("submit", function(e){
     e.preventDefault();
     const formData = new FormData(this);
+    const currentUser = (function() {
+        try {
+            const s = sessionStorage.getItem("dk_logged_user");
+            if (s) {
+                const p = JSON.parse(s);
+                return p.empid || p.username || "001";
+            }
+        } catch(e) {}
+        return "001";
+    })();
+    formData.append("cusid", sessionStorage.getItem("dk_constant_cusid") || "");
     fetch(`${API_BASE}/customer/update`, {
         method: "POST",
         body: formData

@@ -139,37 +139,79 @@
 }
 
 
-.btn-viwe {
-  background: #a6cfeb;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+.action-buttons {
+  display: inline-flex;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
 }
-.btn-edit {
-  background: #ffc107;
+
+.btn-viwe,
+.btn-edit,
+.btn-delete {
   padding: 5px 10px;
-  border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-viwe {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.btn-viwe:hover {
+  background: #bae6fd;
+  color: #0284c7;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(3, 105, 161, 0.15);
+}
+
+.btn-edit {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.btn-edit:hover {
+  background: #fde68a;
+  color: #92400e;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(180, 83, 9, 0.15);
 }
 
 .btn-delete {
-  background: #dc3545;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  cursor: pointer;
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
-.btn-viwe:hover { background: #a6cfeb; }
-.btn-edit:hover { background: #e0a800; }
-.btn-delete:hover { background: #c82333; }
+.btn-delete:hover {
+  background: #fecaca;
+  color: #991b1b;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(185, 28, 28, 0.15);
+}
+
+.btn-viwe:active,
+.btn-edit:active,
+.btn-delete:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
 
 .action-col {
-  text-align: right;     /* ✔ ชิดขวา */
-  padding-right: 10px;   /* ระยะห่าง */
-  white-space: nowrap;   /* ป้องกันปุ่มขึ้นบรรทัดใหม่ */
+  text-align: center;
+  white-space: nowrap;
 }
 #IdEmployee {
   background-color: #fff;

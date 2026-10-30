@@ -34,6 +34,15 @@
       </div>
       <hr class="my-box">
 
+      <input type="hidden" id="recordUserId" name="userid" value="">
+      <input type="hidden" id="recordUserEdit" name="useredit" value="">
+
+      <!-- Audit Info: userid (empid) & useredit (empid) -->
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13px; color:#64748b; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          <span>👤 <strong>ผู้บันทึกข้อมูล (empid):</strong> <span id="displayUserid" style="color:#0f766e; font-weight:600;">-</span></span>
+          <span>✏️ <strong>ผู้แก้ไขล่าสุด (empid):</strong> <span id="displayUseredit" style="color:#b45309; font-weight:600;">- ยังไม่เคยแก้ไข -</span></span>
+      </div>
+
     <div class="row-container">
        
        <div class="form-left">
@@ -225,6 +234,14 @@ fetch(`${API_BASE}/employee1/${id}`)
     document.getElementById("Tel").value = emp.Tel || "";
     document.getElementById("position").value = emp.position || "";
     document.getElementById("status").value =  emp.status ? String(emp.status) : "1";
+
+    // =====================
+    // AUDIT INFO (userid & useredit)
+    // =====================
+    document.getElementById("recordUserId").value = emp.userid || "";
+    document.getElementById("displayUserid").textContent = emp.userid || "-";
+    document.getElementById("displayUseredit").textContent = emp.useredit || "- ยังไม่เคยแก้ไข -";
+
     // =====================
     // DATE
     // =====================
@@ -268,7 +285,24 @@ document.getElementById("btnCancel")
 document.getElementById("employeeForm")
 .addEventListener("submit", function(e){
     e.preventDefault();
+
+    const currentUser = (function() {
+        try {
+            const s = sessionStorage.getItem("dk_logged_user");
+            if (s) {
+                const p = JSON.parse(s);
+                return p.empid || p.username || "001";
+            }
+        } catch(e) {}
+        return "001";
+    })();
+
+    const origUserid = document.getElementById("recordUserId").value || "";
+    document.getElementById("recordUserId").value = origUserid || currentUser;
+    document.getElementById("recordUserEdit").value = currentUser;
+
     const formData = new FormData(this);
+    formData.append("cusid", sessionStorage.getItem("dk_constant_cusid") || "");
     fetch(`${API_BASE}/employee/update`, {
         method: "POST",
         body: formData
@@ -279,7 +313,7 @@ document.getElementById("employeeForm")
             alert("✅ แก้ไขข้อมูลสำเร็จ");
             window.location.href = "/DK_Employee";
         } else {
-            alert("❌ ไม่สามารถแก้ไขข้อมูลได้");
+            alert("❌ ไม่สามารถแก้ไขข้อมูลได้: " + (data.message || ""));
         }
     })
     .catch(err => {

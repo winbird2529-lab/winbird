@@ -71,22 +71,22 @@
 
                     <!-- จาก รหัสสมาชิก/ทั่วไป -->
                     <div class="report-criteria-label">จาก รหัสสมาชิก/ทั่วไป</div>
-                    <div class="report-criteria-field">
-                        <input type="text" id="critFromId" class="crit-input" style="width: 150px;" placeholder="รหัสเริ่มต้น">
-                        <button type="button" class="crit-btn-search" id="btnPickFromId" title="ค้นหารหัสสมาชิกเริ่มต้น">
+                    <div class="report-criteria-field" style="flex-wrap: nowrap;">
+                        <input type="text" id="critFromId" class="crit-input" style="width: 150px; flex-shrink: 0;" placeholder="รหัสเริ่มต้น">
+                        <button type="button" class="crit-btn-search" id="btnPickFromId" title="ค้นหารหัสสมาชิกเริ่มต้น" style="flex-shrink: 0;">
                             🔍
                         </button>
-                        <input type="text" id="critFromName" class="crit-input crit-input-readonly" style="width: 290px;" readonly placeholder="ชื่อ - นามสกุล">
+                        <input type="text" id="critFromName" class="crit-input crit-input-readonly" style="flex: 1; min-width: 200px;" readonly placeholder="ชื่อ - นามสกุล">
                     </div>
 
                     <!-- ถึง รหัสสมาชิก/ทั่วไป -->
                     <div class="report-criteria-label">ถึง รหัสสมาชิก/ทั่วไป</div>
-                    <div class="report-criteria-field">
-                        <input type="text" id="critToId" class="crit-input" style="width: 150px;" placeholder="รหัสสิ้นสุด">
-                        <button type="button" class="crit-btn-search" id="btnPickToId" title="ค้นหารหัสสมาชิกสิ้นสุด">
+                    <div class="report-criteria-field" style="flex-wrap: nowrap;">
+                        <input type="text" id="critToId" class="crit-input" style="width: 150px; flex-shrink: 0;" placeholder="รหัสสิ้นสุด">
+                        <button type="button" class="crit-btn-search" id="btnPickToId" title="ค้นหารหัสสมาชิกสิ้นสุด" style="flex-shrink: 0;">
                             🔍
                         </button>
-                        <input type="text" id="critToName" class="crit-input crit-input-readonly" style="width: 290px;" readonly placeholder="ชื่อ - นามสกุล">
+                        <input type="text" id="critToName" class="crit-input crit-input-readonly" style="flex: 1; min-width: 200px;" readonly placeholder="ชื่อ - นามสกุล">
                     </div>
 
                     <!-- ช่วงอายุ -->
@@ -119,6 +119,21 @@
                             <input type="checkbox" id="chkBilled" name="reportCond" value="4" checked>
                             <span style="font-weight: 600;">ตั้งหนี้</span>
                         </label>-->
+                    </div>
+                </fieldset>
+
+                <!-- Fieldset: รูปแบบแบบฟอร์มรายงาน (ทั่วไป vs ออกชื่อกับที่อยู่) -->
+                <fieldset class="report-fieldset">
+                    <legend class="report-legend">รูปแบบแบบฟอร์มรายงาน</legend>
+                    <div class="report-checkbox-grid">
+                        <label class="report-chk-label">
+                            <input type="radio" name="reportFormFormat" id="formFormatGeneral" value="general" checked>
+                            <span style="font-weight: 600;">📋 แบบทั่วไป (ระบุผู้รับผลประโยชน์)</span>
+                        </label>
+                        <label class="report-chk-label">
+                            <input type="radio" name="reportFormFormat" id="formFormatAddress" value="address">
+                            <span style="font-weight: 600; color: #1e3c72;">🏠 แบบออกชื่อและที่อยู่ (ที่อยู่ตามบัตร / ที่อยู่ปัจจุบัน)</span>
+                        </label>
                     </div>
                 </fieldset>
 
@@ -175,22 +190,22 @@
 
                     <!-- จาก รหัสสมาชิก/ผู้รับผลประโยชน์ -->
                     <div class="report-criteria-label">จาก รหัส</div>
-                    <div class="report-criteria-field">
-                        <input type="text" id="critDeceasedFromId" class="crit-input" style="width: 150px;" placeholder="รหัสเริ่มต้น">
-                        <button type="button" class="crit-btn-search" id="btnPickDeceasedFromId" title="ค้นหารหัสเริ่มต้น">
+                    <div class="report-criteria-field" style="flex-wrap: nowrap;">
+                        <input type="text" id="critDeceasedFromId" class="crit-input" style="width: 150px; flex-shrink: 0;" placeholder="รหัสเริ่มต้น">
+                        <button type="button" class="crit-btn-search" id="btnPickDeceasedFromId" title="ค้นหารหัสเริ่มต้น" style="flex-shrink: 0;">
                             🔍
                         </button>
-                        <input type="text" id="critDeceasedFromName" class="crit-input crit-input-readonly" style="width: 290px;" readonly placeholder="ชื่อ - นามสกุล">
+                        <input type="text" id="critDeceasedFromName" class="crit-input crit-input-readonly" style="flex: 1; min-width: 200px;" readonly placeholder="ชื่อ - นามสกุล">
                     </div>
 
                     <!-- ถึง รหัสสมาชิก/ผู้รับผลประโยชน์ -->
                     <div class="report-criteria-label">ถึง รหัส</div>
-                    <div class="report-criteria-field">
-                        <input type="text" id="critDeceasedToId" class="crit-input" style="width: 150px;" placeholder="รหัสสิ้นสุด">
-                        <button type="button" class="crit-btn-search" id="btnPickDeceasedToId" title="ค้นหารหัสสิ้นสุด">
+                    <div class="report-criteria-field" style="flex-wrap: nowrap;">
+                        <input type="text" id="critDeceasedToId" class="crit-input" style="width: 150px; flex-shrink: 0;" placeholder="รหัสสิ้นสุด">
+                        <button type="button" class="crit-btn-search" id="btnPickDeceasedToId" title="ค้นหารหัสสิ้นสุด" style="flex-shrink: 0;">
                             🔍
                         </button>
-                        <input type="text" id="critDeceasedToName" class="crit-input crit-input-readonly" style="width: 290px;" readonly placeholder="ชื่อ - นามสกุล">
+                        <input type="text" id="critDeceasedToName" class="crit-input crit-input-readonly" style="flex: 1; min-width: 200px;" readonly placeholder="ชื่อ - นามสกุล">
                     </div>
 
                     <!-- ประเภทข้อมูล -->
@@ -219,6 +234,21 @@
                         <label class="report-chk-label">
                             <input type="checkbox" id="chkDeceasedBilled" name="deceasedCond" value="4" checked>
                             <span style="font-weight: 600; color: #7c3aed;">🟣 เสียชีวิต/ตั้งหนี้</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <!-- Fieldset: รูปแบบแบบฟอร์มรายงาน Tab 2 -->
+                <fieldset class="report-fieldset">
+                    <legend class="report-legend">รูปแบบแบบฟอร์มรายงาน</legend>
+                    <div class="report-checkbox-grid">
+                        <label class="report-chk-label">
+                            <input type="radio" name="reportDeceasedFormFormat" id="formDeceasedFormatGeneral" value="general" checked>
+                            <span style="font-weight: 600;">📋 แบบทั่วไป (ระบุผู้รับผลประโยชน์/สมาชิก)</span>
+                        </label>
+                        <label class="report-chk-label">
+                            <input type="radio" name="reportDeceasedFormFormat" id="formDeceasedFormatAddress" value="address">
+                            <span style="font-weight: 600; color: #1e3c72;">🏠 แบบออกชื่อและที่อยู่ (ที่อยู่ตามบัตร / ที่อยู่ปัจจุบัน)</span>
                         </label>
                     </div>
                 </fieldset>
@@ -319,6 +349,185 @@ function changeToBuddhistYear(instance) {
             }
         }
     }, 1);
+}
+
+// ==========================================
+// Beneficiary Helpers (จัดรูปแบบผู้รับผลประโยชน์เป็น ลำดับที่ 1. 2. ...)
+// ==========================================
+function parseBeneficiaryItems(rawVal, rawList) {
+    let items = [];
+
+    // 1. ถ้ามี rawList เป็น Array ของ Object
+    if (Array.isArray(rawList) && rawList.length > 0) {
+        items = rawList.map(b => {
+            if (!b) return '';
+            if (typeof b === "string") return b.trim();
+            const prefix = (b.prefix || '').trim();
+            const name = (b.name || '').trim();
+            const lastname = (b.lastname || '').trim();
+            const fullName = `${prefix}${name} ${lastname}`.trim();
+            const rel = (b.relation || '').trim();
+            return rel ? `${fullName} (${rel})` : fullName;
+        }).filter(Boolean);
+        if (items.length > 0) return items;
+    }
+
+    // 2. ถ้าไม่มี rawList ให้ parse จากข้อความ rawVal
+    if (!rawVal || typeof rawVal !== "string") return [];
+
+    let text = rawVal.trim();
+    if (!text || text === "-" || text.toLowerCase() === "null" || text.toLowerCase() === "undefined") {
+        return [];
+    }
+
+    // 2.1 ตรวจสอบกรณีมีคำว่า "ลำดับที่ X" นำหน้า
+    if (/ลำดับที่\s*\d+/i.test(text)) {
+        const parts = text.split(/(?:^|[\r\n,;]+|\s+)(?=ลำดับที่\s*\d+)/i).filter(Boolean);
+        for (const p of parts) {
+            const cleaned = p.replace(/^ลำดับที่\s*\d+\s*[\.\:\-\)]?\s*/i, '').trim();
+            if (cleaned) items.push(cleaned);
+        }
+        if (items.length > 0) return items;
+    }
+
+    // 2.2 ตรวจสอบกรณีมีตัวเลขลำดับ เช่น "1. ... 2. ..." หรือ "(1) ... (2) ..."
+    if (/(?:^|[\r\n,;]|\s)(?:\(?\d{1,2}[\.\)]\s*)/.test(text) || /^\(?\d{1,2}[\.\)]/.test(text)) {
+        const parts = text.split(/(?:^|[\r\n,;]+|\s+)(?=\(?\d{1,2}[\.\)]\s*)/).filter(Boolean);
+        for (const p of parts) {
+            const cleaned = p.replace(/^\(?\d{1,2}[\.\)]\s*/, '').trim();
+            if (cleaned) items.push(cleaned);
+        }
+        if (items.length > 0) return items;
+    }
+
+    // 2.3 ตรวจสอบแยกตามขึ้นบรรทัดใหม่ \n, \r\n
+    if (/[\r\n]/.test(text)) {
+        const lines = text.split(/[\r\n]+/).map(s => s.trim()).filter(Boolean);
+        for (const l of lines) {
+            const cleaned = l.replace(/^(?:ลำดับที่\s*\d+\s*[\.\:\-\)]?\s*|\(?\d{1,2}[\.\)]\s*)/i, '').trim();
+            if (cleaned) items.push(cleaned);
+        }
+        if (items.length > 0) return items;
+    }
+
+    // 2.4 ตรวจสอบแยกตามเครื่องหมาย comma (,) หรือ semicolon (;)
+    if (/[,;]/.test(text)) {
+        const parts = text.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+        for (const p of parts) {
+            const cleaned = p.replace(/^(?:ลำดับที่\s*\d+\s*[\.\:\-\)]?\s*|\(?\d{1,2}[\.\)]\s*)/i, '').trim();
+            if (cleaned) items.push(cleaned);
+        }
+        if (items.length > 0) return items;
+    }
+
+    // 2.5 ตรวจสอบแยกตามเครื่องหมาย slash (/) ถ้าไม่ใช่กรณีที่อยู่
+    if (text.includes('/') && !/\d+\/\d+/.test(text)) {
+        const parts = text.split(/\/+/).map(s => s.trim()).filter(Boolean);
+        for (const p of parts) {
+            const cleaned = p.replace(/^(?:ลำดับที่\s*\d+\s*[\.\:\-\)]?\s*|\(?\d{1,2}[\.\)]\s*)/i, '').trim();
+            if (cleaned) items.push(cleaned);
+        }
+        if (items.length > 0) return items;
+    }
+
+    // 2.6 กรณีมีคนเดียวและไม่มีเครื่องหมายคั่น
+    const singleClean = text.replace(/^(?:ลำดับที่\s*\d+\s*[\.\:\-\)]?\s*|\(?\d{1,2}[\.\)]\s*)/i, '').trim();
+    if (singleClean) {
+        items.push(singleClean);
+    }
+
+    return items;
+}
+
+function formatBeneficiaryNumbered(rawVal, rawList) {
+    const items = parseBeneficiaryItems(rawVal, rawList);
+    if (!items || items.length === 0) {
+        return "-";
+    }
+
+    return items.map((item, idx) => {
+        const marginBottom = (idx < items.length - 1) ? 'margin-bottom: 3px;' : '';
+        return `<div style="line-height: 1.35; ${marginBottom}">ลำดับที่ ${idx + 1}. ${item}</div>`;
+    }).join('');
+}
+
+function formatBeneficiaryNumberedText(rawVal, rawList) {
+    const items = parseBeneficiaryItems(rawVal, rawList);
+    if (!items || items.length === 0) {
+        return "-";
+    }
+
+    return items.map((item, idx) => `ลำดับที่ ${idx + 1}. ${item}`).join(", ");
+}
+
+// ==========================================
+// Address Helper (จัดรูปแบบที่อยู่สมาชิก)
+// ==========================================
+function formatAddressParts(addrNo, moo, loc, dist, prov, zip) {
+    let parts = [];
+    const a = (addrNo || '').trim();
+    if (a && a !== '-' && a !== '0') parts.push(a);
+
+    const m = (moo || '').trim();
+    if (m && m !== '-' && m !== '0') {
+        parts.push(m.startsWith('หมู่') ? m : `หมู่ ${m}`);
+    }
+
+    const l = (loc || '').trim();
+    if (l && l !== '-') {
+        const isBkk = (prov || '').includes('กรุงเทพ');
+        const pfx = isBkk ? 'แขวง' : 'ต.';
+        parts.push(l.startsWith('ต.') || l.startsWith('ตำบล') || l.startsWith('แขวง') ? l : `${pfx}${l}`);
+    }
+
+    const d = (dist || '').trim();
+    if (d && d !== '-') {
+        const isBkk = (prov || '').includes('กรุงเทพ');
+        const pfx = isBkk ? 'เขต' : 'อ.';
+        parts.push(d.startsWith('อ.') || d.startsWith('อำเภอ') || d.startsWith('เขต') ? d : `${pfx}${d}`);
+    }
+
+    const p = (prov || '').trim();
+    if (p && p !== '-') {
+        parts.push(p.startsWith('จ.') || p.startsWith('จังหวัด') ? p : `จ.${p}`);
+    }
+
+    const z = (zip || '').trim();
+    if (z && z !== '-') parts.push(z);
+
+    return parts.join(' ').trim();
+}
+
+// 1. ที่อยู่ตามบัตร (ID card / Registered address)
+function formatCustomerCardAddress(c) {
+    if (!c) return "-";
+    let addr = formatAddressParts(c.addrNo, c.moo, c.locality, c.district, c.province, c.zipCode);
+    if (!addr && c.address && typeof c.address === 'string' && c.address.trim() && c.address.trim() !== '-') {
+        return c.address.trim();
+    }
+    if (!addr && c.province && c.province.trim() && c.province.trim() !== '-') {
+        return `จ.${c.province.trim()}`;
+    }
+    return addr || "-";
+}
+
+// 2. ที่อยู่ปัจจุบัน (Current address)
+function formatCustomerCurrentAddress(c) {
+    if (!c) return "-";
+    let addr = formatAddressParts(c.cur_addrNo, c.cur_moo, c.cur_locality, c.cur_district, c.cur_province, c.cur_zipCode);
+    if (!addr && c.cur_province && c.cur_province.trim() && c.cur_province.trim() !== '-') {
+        return `จ.${c.cur_province.trim()}`;
+    }
+    return addr || "-";
+}
+
+// รวมสำรองกรณีเรียก formatCustomerAddress
+function formatCustomerAddress(c) {
+    const card = formatCustomerCardAddress(c);
+    if (card !== "-") return card;
+    const cur = formatCustomerCurrentAddress(c);
+    if (cur !== "-") return cur;
+    return "-";
 }
 
 // ==========================================
@@ -1009,6 +1218,59 @@ function getFilteredCustomers() {
 
 
 
+// Helper to paginate items into pages with orphan prevention (prevents leaving only 1 record on a page)
+function paginateReportItems(items, basePerPage = 15, maxPerPage = 16) {
+    if (!items || items.length === 0) return [[]];
+
+    // If total items fit on a single page up to maxPerPage (e.g. 15-16 records), keep all on 1 page
+    if (items.length <= maxPerPage) {
+        return [items];
+    }
+
+    const pages = [];
+    let start = 0;
+    while (start < items.length) {
+        const remaining = items.length - start;
+
+        // If remaining items fit in one page
+        if (remaining <= maxPerPage) {
+            pages.push(items.slice(start));
+            break;
+        }
+
+        // If taking basePerPage would leave an orphan of 1 item on the next page (remaining === basePerPage + 1)
+        if (remaining === basePerPage + 1) {
+            if (remaining <= maxPerPage) {
+                pages.push(items.slice(start));
+                break;
+            } else {
+                const take = Math.ceil(remaining / 2);
+                pages.push(items.slice(start, start + take));
+                start += take;
+                continue;
+            }
+        }
+
+        pages.push(items.slice(start, start + basePerPage));
+        start += basePerPage;
+    }
+
+    // Extra safety: if the last page ended up with only 1 item and there is a previous page
+    if (pages.length > 1 && pages[pages.length - 1].length === 1) {
+        const prevPage = pages[pages.length - 2];
+        const lastPage = pages[pages.length - 1];
+        if (prevPage.length + 1 <= maxPerPage) {
+            prevPage.push(lastPage[0]);
+            pages.pop();
+        } else {
+            const movedItem = prevPage.pop();
+            lastPage.unshift(movedItem);
+        }
+    }
+
+    return pages;
+}
+
 // ==========================================
 // Generate Official Report HTML for Print & Preview
 // ==========================================
@@ -1017,6 +1279,9 @@ function buildOfficialReportDocument(filteredList, autoPrint = false) {
     const fromId = document.getElementById("critFromId")?.value || "เริ่มต้น";
     const toId = document.getElementById("critToId")?.value || "สิ้นสุด";
     const dateFilterType = document.querySelector('input[name="dateFilterType"]:checked')?.value || 'range';
+    const formFormat = document.querySelector('input[name="reportFormFormat"]:checked')?.value || 'general';
+    const isAddressForm = (formFormat === 'address');
+    const reportTitleText = isAddressForm ? "รายงานรายชื่อและที่อยู่สมาชิก" : "รายงานรายชื่อสมาชิก";
 
     let dateRangeDisplay = "ทั้งหมด";
     const fromVal = document.getElementById("critFromDate")?.value;
@@ -1043,31 +1308,118 @@ function buildOfficialReportDocument(filteredList, autoPrint = false) {
         else if (s === "4") countBilled++;
     });
 
-    let rowsHtml = "";
-    filteredList.forEach((c, idx) => {
-        const s = String(c.status);
-        let stText = "ปกติ";
-        if (s === "2") stText = "ลาออก";
-        else if (s === "3") stText = "ตาย";
-        else if (s === "4") stText = "ตั้งหนี้";
+    // Pagination into pages (smart orphan prevention: fits 15-16 rows per page, no orphan single-row pages)
+    const pages = paginateReportItems(filteredList, 15, 16);
+    const totalPages = pages.length;
 
-        rowsHtml += `
-            <tr>
-                <td style="text-align: center;">${idx + 1}</td>
-                <td style="text-align: center; font-family: monospace; font-weight: 600;">${c.Idcustomer || '-'}</td>
-                <td>${c.fullName || '-'}</td>
-                <td style="text-align: center;">${c.Idcard || '-'}</td>
-                <td style="text-align: center;">${c.Tel || '-'}</td>
-                <td>${c.province || '-'}</td>
-                <td style="text-align: center;">${formatThaiDate(c.date)}</td>
-                <td style="text-align: center;">${stText}</td>
-                <td>${c.beneficiary || c.beneficiary_name || '-'}</td>
-            </tr>
+    let pagesHtml = "";
+    let globalCounter = 0;
+
+    for (let pIdx = 0; pIdx < totalPages; pIdx++) {
+        const pageNum = pIdx + 1;
+        const pageItems = pages[pIdx];
+
+        let rowsHtml = "";
+        pageItems.forEach((c) => {
+            globalCounter++;
+            const globalIdx = globalCounter;
+            const s = String(c.status);
+            let stText = "ปกติ";
+            if (s === "2") stText = "ลาออก";
+            else if (s === "3") stText = "ตาย";
+            else if (s === "4") stText = "ตั้งหนี้";
+
+            if (isAddressForm) {
+                rowsHtml += `
+                    <tr>
+                        <td style="text-align: center;">${globalIdx}</td>
+                        <td style="text-align: center;">${formatThaiDate(c.date)}</td>
+                        <td style="text-align: center; font-family: monospace; font-weight: 600;">${c.Idcustomer || '-'}</td>
+                        <td style="white-space: nowrap;">${c.fullName || '-'}</td>
+                        <td style="text-align: center;">${c.Idcard || '-'}</td>
+                        <td style="line-height: 1.35;">${formatCustomerCardAddress(c)}</td>
+                        <td style="line-height: 1.35;">${formatCustomerCurrentAddress(c)}</td>
+                        <td style="text-align: center;">${stText}</td>
+                    </tr>
+                `;
+            } else {
+                rowsHtml += `
+                    <tr>
+                        <td style="text-align: center;">${globalIdx}</td>
+                        <td style="text-align: center;">${formatThaiDate(c.date)}</td>
+                        <td style="text-align: center; font-family: monospace; font-weight: 600;">${c.Idcustomer || '-'}</td>
+                        <td style="white-space: nowrap;">${c.fullName || '-'}</td>
+                        <td style="text-align: center;">${c.Idcard || '-'}</td>
+                        <td style="text-align: center;">${c.Tel || '-'}</td>
+                        <td style="text-align: center;">${stText}</td>
+                        <td>${formatBeneficiaryNumbered(c.beneficiary || c.beneficiary_name || c.customer_beneficiary, c.beneficiaries)}</td>
+                    </tr>
+                `;
+            }
+        });
+
+        if (!rowsHtml) {
+            rowsHtml = `<tr><td colspan="8" style="text-align: center; padding: 20px;">ไม่พบข้อมูลสมาชิกตามเงื่อนไขที่ระบุ</td></tr>`;
+        }
+
+        const isLastPage = (pageNum === totalPages);
+        const summaryBoxHtml = isLastPage ? `
+            <div class="summary-box">
+                <span>สรุปยอด: ปกติ ${countActive.toLocaleString()} ราย</span>
+                <span>ลาออก ${countResigned.toLocaleString()} ราย</span>
+                <span>ตาย ${countDeceased.toLocaleString()} ราย</span>
+                <span>ตั้งหนี้ ${countBilled.toLocaleString()} ราย</span>
+                <span><strong>รวมทั้งสิ้น ${filteredList.length.toLocaleString()} ราย</strong></span>
+            </div>
+        ` : '';
+
+        const tableHeadHtml = isAddressForm ? `
+            <thead>
+                <tr>
+                    <th style="width: 40px;">ลำดับ</th>
+                    <th style="width: 90px;">วันที่สมัคร</th>
+                    <th style="width: 85px;">รหัสสมาชิก</th>
+                    <th style="text-align: left; width: 175px;">คำนำหน้า - ชื่อ - นามสกุล</th>
+                    <th style="width: 120px;">เลขบัตรประชาชน</th>
+                    <th style="text-align: left; width: 230px;">ที่อยู่ตามบัตร</th>
+                    <th style="text-align: left; width: 230px;">ที่อยู่ปัจจุบัน</th>
+                    <th style="width: 75px;">สถานะ</th>
+                </tr>
+            </thead>
+        ` : `
+            <thead>
+                <tr>
+                    <th style="width: 45px;">ลำดับ</th>
+                    <th style="width: 95px;">วันที่สมัคร</th>
+                    <th style="width: 95px;">รหัสสมาชิก</th>
+                    <th style="text-align: left;">คำนำหน้า - ชื่อ - นามสกุล</th>
+                    <th style="width: 130px;">เลขบัตรประชาชน</th>
+                    <th style="width: 110px;">เบอร์โทรศัพท์</th>
+                    <th style="width: 85px;">สถานะ</th>
+                    <th style="text-align: left; width: 195px;">ผู้รับผลประโยชน์</th>
+                </tr>
+            </thead>
         `;
-    });
 
-    if (!rowsHtml) {
-        rowsHtml = `<tr><td colspan="9" style="text-align: center; padding: 20px;">ไม่พบข้อมูลสมาชิกตามเงื่อนไขที่ระบุ</td></tr>`;
+        pagesHtml += `
+            <div class="report-page ${isLastPage ? 'last-page' : ''}">
+                <div class="report-header">
+                    <div class="page-corner-number">หน้า ${pageNum}/${totalPages}</div>
+                    <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
+                    <h3>${reportTitleText}</h3>
+                    <p>${dateFilterHeaderText} | ช่วงรหัส: ${fromId} ถึง ${toId}</p>
+                </div>
+
+                <table>
+                    ${tableHeadHtml}
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+
+                ${summaryBoxHtml}
+            </div>
+        `;
     }
 
     const printScript = autoPrint ? `
@@ -1091,137 +1443,129 @@ function buildOfficialReportDocument(filteredList, autoPrint = false) {
         <html lang="th">
         <head>
             <meta charset="UTF-8">
-            <title>รายงานรายชื่อสมาชิก - สมาคมฌาปนกิจสงเคราะห์</title>
+            <title>${reportTitleText} - สมาคมฌาปนกิจสงเคราะห์</title>
             <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
             <style>
                 @page {
                     size: A4 landscape;
-                    margin: 10mm;
+                    margin: 8mm 10mm 8mm 10mm;
                 }
                 body {
                     font-family: 'Sarabun', 'Prompt', sans-serif;
                     color: #000;
                     margin: 0;
-                    padding: 15px;
-                    font-size: 13px;
+                    padding: 10px 15px;
+                    font-size: 12px;
+                    background: #fff;
+                }
+                .report-page {
+                    position: relative;
                 }
                 .report-header {
                     text-align: center;
                     border-bottom: 2px solid #000;
-                    padding-bottom: 8px;
-                    margin-bottom: 12px;
+                    padding-bottom: 6px;
+                    margin-bottom: 8px;
+                    position: relative;
+                }
+                .page-corner-number {
+                    position: absolute;
+                    right: 0;
+                    bottom: 4px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #000;
                 }
                 .report-header h2 {
-                    margin: 0 0 4px 0;
-                    font-size: 19px;
+                    margin: 0 0 2px 0;
+                    font-size: 18px;
                     font-weight: 700;
                 }
                 .report-header h3 {
-                    margin: 0 0 4px 0;
-                    font-size: 15px;
+                    margin: 0 0 2px 0;
+                    font-size: 14.5px;
                     font-weight: 600;
                 }
                 .report-header p {
                     margin: 0;
-                    font-size: 12.5px;
+                    font-size: 11.5px;
                     color: #333;
+                    padding: 0 80px;
                 }
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 12px;
-                    margin-bottom: 14px;
+                    font-size: 11.5px;
+                    margin-bottom: 8px;
+                }
+                thead {
+                    display: table-header-group;
+                }
+                tbody {
+                    display: table-row-group;
+                }
+                tr {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
                 }
                 th {
                     background: #f1f5f9;
                     border: 1px solid #000;
-                    padding: 6px 8px;
+                    padding: 4.5px 6px;
                     text-align: center;
                     font-weight: 600;
+                    font-size: 11.5px;
                 }
                 td {
                     border: 1px solid #000;
-                    padding: 5px 8px;
+                    padding: 3.5px 6px;
+                    font-size: 11.5px;
+                    line-height: 1.35;
                 }
                 .summary-box {
-                    font-size: 12.5px;
+                    font-size: 11.5px;
                     font-weight: 600;
-                    margin-bottom: 24px;
-                    padding: 8px 14px;
+                    margin-bottom: 0;
+                    padding: 5px 12px;
                     border: 1px dashed #000;
                     display: flex;
                     justify-content: space-around;
                     background: #fafafa;
-                }
-                .signatures-grid {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 36px;
                     page-break-inside: avoid;
+                    break-inside: avoid;
                 }
-                .sign-box {
-                    text-align: center;
-                    width: 240px;
-                    font-size: 12.5px;
+                @media screen {
+                    .report-page:not(:last-child) {
+                        margin-bottom: 30px;
+                        padding-bottom: 25px;
+                        border-bottom: 2px dashed #94a3b8;
+                    }
                 }
                 @media print {
                     .no-print { display: none !important; }
+                    body { padding: 0; }
+                    .report-page {
+                        page-break-after: always;
+                        break-after: page;
+                    }
+                    .report-page.last-page, .report-page:last-child {
+                        page-break-after: auto;
+                        break-after: auto;
+                    }
                 }
             </style>
         </head>
         <body>
             <!-- Toolbar for Preview Mode -->
             <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Prompt', sans-serif; margin: -15px -15px 15px -15px;">
-                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">📋 รายงานรายชื่อสมาชิก (${filteredList.length} รายการ)</div>
+                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">📋 ${reportTitleText} (${filteredList.length} รายการ - ทั้งหมด ${totalPages} หน้า)</div>
                 <div style="display: flex; gap: 10px;">
                     <button onclick="window.print()" style="padding: 7px 18px; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">🖨️ สั่งพิมพ์เอกสาร</button>
                     <button onclick="window.close()" style="padding: 7px 18px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">❌ ปิดหน้าต่าง</button>
                 </div>
             </div>
 
-            <div class="report-header">
-                <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
-                <h3>รายงานรายชื่อสมาชิก</h3>
-                <p>${dateFilterHeaderText} | ช่วงรหัส: ${fromId} ถึง ${toId}</p>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 45px;">ลำดับ</th>
-                        <th style="width: 100px;">รหัสสมาชิก</th>
-                        <th style="text-align: left;">คำนำหน้า - ชื่อ - นามสกุล</th>
-                        <th style="width: 130px;">เลขบัตรประชาชน</th>
-                        <th style="width: 105px;">เบอร์โทรศัพท์</th>
-                        <th style="width: 110px;">จังหวัด/พื้นที่</th>
-                        <th style="width: 95px;">วันที่สมัคร</th>
-                        <th style="width: 80px;">สถานะ</th>
-                        <th style="text-align: left; width: 140px;">ผู้รับผลประโยชน์</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rowsHtml}
-                </tbody>
-            </table>
-
-            <div class="summary-box">
-                <span>สรุปยอด: ปกติ ${countActive.toLocaleString()} ราย</span>
-                <span>ลาออก ${countResigned.toLocaleString()} ราย</span>
-                <span>ตาย ${countDeceased.toLocaleString()} ราย</span>
-                <span>ตั้งหนี้ ${countBilled.toLocaleString()} ราย</span>
-                <span><strong>รวมทั้งสิ้น ${filteredList.length.toLocaleString()} ราย</strong></span>
-            </div>
-
-            <div class="signatures-grid">
-                <div class="sign-box">
-                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>เจ้าหน้าที่ผู้จัดทำรายงาน</p>
-                    <p>(.......................................................)</p>
-                </div>
-                <div class="sign-box">
-                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>นายทะเบียน / ผู้ตรวจสอบ</p>
-                    <p>(.......................................................)</p>
-                </div>
-            </div>
+            ${pagesHtml}
 
             ${printScript}
         </body>
@@ -1310,26 +1654,56 @@ document.getElementById("btnExportExcel").addEventListener("click", () => {
         return;
     }
 
-    const headers = ["ลำดับ", "รหัสสมาชิก", "คำนำหน้า", "ชื่อ", "นามสกุล", "เลขบัตรประชาชน", "เบอร์โทร", "จังหวัด", "วันที่สมัคร", "สถานะ", "ผู้รับผลประโยชน์"];
-    const rows = filtered.map((c, idx) => {
-        let stName = "ปกติ";
-        if (c.status == 2) stName = "ลาออก";
-        else if (c.status == 3) stName = "ตาย";
-        else if (c.status == 4) stName = "ตั้งหนี้";
-        return [
-            idx + 1,
-            `"${c.Idcustomer || ''}"`,
-            `"${c.prefix || ''}"`,
-            `"${c.name || ''}"`,
-            `"${c.lastname || ''}"`,
-            `"${c.Idcard || ''}"`,
-            `"${c.Tel || ''}"`,
-            `"${c.province || ''}"`,
-            `"${formatThaiDate(c.date)}"`,
-            `"${stName}"`,
-            `"${c.beneficiary || c.beneficiary_name || ''}"`
-        ];
-    });
+    const formFormat = document.querySelector('input[name="reportFormFormat"]:checked')?.value || 'general';
+    const isAddressForm = (formFormat === 'address');
+
+    let headers = [];
+    let rows = [];
+    let filenamePrefix = "";
+
+    if (isAddressForm) {
+        headers = ["ลำดับ", "วันที่สมัคร", "รหัสสมาชิก", "คำนำหน้า", "ชื่อ", "นามสกุล", "เลขบัตรประชาชน", "ที่อยู่ตามบัตร", "ที่อยู่ปัจจุบัน", "สถานะ"];
+        rows = filtered.map((c, idx) => {
+            let stName = "ปกติ";
+            if (c.status == 2) stName = "ลาออก";
+            else if (c.status == 3) stName = "ตาย";
+            else if (c.status == 4) stName = "ตั้งหนี้";
+            return [
+                idx + 1,
+                `"${formatThaiDate(c.date)}"`,
+                `"${c.Idcustomer || ''}"`,
+                `"${c.prefix || ''}"`,
+                `"${c.name || ''}"`,
+                `"${c.lastname || ''}"`,
+                `"${c.Idcard || ''}"`,
+                `"${formatCustomerCardAddress(c)}"`,
+                `"${formatCustomerCurrentAddress(c)}"`,
+                `"${stName}"`
+            ];
+        });
+        filenamePrefix = "รายงานรายชื่อและที่อยู่สมาชิก";
+    } else {
+        headers = ["ลำดับ", "วันที่สมัคร", "รหัสสมาชิก", "คำนำหน้า", "ชื่อ", "นามสกุล", "เลขบัตรประชาชน", "เบอร์โทร", "สถานะ", "ผู้รับผลประโยชน์"];
+        rows = filtered.map((c, idx) => {
+            let stName = "ปกติ";
+            if (c.status == 2) stName = "ลาออก";
+            else if (c.status == 3) stName = "ตาย";
+            else if (c.status == 4) stName = "ตั้งหนี้";
+            return [
+                idx + 1,
+                `"${formatThaiDate(c.date)}"`,
+                `"${c.Idcustomer || ''}"`,
+                `"${c.prefix || ''}"`,
+                `"${c.name || ''}"`,
+                `"${c.lastname || ''}"`,
+                `"${c.Idcard || ''}"`,
+                `"${c.Tel || ''}"`,
+                `"${stName}"`,
+                `"${formatBeneficiaryNumberedText(c.beneficiary || c.beneficiary_name || c.customer_beneficiary, c.beneficiaries)}"`
+            ];
+        });
+        filenamePrefix = "รายงานรายชื่อสมาชิก";
+    }
 
     const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -1337,7 +1711,7 @@ document.getElementById("btnExportExcel").addEventListener("click", () => {
     const link = document.createElement("a");
     const dateRangeSuffix = fromDateYMD || toDateYMD ? `_${fromDateYMD || ''}_ถึง_${toDateYMD || ''}` : '';
     link.setAttribute("href", url);
-    link.setAttribute("download", `รายงานรายชื่อสมาชิก${dateRangeSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute("download", `${filenamePrefix}${dateRangeSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1403,6 +1777,9 @@ function buildDeceasedReportDocument(filteredList, autoPrint = false) {
     const toId = document.getElementById("critDeceasedToId")?.value || "สิ้นสุด";
     const dateFilterType = document.querySelector('input[name="deceasedDateFilterType"]:checked')?.value || 'range';
     const typeFilter = document.getElementById("critDeceasedType")?.value || "all";
+    const formFormat = document.querySelector('input[name="reportDeceasedFormFormat"]:checked')?.value || 'general';
+    const isAddressForm = (formFormat === 'address');
+    const reportTitleText = isAddressForm ? "รายงานสมาชิกลาออก / เสียชีวิต (ที่อยู่)" : "รายงานสมาชิกลาออก / เสียชีวิต";
 
     let typeText = "ทั้งหมด (สมาชิกและผู้รับผลประโยชน์)";
     if (typeFilter === "member") typeText = "เฉพาะสมาชิก";
@@ -1436,38 +1813,134 @@ function buildDeceasedReportDocument(filteredList, autoPrint = false) {
         else countMembers++;
     });
 
-    let rowsHtml = "";
-    filteredList.forEach((c, idx) => {
-        const s = String(c.status);
-        let stText = "ปกติ";
-        let stColor = "#334155";
-        if (s === "2") { stText = "ลาออก"; stColor = "#d97706"; }
-        else if (s === "3") { stText = "เสียชีวิต"; stColor = "#dc2626"; }
-        else if (s === "4") { stText = "เสียชีวิต/ตั้งหนี้"; stColor = "#7c3aed"; }
+    // Pagination into pages (smart orphan prevention: fits 15-16 rows per page, no orphan single-row pages)
+    const pages = paginateReportItems(filteredList, 15, 16);
+    const totalPages = pages.length;
 
-        const rawDate = c.dateEndStr || c.dateend || c.date_deceased || c.date;
-        const code = c.code || c.Idcustomer || c.Idbeneficiary || "-";
-        const typeLabel = c.record_type === "beneficiary" ? "ผู้รับผลประโยชน์" : "สมาชิก";
-        const reasonText = c.cause || c.reason || c.remark || "-";
-        const linkedText = c.linkedInfo || c.beneficiary || c.customer_fullname || "-";
+    let pagesHtml = "";
+    let globalCounter = 0;
 
-        rowsHtml += `
-            <tr>
-                <td style="text-align: center;">${idx + 1}</td>
-                <td style="text-align: center; font-family: monospace; font-weight: 600;">${code}</td>
-                <td style="text-align: center;">${typeLabel}</td>
-                <td>${c.fullName || '-'}</td>
-                <td style="text-align: center;">${c.Idcard || '-'}</td>
-                <td style="text-align: center;">${formatThaiDate(rawDate)}</td>
-                <td style="text-align: center; font-weight: 600; color: ${stColor};">${stText}</td>
-                <td>${reasonText}</td>
-                <td>${linkedText}</td>
-            </tr>
+    for (let pIdx = 0; pIdx < totalPages; pIdx++) {
+        const pageNum = pIdx + 1;
+        const pageItems = pages[pIdx];
+
+        let rowsHtml = "";
+        pageItems.forEach((c) => {
+            globalCounter++;
+            const globalIdx = globalCounter;
+            const s = String(c.status);
+            let stText = "ปกติ";
+            let stColor = "#334155";
+            if (s === "2") { stText = "ลาออก"; stColor = "#d97706"; }
+            else if (s === "3") { stText = "เสียชีวิต"; stColor = "#dc2626"; }
+            else if (s === "4") { stText = "เสียชีวิต/ตั้งหนี้"; stColor = "#7c3aed"; }
+
+            const rawDate = c.dateEndStr || c.dateend || c.date_deceased || c.date;
+            const code = c.code || c.Idcustomer || c.Idbeneficiary || "-";
+            const typeLabel = c.record_type === "beneficiary" ? "ผู้รับผลประโยชน์" : "สมาชิก";
+            const reasonText = c.reason || c.remark || '-';
+            const linkedText = c.record_type === "member"
+                ? formatBeneficiaryNumbered(c.linkedInfo || c.beneficiary || c.beneficiary_name || c.customer_beneficiary, c.beneficiaries)
+                : (c.linkedInfo || c.customer_fullname || "-");
+
+            if (isAddressForm) {
+                rowsHtml += `
+                    <tr>
+                        <td style="text-align: center;">${globalIdx}</td>
+                        <td style="text-align: center; font-family: monospace; font-weight: 600;">${code}</td>
+                        <td style="text-align: center;">${typeLabel}</td>
+                        <td style="white-space: nowrap;">${c.fullName || '-'}</td>
+                        <td style="text-align: center;">${c.Idcard || '-'}</td>
+                        <td style="text-align: center;">${formatThaiDate(rawDate)}</td>
+                        <td style="text-align: center; font-weight: 600; color: ${stColor};">${stText}</td>
+                        <td style="line-height: 1.35;">${formatCustomerCardAddress(c)}</td>
+                        <td style="line-height: 1.35;">${formatCustomerCurrentAddress(c)}</td>
+                        <td>${reasonText}</td>
+                    </tr>
+                `;
+            } else {
+                rowsHtml += `
+                    <tr>
+                        <td style="text-align: center;">${globalIdx}</td>
+                        <td style="text-align: center; font-family: monospace; font-weight: 600;">${code}</td>
+                        <td style="text-align: center;">${typeLabel}</td>
+                        <td style="white-space: nowrap;">${c.fullName || '-'}</td>
+                        <td style="text-align: center;">${c.Idcard || '-'}</td>
+                        <td style="text-align: center;">${formatThaiDate(rawDate)}</td>
+                        <td style="text-align: center; font-weight: 600; color: ${stColor};">${stText}</td>
+                        <td>${reasonText}</td>
+                        <td>${linkedText}</td>
+                    </tr>
+                `;
+            }
+        });
+
+        if (!rowsHtml) {
+            const emptyColspan = isAddressForm ? 10 : 9;
+            rowsHtml = `<tr><td colspan="${emptyColspan}" style="text-align: center; padding: 25px; color: #888;">ไม่พบข้อมูลสมาชิกลาออก/เสียชีวิตตามเงื่อนไขที่ระบุ</td></tr>`;
+        }
+
+        const isLastPage = (pageNum === totalPages);
+        const summaryBoxHtml = isLastPage ? `
+            <div class="summary-box">
+                <span>ลาออก: ${countResigned.toLocaleString()} ราย</span>
+                <span>เสียชีวิต: ${countDied.toLocaleString()} ราย</span>
+                <span>เสียชีวิต/ตั้งหนี้: ${countBilled.toLocaleString()} ราย</span>
+                <span>(สมาชิก ${countMembers.toLocaleString()} ราย, ผู้รับผลประโยชน์ ${countBeneficiaries.toLocaleString()} ราย)</span>
+                <span><strong>รวมทั้งสิ้น ${filteredList.length.toLocaleString()} ราย</strong></span>
+            </div>
+        ` : '';
+
+        const tableHeadHtml = isAddressForm ? `
+            <thead>
+                <tr>
+                    <th style="width: 40px;">ลำดับ</th>
+                    <th style="width: 85px;">รหัส</th>
+                    <th style="width: 75px;">ประเภท</th>
+                    <th style="text-align: left; width: 165px;">คำนำหน้า - ชื่อ - นามสกุล</th>
+                    <th style="width: 120px;">เลขบัตรประชาชน</th>
+                    <th style="width: 95px;">วันที่ออก/เสียชีวิต</th>
+                    <th style="width: 80px;">สถานะ</th>
+                    <th style="text-align: left; width: 175px;">ที่อยู่ตามบัตร</th>
+                    <th style="text-align: left; width: 175px;">ที่อยู่ปัจจุบัน</th>
+                    <th style="text-align: left; width: 110px;">สาเหตุ / หมายเหตุ</th>
+                </tr>
+            </thead>
+        ` : `
+            <thead>
+                <tr>
+                    <th style="width: 45px;">ลำดับ</th>
+                    <th style="width: 95px;">รหัส</th>
+                    <th style="width: 90px;">ประเภท</th>
+                    <th style="text-align: left;">คำนำหน้า - ชื่อ - นามสกุล</th>
+                    <th style="width: 125px;">เลขบัตรประชาชน</th>
+                    <th style="width: 105px;">วันที่ออก/เสียชีวิต</th>
+                    <th style="width: 95px;">สถานะ</th>
+                    <th style="text-align: left; width: 120px;">สาเหตุ / หมายเหตุ</th>
+                    <th style="text-align: left; width: 165px;">ผู้รับผลประโยชน์/สมาชิก</th>
+                </tr>
+            </thead>
         `;
-    });
 
-    if (!rowsHtml) {
-        rowsHtml = `<tr><td colspan="9" style="text-align: center; padding: 25px; color: #888;">ไม่พบข้อมูลสมาชิกลาออก/เสียชีวิตตามเงื่อนไขที่ระบุ</td></tr>`;
+        pagesHtml += `
+            <div class="report-page ${isLastPage ? 'last-page' : ''}">
+                <div class="report-header">
+                    <div class="page-corner-number">หน้า ${pageNum}/${totalPages}</div>
+                    <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
+                    <h3>${reportTitleText}</h3>
+                    <p>${dateFilterHeaderText} | ประเภทข้อมูล: ${typeText} | ช่วงรหัส: ${fromId} ถึง ${toId}</p>
+                </div>
+
+                <table>
+                    ${tableHeadHtml}
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+
+                ${summaryBoxHtml}
+            </div>
+        `;
     }
 
     const printScript = autoPrint ? `
@@ -1491,137 +1964,129 @@ function buildDeceasedReportDocument(filteredList, autoPrint = false) {
         <html lang="th">
         <head>
             <meta charset="UTF-8">
-            <title>รายงานสมาชิกลาออก / เสียชีวิต - สมาคมฌาปนกิจสงเคราะห์</title>
+            <title>${reportTitleText} - สมาคมฌาปนกิจสงเคราะห์</title>
             <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
             <style>
                 @page {
                     size: A4 landscape;
-                    margin: 10mm;
+                    margin: 8mm 10mm 8mm 10mm;
                 }
                 body {
                     font-family: 'Sarabun', 'Prompt', sans-serif;
                     color: #000;
                     margin: 0;
-                    padding: 15px;
-                    font-size: 13px;
+                    padding: 10px 15px;
+                    font-size: 12px;
+                    background: #fff;
+                }
+                .report-page {
+                    position: relative;
                 }
                 .report-header {
                     text-align: center;
                     border-bottom: 2px solid #000;
-                    padding-bottom: 8px;
-                    margin-bottom: 12px;
+                    padding-bottom: 6px;
+                    margin-bottom: 8px;
+                    position: relative;
+                }
+                .page-corner-number {
+                    position: absolute;
+                    right: 0;
+                    bottom: 4px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #000;
                 }
                 .report-header h2 {
-                    margin: 0 0 4px 0;
-                    font-size: 19px;
+                    margin: 0 0 2px 0;
+                    font-size: 18px;
                     font-weight: 700;
                 }
                 .report-header h3 {
-                    margin: 0 0 4px 0;
-                    font-size: 15px;
+                    margin: 0 0 2px 0;
+                    font-size: 14.5px;
                     font-weight: 600;
                 }
                 .report-header p {
                     margin: 0;
-                    font-size: 12.5px;
+                    font-size: 11.5px;
                     color: #333;
+                    padding: 0 80px;
                 }
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 12px;
-                    margin-bottom: 14px;
+                    font-size: 11.5px;
+                    margin-bottom: 8px;
+                }
+                thead {
+                    display: table-header-group;
+                }
+                tbody {
+                    display: table-row-group;
+                }
+                tr {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
                 }
                 th {
                     background: #f1f5f9;
                     border: 1px solid #000;
-                    padding: 6px 8px;
+                    padding: 4.5px 6px;
                     text-align: center;
                     font-weight: 600;
+                    font-size: 11.5px;
                 }
                 td {
                     border: 1px solid #000;
-                    padding: 5px 8px;
+                    padding: 3.5px 6px;
+                    font-size: 11.5px;
+                    line-height: 1.35;
                 }
                 .summary-box {
-                    font-size: 12.5px;
+                    font-size: 11.5px;
                     font-weight: 600;
-                    margin-bottom: 24px;
-                    padding: 8px 14px;
+                    margin-bottom: 0;
+                    padding: 5px 12px;
                     border: 1px dashed #000;
                     display: flex;
                     justify-content: space-around;
                     background: #fafafa;
-                }
-                .signatures-grid {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 36px;
                     page-break-inside: avoid;
+                    break-inside: avoid;
                 }
-                .sign-box {
-                    text-align: center;
-                    width: 240px;
-                    font-size: 12.5px;
+                @media screen {
+                    .report-page:not(:last-child) {
+                        margin-bottom: 30px;
+                        padding-bottom: 25px;
+                        border-bottom: 2px dashed #94a3b8;
+                    }
                 }
                 @media print {
                     .no-print { display: none !important; }
+                    body { padding: 0; }
+                    .report-page {
+                        page-break-after: always;
+                        break-after: page;
+                    }
+                    .report-page.last-page, .report-page:last-child {
+                        page-break-after: auto;
+                        break-after: auto;
+                    }
                 }
             </style>
         </head>
         <body>
             <!-- Toolbar for Preview Mode -->
             <div class="no-print" style="position: sticky; top: 0; background: #ffffff; padding: 10px 18px; border-bottom: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Prompt', sans-serif; margin: -15px -15px 15px -15px;">
-                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">⚰️ รายงานสมาชิกลาออก / เสียชีวิต (${filteredList.length} รายการ)</div>
+                <div style="font-weight: 600; color: #1e3c72; font-size: 15px;">⚰️ ${reportTitleText} (${filteredList.length} รายการ - ทั้งหมด ${totalPages} หน้า)</div>
                 <div style="display: flex; gap: 10px;">
                     <button onclick="window.print()" style="padding: 7px 18px; background: #2563eb; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">🖨️ สั่งพิมพ์เอกสาร</button>
                     <button onclick="window.close()" style="padding: 7px 18px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13.5px; font-family: 'Prompt', sans-serif;">❌ ปิดหน้าต่าง</button>
                 </div>
             </div>
 
-            <div class="report-header">
-                <h2>สมาคมฌาปนกิจสงเคราะห์</h2>
-                <h3>รายงานสมาชิกลาออก / เสียชีวิต</h3>
-                <p>${dateFilterHeaderText} | ประเภทข้อมูล: ${typeText} | ช่วงรหัส: ${fromId} ถึง ${toId}</p>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 45px;">ลำดับ</th>
-                        <th style="width: 95px;">รหัส</th>
-                        <th style="width: 90px;">ประเภท</th>
-                        <th style="text-align: left;">คำนำหน้า - ชื่อ - นามสกุล</th>
-                        <th style="width: 125px;">เลขบัตรประชาชน</th>
-                        <th style="width: 105px;">วันที่ออก/เสียชีวิต</th>
-                        <th style="width: 95px;">สถานะ</th>
-                        <th style="text-align: left; width: 120px;">สาเหตุ / หมายเหตุ</th>
-                        <th style="text-align: left; width: 140px;">ผู้รับผลประโยชน์/สมาชิก</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rowsHtml}
-                </tbody>
-            </table>
-
-            <div class="summary-box">
-                <span>ลาออก: ${countResigned.toLocaleString()} ราย</span>
-                <span>เสียชีวิต: ${countDied.toLocaleString()} ราย</span>
-                <span>เสียชีวิต/ตั้งหนี้: ${countBilled.toLocaleString()} ราย</span>
-                <span>(สมาชิก ${countMembers.toLocaleString()} ราย, ผู้รับผลประโยชน์ ${countBeneficiaries.toLocaleString()} ราย)</span>
-                <span><strong>รวมทั้งสิ้น ${filteredList.length.toLocaleString()} ราย</strong></span>
-            </div>
-
-            <div class="signatures-grid">
-                <div class="sign-box">
-                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>เจ้าหน้าที่ผู้จัดทำรายงาน</p>
-                    <p>(.......................................................)</p>
-                </div>
-                <div class="sign-box">
-                    <p style="margin-bottom: 50px;">ลงชื่อ.......................................................<br>นายทะเบียน / ผู้ตรวจสอบ</p>
-                    <p>(.......................................................)</p>
-                </div>
-            </div>
+            ${pagesHtml}
 
             ${printScript}
         </body>
@@ -1659,32 +2124,72 @@ document.getElementById("btnExportDeceasedExcel")?.addEventListener("click", () 
         return;
     }
 
-    const headers = ["ลำดับ", "รหัส", "ประเภท", "ชื่อ-นามสกุล", "เลขบัตรประชาชน", "วันที่ลาออก/เสียชีวิต", "สถานะ", "สาเหตุ", "ข้อมูลเชื่อมโยง"];
-    const rows = filtered.map((c, idx) => {
-        const s = String(c.status);
-        let stName = "ปกติ";
-        if (s === "2") stName = "ลาออก";
-        else if (s === "3") stName = "เสียชีวิต";
-        else if (s === "4") stName = "เสียชีวิต/ตั้งหนี้";
+    const formFormat = document.querySelector('input[name="reportDeceasedFormFormat"]:checked')?.value || 'general';
+    const isAddressForm = (formFormat === 'address');
 
-        const rawDate = c.dateEndStr || c.dateend || c.date_deceased || c.date;
-        const code = c.code || c.Idcustomer || c.Idbeneficiary || "";
-        const typeLabel = c.record_type === "beneficiary" ? "ผู้รับผลประโยชน์" : "สมาชิก";
-        const reasonText = c.cause || c.reason || c.remark || "";
-        const linkedText = c.linkedInfo || c.beneficiary || c.customer_fullname || "";
+    let headers = [];
+    let rows = [];
+    let filenamePrefix = "";
 
-        return [
-            idx + 1,
-            `"${code}"`,
-            `"${typeLabel}"`,
-            `"${c.fullName || ''}"`,
-            `"${c.Idcard || ''}"`,
-            `"${formatThaiDate(rawDate)}"`,
-            `"${stName}"`,
-            `"${reasonText}"`,
-            `"${linkedText}"`
-        ];
-    });
+    if (isAddressForm) {
+        headers = ["ลำดับ", "รหัส", "ประเภท", "ชื่อ-นามสกุล", "เลขบัตรประชาชน", "วันที่ลาออก/เสียชีวิต", "สถานะ", "ที่อยู่ตามบัตร", "ที่อยู่ปัจจุบัน", "สาเหตุ"];
+        rows = filtered.map((c, idx) => {
+            const s = String(c.status);
+            let stName = "ปกติ";
+            if (s === "2") stName = "ลาออก";
+            else if (s === "3") stName = "เสียชีวิต";
+            else if (s === "4") stName = "เสียชีวิต/ตั้งหนี้";
+
+            const rawDate = c.dateEndStr || c.dateend || c.date_deceased || c.date;
+            const code = c.code || c.Idcustomer || c.Idbeneficiary || "";
+            const typeLabel = c.record_type === "beneficiary" ? "ผู้รับผลประโยชน์" : "สมาชิก";
+            const reasonText = c.reason || c.remark || '-';
+
+            return [
+                idx + 1,
+                `"${code}"`,
+                `"${typeLabel}"`,
+                `"${c.fullName || ''}"`,
+                `"${c.Idcard || ''}"`,
+                `"${formatThaiDate(rawDate)}"`,
+                `"${stName}"`,
+                `"${formatCustomerCardAddress(c)}"`,
+                `"${formatCustomerCurrentAddress(c)}"`,
+                `"${reasonText}"`
+            ];
+        });
+        filenamePrefix = "รายงานสมาชิกลาออก_เสียชีวิต_ที่อยู่";
+    } else {
+        headers = ["ลำดับ", "รหัส", "ประเภท", "ชื่อ-นามสกุล", "เลขบัตรประชาชน", "วันที่ลาออก/เสียชีวิต", "สถานะ", "สาเหตุ", "ข้อมูลเชื่อมโยง"];
+        rows = filtered.map((c, idx) => {
+            const s = String(c.status);
+            let stName = "ปกติ";
+            if (s === "2") stName = "ลาออก";
+            else if (s === "3") stName = "เสียชีวิต";
+            else if (s === "4") stName = "เสียชีวิต/ตั้งหนี้";
+
+            const rawDate = c.dateEndStr || c.dateend || c.date_deceased || c.date;
+            const code = c.code || c.Idcustomer || c.Idbeneficiary || "";
+            const typeLabel = c.record_type === "beneficiary" ? "ผู้รับผลประโยชน์" : "สมาชิก";
+            const reasonText = c.reason || c.remark || '-';
+            const linkedText = c.record_type === "member"
+                ? formatBeneficiaryNumberedText(c.linkedInfo || c.beneficiary || c.beneficiary_name || c.customer_beneficiary, c.beneficiaries)
+                : (c.linkedInfo || c.customer_fullname || "");
+
+            return [
+                idx + 1,
+                `"${code}"`,
+                `"${typeLabel}"`,
+                `"${c.fullName || ''}"`,
+                `"${c.Idcard || ''}"`,
+                `"${formatThaiDate(rawDate)}"`,
+                `"${stName}"`,
+                `"${reasonText}"`,
+                `"${linkedText}"`
+            ];
+        });
+        filenamePrefix = "รายงานสมาชิกลาออก_เสียชีวิต";
+    }
 
     const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -1692,7 +2197,7 @@ document.getElementById("btnExportDeceasedExcel")?.addEventListener("click", () 
     const link = document.createElement("a");
     const dateRangeSuffix = deceasedFromDateYMD || deceasedToDateYMD ? `_${deceasedFromDateYMD || ''}_ถึง_${deceasedToDateYMD || ''}` : '';
     link.setAttribute("href", url);
-    link.setAttribute("download", `รายงานสมาชิกลาออก_เสียชีวิต${dateRangeSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute("download", `${filenamePrefix}${dateRangeSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

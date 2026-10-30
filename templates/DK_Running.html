@@ -1,338 +1,793 @@
-﻿{% extends "BaseLayout.html" %}
+{% extends "BaseLayout.html" %}
 
-{% block title %}เลขที่เอกสารและตั้งค่ายอดเงิน{% endblock %}
+{% block title %}กำหนดเลขที่เอกสารและตั้งค่ายอดเงิน{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='Running.css') }}">
 
-<h2>Welcome to เลขที่เอกสาร</h2>
-<p>Hello Flask layout!</p>
-<h3><a href="/DK_Home">HOME</a> \ เลขที่เอกสารและตั้งค่ายอดเงิน</h3>
+<div class="dk-running-page">
 
-<div class="main">
-    <div class="running-container">
-        <form id="registerForm" onsubmit="event.preventDefault(); handleSave();">
-            
-            <!-- Top Action Bar -->
-            <div class="button-group">
-                <div class="mode-badge view-mode" id="modeBadge">
+    <!-- Breadcrumb -->
+    <div class="page-breadcrumb">
+        <a href="/DK_Home">หน้าหลัก</a>
+        <span class="sep">/</span>
+        <span>ค่าคงที่ระบบ</span>
+        <span class="sep">/</span>
+        <span class="current">เลขที่เอกสารและตั้งค่ายอดเงิน</span>
+    </div>
+
+    <!-- Action Toolbar (เรียบง่าย) -->
+    <form id="registerForm" onsubmit="event.preventDefault(); handleSave();">
+        <div class="action-toolbar">
+            <div class="toolbar-left">
+                <div class="status-indicator-badge view-mode" id="modeBadge">
                     <span id="modeIcon">🔒</span>
                     <span id="modeText">ดูข้อมูลเท่านั้น</span>
                 </div>
-                <div class="button-group-right">
-                    <button type="button" class="btn-cancel" id="btnCancel" onclick="cancelEdit()">
-                        ✕ ยกเลิก
-                    </button>
-                    <button type="button" class="btn-edit" id="btnEdit" onclick="toggleEditMode()">
-                        ✏️ แก้ไข
-                    </button>
-                    <button type="button" class="submit-btnsave" id="btnSave" onclick="handleSave()" disabled>
-                        📄 บันทึก
-                    </button>
+            </div>
+            <div class="toolbar-right">
+                <button type="button" class="btn-action btn-cancel-neutral" id="btnCancel" onclick="cancelEdit()" style="display:none;">
+                    ✕ ยกเลิก
+                </button>
+                <button type="button" class="btn-action btn-edit-warning" id="btnEdit" onclick="toggleEditMode()">
+                    ✏️ แก้ไขข้อมูล
+                </button>
+                <button type="submit" class="btn-action btn-save-primary" id="btnSave" disabled>
+                    💾 บันทึกข้อมูล
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs (เรียบแบน) -->
+        <div class="tabs-navigation">
+            <button type="button" class="nav-tab-btn active" id="tabBtnRunning" onclick="openTab(event, 'tabRunning')">
+                <span>รูปแบบเลขที่เอกสาร</span>
+                <span class="tab-badge" id="countRunningBadge">5</span>
+            </button>
+            <button type="button" class="nav-tab-btn" id="tabBtnMoney" onclick="openTab(event, 'tabMoney')">
+                <span>อัตราค่าธรรมเนียมและยอดเงิน</span>
+                <span class="tab-badge" id="countMoneyBadge">3</span>
+            </button>
+        </div>
+
+        <!-- Tab 1: รูปแบบเลขที่เอกสาร (แยกเป็นบล็อคเรียบง่าย) -->
+        <div id="tabRunning" class="tab-panel active">
+            <div class="running-blocks-grid" id="runningListContainer">
+                <!-- Card 1: บันทึกสมาชิก (PC) -->
+                <div class="simple-block" id="card_1" data-id="1">
+                    <div>
+                        <div class="block-header">
+                            <div class="block-title-group">
+                                <span class="block-icon">👥</span>
+                                <h4 class="block-title">บันทึกสมาชิก</h4>
+                                <span class="block-tag">#1</span>
+                            </div>
+                            <div class="block-actions">
+                                <div class="mode-toggle-group" id="modeControl_1">
+                                    <button type="button" class="mode-btn active auto" id="btnModeAuto_1" onclick="setRowMode(1, 'auto')" disabled>
+                                        AUTO
+                                    </button>
+                                    <button type="button" class="mode-btn" id="btnModeManual_1" onclick="setRowMode(1, 'manual')" disabled>
+                                        MANUAL
+                                    </button>
+                                    <input type="hidden" name="mode_1" id="inputMode_1" value="auto">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-fields">
+                            <div class="field-item">
+                                <label for="docPrefix_1">คำนำหน้า (Prefix)</label>
+                                <input type="text" id="docPrefix_1" class="block-input mono-code" value="" placeholder="" maxlength="10" oninput="updateSinglePreview(1)" disabled>
+                            </div>
+                            <div class="field-item">
+                                <label for="docRunNumber_1">เลขที่ล่าสุด</label>
+                                <input type="text" id="docRunNumber_1" class="block-input mono-code" value="" placeholder="" oninput="updateSinglePreview(1)" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block-footer">
+                        <span>ตัวอย่างถัดไป:</span>
+                        <span class="preview-val" id="previewNext_1">-</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: บันทึกพนักงาน (EY) -->
+                <div class="simple-block" id="card_2" data-id="2">
+                    <div>
+                        <div class="block-header">
+                            <div class="block-title-group">
+                                <span class="block-icon">👔</span>
+                                <h4 class="block-title">บันทึกพนักงาน</h4>
+                                <span class="block-tag">#2</span>
+                            </div>
+                            <div class="block-actions">
+                                <div class="mode-toggle-group" id="modeControl_2">
+                                    <button type="button" class="mode-btn active auto" id="btnModeAuto_2" onclick="setRowMode(2, 'auto')" disabled>
+                                        AUTO
+                                    </button>
+                                    <button type="button" class="mode-btn" id="btnModeManual_2" onclick="setRowMode(2, 'manual')" disabled>
+                                        MANUAL
+                                    </button>
+                                    <input type="hidden" name="mode_2" id="inputMode_2" value="auto">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-fields">
+                            <div class="field-item">
+                                <label for="docPrefix_2">คำนำหน้า (Prefix)</label>
+                                <input type="text" id="docPrefix_2" class="block-input mono-code" value="" placeholder="" maxlength="10" oninput="updateSinglePreview(2)" disabled>
+                            </div>
+                            <div class="field-item">
+                                <label for="docRunNumber_2">เลขที่ล่าสุด</label>
+                                <input type="text" id="docRunNumber_2" class="block-input mono-code" value="" placeholder="" oninput="updateSinglePreview(2)" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block-footer">
+                        <span>ตัวอย่างถัดไป:</span>
+                        <span class="preview-val" id="previewNext_2">-</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: ตั้งเอกสารเสียชีวิต (DW) -->
+                <div class="simple-block" id="card_3" data-id="3">
+                    <div>
+                        <div class="block-header">
+                            <div class="block-title-group">
+                                <span class="block-icon">🕊️</span>
+                                <h4 class="block-title">ตั้งเอกสารเสียชีวิต</h4>
+                                <span class="block-tag">#3</span>
+                            </div>
+                            <div class="block-actions">
+                                <div class="mode-toggle-group" id="modeControl_3">
+                                    <button type="button" class="mode-btn active auto" id="btnModeAuto_3" onclick="setRowMode(3, 'auto')" disabled>
+                                        AUTO
+                                    </button>
+                                    <button type="button" class="mode-btn" id="btnModeManual_3" onclick="setRowMode(3, 'manual')" disabled>
+                                        MANUAL
+                                    </button>
+                                    <input type="hidden" name="mode_3" id="inputMode_3" value="auto">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-fields">
+                            <div class="field-item">
+                                <label for="docPrefix_3">คำนำหน้า (Prefix)</label>
+                                <input type="text" id="docPrefix_3" class="block-input mono-code" value="" placeholder="" maxlength="10" oninput="updateSinglePreview(3)" disabled>
+                            </div>
+                            <div class="field-item">
+                                <label for="docRunNumber_3">เลขที่ล่าสุด</label>
+                                <input type="text" id="docRunNumber_3" class="block-input mono-code" value="" placeholder="" oninput="updateSinglePreview(3)" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block-footer">
+                        <span>ตัวอย่างถัดไป:</span>
+                        <span class="preview-val" id="previewNext_3">-</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: บันทึกข้อมูลรายวัน (TR) -->
+                <div class="simple-block" id="card_4" data-id="4">
+                    <div>
+                        <div class="block-header">
+                            <div class="block-title-group">
+                                <span class="block-icon">🧾</span>
+                                <h4 class="block-title">บันทึกข้อมูลรายวัน</h4>
+                                <span class="block-tag">#4</span>
+                            </div>
+                            <div class="block-actions">
+                                <div class="mode-toggle-group" id="modeControl_4">
+                                    <button type="button" class="mode-btn active auto" id="btnModeAuto_4" onclick="setRowMode(4, 'auto')" disabled>
+                                        AUTO
+                                    </button>
+                                    <button type="button" class="mode-btn" id="btnModeManual_4" onclick="setRowMode(4, 'manual')" disabled>
+                                        MANUAL
+                                    </button>
+                                    <input type="hidden" name="mode_4" id="inputMode_4" value="auto">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-fields">
+                            <div class="field-item">
+                                <label for="docPrefix_4">คำนำหน้า (Prefix)</label>
+                                <input type="text" id="docPrefix_4" class="block-input mono-code" value="" placeholder="" maxlength="10" oninput="updateSinglePreview(4)" disabled>
+                            </div>
+                            <div class="field-item">
+                                <label for="docRunNumber_4">เลขที่ล่าสุด</label>
+                                <input type="text" id="docRunNumber_4" class="block-input mono-code" value="" placeholder="" oninput="updateSinglePreview(4)" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block-footer">
+                        <span>ตัวอย่างถัดไป:</span>
+                        <span class="preview-val" id="previewNext_4">-</span>
+                    </div>
+                </div>
+
+                <!-- Card 5: ใบเสร็จรับเงิน (RW) -->
+                <div class="simple-block" id="card_5" data-id="5">
+                    <div>
+                        <div class="block-header">
+                            <div class="block-title-group">
+                                <span class="block-icon">🧾</span>
+                                <h4 class="block-title">ใบเสร็จรับเงิน</h4>
+                                <span class="block-tag">#5</span>
+                            </div>
+                            <div class="block-actions">
+                                <div class="mode-toggle-group" id="modeControl_5">
+                                    <button type="button" class="mode-btn active auto" id="btnModeAuto_5" onclick="setRowMode(5, 'auto')" disabled>
+                                        AUTO
+                                    </button>
+                                    <button type="button" class="mode-btn" id="btnModeManual_5" onclick="setRowMode(5, 'manual')" disabled>
+                                        MANUAL
+                                    </button>
+                                    <input type="hidden" name="mode_5" id="inputMode_5" value="auto">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-fields">
+                            <div class="field-item">
+                                <label for="docPrefix_5">คำนำหน้า (Prefix)</label>
+                                <input type="text" id="docPrefix_5" class="block-input mono-code" value="" placeholder="" maxlength="10" oninput="updateSinglePreview(5)" disabled>
+                            </div>
+                            <div class="field-item">
+                                <label for="docRunNumber_5">เลขที่ล่าสุด</label>
+                                <input type="text" id="docRunNumber_5" class="block-input mono-code" value="" placeholder="" oninput="updateSinglePreview(5)" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block-footer">
+                        <span>ตัวอย่างถัดไป:</span>
+                        <span class="preview-val" id="previewNext_5">-</span>
+                    </div>
                 </div>
             </div>
+            <div class="simple-note">
+                * <strong>AUTO:</strong> ระบบสร้างเลขถัดไปให้อัตโนมัติ | <strong>MANUAL:</strong> เปิดให้พิมพ์เลขเอกสารเองในแบบฟอร์ม
+            </div>
+        </div>
 
-            <!-- Form Card with Tabs -->
-            <div class="form-group1">
-                <div class="tabs">
-                    <button type="button"
-                            class="tab-btn active"
-                            onclick="openTab(event, 'tabRunning')">
-                        🔢 เลขที่ Running
-                    </button>
-                    <button type="button"
-                            class="tab-btn"
-                            onclick="openTab(event, 'tabMoney')">
-                        💰 ตั้งค่ายอดเงิน
-                    </button>
-                </div>
-
-                <!-- Tab 1: เลขที่ Running (เรียงยาวทีละ Row) -->
-                <div id="tabRunning" class="tab-content active">
-                    <div class="running-list">
-                        
-                        <!-- Row 1: บันทึกสมาชิก -->
-                        <div class="running-row-item" id="cardPC">
-                            <div class="row-title-col">
-                                <h4><span>👥</span> บันทึกสมาชิก</h4>
-                                <span class="mode-badge-card auto" id="badgeModePC">AUTO</span>
-                            </div>
-
-                            <div class="row-mode-col">
-                                <span class="field-label">รูปแบบเลขที่:</span>
-                                <div class="mode-radios">
-                                    <label class="mode-radio">
-                                        <input type="radio" name="modePC" value="auto" checked disabled onchange="handleCardModeChange('PC', 'auto')">
-                                        <span>⚡ อัตโนมัติ</span>
-                                    </label>
-                                    <label class="mode-radio">
-                                        <input type="radio" name="modePC" value="manual" disabled onchange="handleCardModeChange('PC', 'manual')">
-                                        <span>✏️ กำหนดเอง (Manual)</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="row-field-col">
-                                <label class="field-label" for="docPrefixPC">อักษรนำหน้า</label>
-                                <input type="text" id="docPrefixPC" class="running-input code-input" placeholder="เช่น PC" disabled>
-                            </div>
-
-                            <div class="row-field-col">
-                                <label class="field-label" for="docRunNumberPC">เลขที่ Running ล่าสุด</label>
-                                <input type="text" id="docRunNumberPC" class="running-input code-input" placeholder="000000" disabled>
+        <!-- Tab 2: ตั้งค่ายอดเงิน (แยกเป็นบล็อคเรียบง่าย) -->
+        <div id="tabMoney" class="tab-panel">
+            <div class="money-blocks-grid" id="moneyListContainer">
+                <!-- Card 6: ค่าสมัครสมาชิก -->
+                <div class="simple-block money-block" id="moneyRow_6" data-id="6">
+                    <div>
+                        <div class="block-header">
+                            <div class="block-title-group">
+                                <span class="block-icon">💳</span>
+                                <h4 class="block-title">ค่าสมัครสมาชิก</h4>
                             </div>
                         </div>
-
-                        <!-- Row 2: บันทึกพนักงาน -->
-                        <div class="running-row-item" id="cardEY">
-                            <div class="row-title-col">
-                                <h4><span>👔</span> บันทึกพนักงาน</h4>
-                                <span class="mode-badge-card auto" id="badgeModeEY">AUTO</span>
-                            </div>
-
-                            <div class="row-mode-col">
-                                <span class="field-label">รูปแบบเลขที่:</span>
-                                <div class="mode-radios">
-                                    <label class="mode-radio">
-                                        <input type="radio" name="modeEY" value="auto" checked disabled onchange="handleCardModeChange('EY', 'auto')">
-                                        <span>⚡ อัตโนมัติ</span>
-                                    </label>
-                                    <label class="mode-radio">
-                                        <input type="radio" name="modeEY" value="manual" disabled onchange="handleCardModeChange('EY', 'manual')">
-                                        <span>✏️ กำหนดเอง (Manual)</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="row-field-col">
-                                <label class="field-label" for="docPrefixEY">อักษรนำหน้า</label>
-                                <input type="text" id="docPrefixEY" class="running-input code-input" placeholder="เช่น EY" disabled>
-                            </div>
-
-                            <div class="row-field-col">
-                                <label class="field-label" for="docRunNumberEY">เลขที่ Running ล่าสุด</label>
-                                <input type="text" id="docRunNumberEY" class="running-input code-input" placeholder="000" disabled>
-                            </div>
+                        <div class="money-desc-text">ค่าธรรมเนียมแรกเข้าตอนสมัครสมาชิกใหม่</div>
+                    </div>
+                    <div>
+                        <div class="money-view-row" id="feeViewBox_6" style="display:flex;">
+                            <span class="money-big-num" id="feeDisplayVal_6">-</span>
+                            <span class="money-unit" id="feeUnit_6"></span>
                         </div>
-
-                        <!-- Row 3: บันทึกตั้งเอกสารเสียชีวิต -->
-                        <div class="running-row-item" id="cardDW">
-                            <div class="row-title-col">
-                                <h4><span>🕊️</span> ตั้งเอกสารเสียชีวิต</h4>
-                                <span class="mode-badge-card auto" id="badgeModeDW">AUTO</span>
-                            </div>
-
-                            <div class="row-mode-col">
-                                <span class="field-label">รูปแบบเลขที่:</span>
-                                <div class="mode-radios">
-                                    <label class="mode-radio">
-                                        <input type="radio" name="modeDW" value="auto" checked disabled onchange="handleCardModeChange('DW', 'auto')">
-                                        <span>⚡ อัตโนมัติ</span>
-                                    </label>
-                                    <label class="mode-radio">
-                                        <input type="radio" name="modeDW" value="manual" disabled onchange="handleCardModeChange('DW', 'manual')">
-                                        <span>✏️ กำหนดเอง (Manual)</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="row-field-col">
-                                <label class="field-label" for="docPrefixDW">อักษรนำหน้า</label>
-                                <input type="text" id="docPrefixDW" class="running-input code-input" placeholder="เช่น DW" disabled>
-                            </div>
-
-                            <div class="row-field-col">
-                                <label class="field-label" for="docRunNumberDW">เลขที่ Running ล่าสุด</label>
-                                <input type="text" id="docRunNumberDW" class="running-input code-input" placeholder="000000" disabled>
-                            </div>
+                        <div class="money-edit-wrapper" id="feeEditBox_6" style="display:none;">
+                            <input type="number" id="moneyAmount_6" class="block-input money-input" value="" placeholder="" step="0.01" oninput="updateMoneyDisplayLive(6)" disabled>
+                            <span class="money-unit">บาท</span>
                         </div>
-
-                        <!-- Row 4: บันทึกข้อมูลรายวัน -->
-                        <div class="running-row-item" id="cardTW">
-                            <div class="row-title-col">
-                                <h4><span>📅</span> บันทึกข้อมูลรายวัน</h4>
-                                <span class="mode-badge-card auto" id="badgeModeTW">AUTO</span>
-                            </div>
-
-                            <div class="row-mode-col">
-                                <span class="field-label">รูปแบบเลขที่:</span>
-                                <div class="mode-radios">
-                                    <label class="mode-radio">
-                                        <input type="radio" name="modeTW" value="auto" checked disabled onchange="handleCardModeChange('TW', 'auto')">
-                                        <span>⚡ อัตโนมัติ</span>
-                                    </label>
-                                    <label class="mode-radio">
-                                        <input type="radio" name="modeTW" value="manual" disabled onchange="handleCardModeChange('TW', 'manual')">
-                                        <span>✏️ กำหนดเอง (Manual)</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="row-field-col">
-                                <label class="field-label" for="docPrefixTW">อักษรนำหน้า</label>
-                                <input type="text" id="docPrefixTW" class="running-input code-input" placeholder="เช่น TR" disabled>
-                            </div>
-
-                            <div class="row-field-col">
-                                <label class="field-label" for="docRunNumberTW">เลขที่ Running ล่าสุด</label>
-                                <input type="text" id="docRunNumberTW" class="running-input code-input" placeholder="000000" disabled>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
 
-                <!-- Tab 2: ตั้งค่ายอดเงิน (เรียงยาวทีละ Row) -->
-                <div id="tabMoney" class="tab-content">
-                    <div class="money-list">
-                        
-                        <!-- Row 1: ค่าสมัครสมาชิก -->
-                        <div class="money-row-item">
-                            <div class="row-title-col">
-                                <h4><span>💳</span> ค่าสมัครสมาชิก</h4>
-                            </div>
-                            <div class="money-field-wrapper">
-                                <label class="field-label" for="registerAmount">จำนวนเงิน:</label>
-                                <div class="money-unit-addon" style="flex:1;">
-                                    <input type="number" id="registerAmount" class="running-input money-input" placeholder="0.00" step="0.01" disabled>
-                                    <span class="unit-text">บาท</span>
-                                </div>
+                <!-- Card 7: เงินสงเคราะห์ล่วงหน้า -->
+                <div class="simple-block money-block" id="moneyRow_7" data-id="7">
+                    <div>
+                        <div class="block-header">
+                            <div class="block-title-group">
+                                <span class="block-icon">🤝</span>
+                                <h4 class="block-title">เงินสงเคราะห์ล่วงหน้า</h4>
                             </div>
                         </div>
-
-                        <!-- Row 2: เงินสงเคราะห์เสียชีวิต -->
-                        <div class="money-row-item">
-                            <div class="row-title-col">
-                                <h4><span>🤝</span> เงินสงเคราะห์เสียชีวิต</h4>
-                            </div>
-                            <div class="money-field-wrapper">
-                                <label class="field-label" for="yearAmount">จำนวนเงิน:</label>
-                                <div class="money-unit-addon" style="flex:1;">
-                                    <input type="number" id="yearAmount" class="running-input money-input" placeholder="0.00" step="0.01" disabled>
-                                    <span class="unit-text">บาท</span>
-                                </div>
-                            </div>
+                        <div class="money-desc-text">เงินสงเคราะห์ล่วงหน้าสะสมตามระเบียบ</div>
+                    </div>
+                    <div>
+                        <div class="money-view-row" id="feeViewBox_7" style="display:flex;">
+                            <span class="money-big-num" id="feeDisplayVal_7">-</span>
+                            <span class="money-unit" id="feeUnit_7"></span>
                         </div>
-
-                        <!-- Row 3: ค่าธรรมเนียมรายปี -->
-                        <div class="money-row-item">
-                            <div class="row-title-col">
-                                <h4><span>📋</span> ค่าธรรมเนียมรายปี</h4>
-                            </div>
-                            <div class="money-field-wrapper">
-                                <label class="field-label" for="yearlyAmount">จำนวนเงิน:</label>
-                                <div class="money-unit-addon" style="flex:1;">
-                                    <input type="number" id="yearlyAmount" class="running-input money-input" placeholder="0.00" step="0.01" disabled>
-                                    <span class="unit-text">บาท</span>
-                                </div>
-                            </div>
+                        <div class="money-edit-wrapper" id="feeEditBox_7" style="display:none;">
+                            <input type="number" id="moneyAmount_7" class="block-input money-input" value="" placeholder="" step="0.01" oninput="updateMoneyDisplayLive(7)" disabled>
+                            <span class="money-unit">บาท</span>
                         </div>
-
                     </div>
                 </div>
 
+                <!-- Card 8: ค่าบำรุงรายปี -->
+                <div class="simple-block money-block" id="moneyRow_8" data-id="8">
+                    <div>
+                        <div class="block-header">
+                            <div class="block-title-group">
+                                <span class="block-icon">📋</span>
+                                <h4 class="block-title">ค่าบำรุงรายปี</h4>
+                            </div>
+                        </div>
+                        <div class="money-desc-text">ค่าบำรุงสมาชิกรายปีตามรอบ</div>
+                    </div>
+                    <div>
+                        <div class="money-view-row" id="feeViewBox_8" style="display:flex;">
+                            <span class="money-big-num" id="feeDisplayVal_8">-</span>
+                            <span class="money-unit" id="feeUnit_8"></span>
+                        </div>
+                        <div class="money-edit-wrapper" id="feeEditBox_8" style="display:none;">
+                            <input type="number" id="moneyAmount_8" class="block-input money-input" value="" placeholder="" step="0.01" oninput="updateMoneyDisplayLive(8)" disabled>
+                            <span class="money-unit">บาท</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="simple-note">
+                * ค่าธรรมเนียมที่กำหนดที่นี่จะถูกดึงไปแสดงในหน้าสมัครสมาชิกและการรับชำระเงินโดยอัตโนมัติ
+            </div>
+        </div>
+
+
+    </form>
+</div>
+
+<!-- Modal สำหรับเพิ่มรายการใหม่ (ซ่อนไว้สำหรับ API) -->
+<div class="modal-overlay" id="addModalOverlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>เพิ่มรายการใหม่</h3>
+            <button type="button" class="modal-close" onclick="closeAddModal()">&times;</button>
+        </div>
+        <form id="addRunningForm" onsubmit="event.preventDefault(); submitNewItem();">
+            <div class="form-field-modal">
+                <label for="newCategory">ประเภทรายการ</label>
+                <select id="newCategory" onchange="handleNewCategoryChange()">
+                    <option value="running">เลขที่เอกสาร (Running)</option>
+                    <option value="money">ยอดเงิน / ค่าธรรมเนียม (Money)</option>
+                </select>
+            </div>
+            <div class="form-field-modal">
+                <label for="newName">ชื่อรายการ</label>
+                <input type="text" id="newName" placeholder="เช่น ค่าธรรมเนียมพิเศษ" required>
+            </div>
+            <div class="form-field-modal" id="modalPrefixGroup">
+                <label for="newDocid">อักษรนำหน้า (Prefix)</label>
+                <input type="text" id="newDocid" placeholder="เช่น PV" maxlength="10">
+            </div>
+            <div class="form-field-modal">
+                <label for="newIdRunning" id="labelNewIdRunning">เลขที่เริ่มต้น</label>
+                <input type="text" id="newIdRunning" placeholder="000000" required>
+            </div>
+            <div class="form-field-modal" id="modalModeGroup">
+                <label for="newMode">รูปแบบการออกเลข</label>
+                <select id="newMode">
+                    <option value="auto">AUTO (อัตโนมัติ)</option>
+                    <option value="manual">MANUAL (กำหนดเอง)</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action btn-cancel-neutral" onclick="closeAddModal()">ยกเลิก</button>
+                <button type="submit" class="btn-action btn-save-primary">บันทึก</button>
             </div>
         </form>
     </div>
 </div>
 
-<script type="module">
-import { API_BASE } from "/static/js/config.js";
-import { getRunningConfig, saveRunningConfig } from "/static/js/runningConfig.js";
+<script>
+// ข้อมูลเริ่มต้น (โหลดผ่าน API เสมอ)
+window.INITIAL_RUNNING_DATA = [];
 
-// Tab Switching
-window.openTab = function(evt, tabId) {
-    document.querySelectorAll('.tab-content')
-        .forEach(tab => tab.classList.remove('active'));
+// API Endpoint สำหรับเชื่อมต่อ FastAPI
+const API_BASE = window.API_BASE || (window.location.protocol + "//" + (window.location.hostname || "127.0.0.1") + ":8000");
 
-    document.querySelectorAll('.tab-btn')
-        .forEach(btn => btn.classList.remove('active'));
+// ตรวจสอบสิทธิ์การเข้าใช้งาน
+(function checkRunningAccess() {
+    try {
+        const saved = sessionStorage.getItem("dk_logged_user");
+        if (saved) {
+            const u = JSON.parse(saved);
+            const role = (u.role || "").toLowerCase();
+            const perms = Array.isArray(u.permissions) ? u.permissions : [];
+            if (role === "user" || role === "staff" || role === "member") {
+                if (!perms.includes("running")) {
+                    alert("⚠️ คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
+                    window.location.replace("/DK_Home");
+                }
+            }
+        }
+    } catch(e) {}
+})();
+
+// สลับแท็บ
+function openTab(evt, tabId) {
+    document.querySelectorAll('.tab-panel').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
 
     const targetTab = document.getElementById(tabId);
     if (targetTab) targetTab.classList.add('active');
 
     if (evt && evt.currentTarget) {
         evt.currentTarget.classList.add('active');
+    } else {
+        const btn = tabId === 'tabRunning' ? document.getElementById('tabBtnRunning') : document.getElementById('tabBtnMoney');
+        if (btn) btn.classList.add('active');
     }
-};
+}
+window.openTab = openTab;
 
-// State Store
 let isEditMode = false;
-const originalValues = {};
-const originalModes = {};
-const inputIds = [
-    "docPrefixPC", "docRunNumberPC",
-    "docPrefixEY", "docRunNumberEY",
-    "docPrefixDW", "docRunNumberDW",
-    "docPrefixTW", "docRunNumberTW",
-    "registerAmount", "yearAmount", "yearlyAmount"
-];
-const modeKeys = ["PC", "EY", "DW", "TW"];
+let isApiOffline = false;
+let runningData = [];
+let originalSnapshot = [];
 
-// Update Card Mode Badge UI
-window.handleCardModeChange = function(cardType, mode) {
-    const badge = document.getElementById(`badgeMode${cardType}`);
-    if (badge) {
-        if (mode === 'manual') {
-            badge.className = 'mode-badge-card manual';
-            badge.textContent = 'MANUAL';
+function normalizeRunningItem(it) {
+    if (!it) return null;
+    const item_id = Number(it.Id || it.id || 0);
+    const doc = (it.docid || it.docId || '').trim();
+    let cat = (it.category || '').trim().toLowerCase();
+    if (item_id === 6 || item_id === 7 || item_id === 8) {
+        cat = 'money';
+    } else if (item_id >= 1 && item_id <= 5) {
+        cat = 'running';
+    } else if (!cat) {
+        cat = doc ? 'running' : 'money';
+    }
+    return {
+        ...it,
+        Id: item_id,
+        id: item_id,
+        docid: cat === 'money' ? null : doc,
+        docId: cat === 'money' ? null : doc,
+        IdRunning: it.IdRunning !== undefined && it.IdRunning !== null ? String(it.IdRunning) : String(it.id_running || ''),
+        name: it.name || (cat === 'money' ? `รายการยอดเงิน ${item_id}` : `เอกสาร ${doc || item_id}`),
+        mode: it.mode || 'auto',
+        category: cat
+    };
+}
+
+function getIconForDoc(item) {
+    const doc = (item.docid || '').toUpperCase();
+    const name = item.name || '';
+    if (doc === 'PC' || name.includes('สมาชิก')) return '👥';
+    if (doc === 'EY' || name.includes('พนักงาน') || name.includes('เจ้าหน้าที่')) return '👔';
+    if (doc === 'DW' || name.includes('เสียชีวิต') || name.includes('หนี้')) return '🕊️';
+    if (doc === 'TR' || name.includes('รายวัน')) return '🧾';
+    if (doc === 'RW' || doc === 'TW' || name.includes('เสร็จ')) return '🧾';
+    return '📄';
+}
+
+function getIconForMoney(item) {
+    const name = item.name || '';
+    if (name.includes('สมัคร')) return '💳';
+    if (name.includes('สงเคราะห์') || name.includes('เสียชีวิต')) return '🤝';
+    if (name.includes('ปี') || name.includes('ธรรมเนียม')) return '📋';
+    return '💰';
+}
+
+function getMoneySubtitle(id) {
+    if (id === 6) return 'ค่าธรรมเนียมแรกเข้าตอนสมัครสมาชิกใหม่';
+    if (id === 7) return 'เงินสงเคราะห์ล่วงหน้าสะสมตามระเบียบ';
+    if (id === 8) return 'ค่าบำรุงสมาชิกรายปีตามรอบ';
+    return 'กำหนดยอดเงินอัตโนมัติในระบบ';
+}
+
+function calculateNextPreview(prefix, runNumber, mode) {
+    if ((mode || 'auto').toLowerCase() === 'manual') {
+        return 'กำหนดเองในแบบฟอร์ม';
+    }
+    const pfx = (prefix || '').trim();
+    const runStr = String(runNumber || '').trim();
+    if (!runStr) return '-';
+
+    const match = runStr.match(/^(.*?)(\d+)$/);
+    if (match) {
+        const leading = match[1];
+        const numPart = match[2];
+        const nextNum = String(parseInt(numPart, 10) + 1).padStart(numPart.length, '0');
+        return `${pfx}${leading}${nextNum}`;
+    }
+
+    const n = parseInt(runStr, 10);
+    if (!isNaN(n)) {
+        return `${pfx}${String(n + 1).padStart(runStr.length, '0')}`;
+    }
+    return `${pfx}${runStr}`;
+}
+
+function updateSinglePreview(id) {
+    const pfxInput = document.getElementById(`docPrefix_${id}`);
+    const runInput = document.getElementById(`docRunNumber_${id}`);
+    const modeInput = document.getElementById(`inputMode_${id}`);
+    const previewEl = document.getElementById(`previewNext_${id}`);
+    if (!previewEl) return;
+
+    const prefix = pfxInput ? pfxInput.value : '';
+    const run = runInput ? runInput.value : '';
+    const mode = modeInput ? modeInput.value : 'auto';
+
+    if (mode === 'manual') {
+        previewEl.textContent = 'กำหนดเองในแบบฟอร์ม';
+        previewEl.className = 'preview-val manual';
+    } else {
+        previewEl.textContent = calculateNextPreview(prefix, run, 'auto');
+        previewEl.className = 'preview-val';
+    }
+}
+window.updateSinglePreview = updateSinglePreview;
+
+function setRowMode(id, mode) {
+    if (!isEditMode) return;
+    const inputMode = document.getElementById(`inputMode_${id}`);
+    const btnAuto = document.getElementById(`btnModeAuto_${id}`);
+    const btnManual = document.getElementById(`btnModeManual_${id}`);
+    if (inputMode) inputMode.value = mode;
+
+    if (mode === 'manual') {
+        if (btnAuto) btnAuto.className = 'mode-btn';
+        if (btnManual) btnManual.className = 'mode-btn active manual';
+    } else {
+        if (btnAuto) btnAuto.className = 'mode-btn active auto';
+        if (btnManual) btnManual.className = 'mode-btn';
+    }
+    updateSinglePreview(id);
+}
+window.setRowMode = setRowMode;
+
+function updateMoneyDisplayLive(id) {
+    const input = document.getElementById(`moneyAmount_${id}`);
+    const display = document.getElementById(`feeDisplayVal_${id}`);
+    const unit = document.getElementById(`feeUnit_${id}`);
+    if (input && display) {
+        const valStr = (input.value || "").trim();
+        if (valStr === "") {
+            display.textContent = "-";
+            if (unit) unit.textContent = "";
         } else {
-            badge.className = 'mode-badge-card auto';
-            badge.textContent = 'AUTO';
+            const val = parseFloat(valStr) || 0;
+            display.textContent = `฿ ${val.toFixed(2)}`;
+            if (unit) unit.textContent = "บาท";
         }
     }
-};
+}
+window.updateMoneyDisplayLive = updateMoneyDisplayLive;
 
-// Snapshot current values into originalValues & originalModes
+function escapeHtml(text) {
+    if (text === null || text === undefined) return "";
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function updateCounts() {
+    const runningItems = runningData.filter(it => it.category !== 'money');
+    const moneyItems = runningData.filter(it => it.category === 'money');
+    const badgeRun = document.getElementById("countRunningBadge");
+    const badgeMon = document.getElementById("countMoneyBadge");
+    if (badgeRun) badgeRun.textContent = String(runningItems.length);
+    if (badgeMon) badgeMon.textContent = String(moneyItems.length);
+}
+
+function renderRunningUI(items) {
+    const runningContainer = document.getElementById("runningListContainer");
+    const moneyContainer = document.getElementById("moneyListContainer");
+    if (!runningContainer || !moneyContainer) return;
+
+    const normalizedItems = (Array.isArray(items) ? items : []).map(normalizeRunningItem).filter(Boolean);
+    if (normalizedItems.length === 0) return;
+
+    runningContainer.innerHTML = "";
+    moneyContainer.innerHTML = "";
+
+    const runningItems = normalizedItems.filter(it => it.category !== 'money');
+    const moneyItems = normalizedItems.filter(it => it.category === 'money');
+
+    // 1. เรนเดอร์ Tab 1: เลขที่ Running (แยกเป็นบล็อค)
+    if (runningItems.length === 0) {
+        runningContainer.innerHTML = `<div class="loading-indicator">ไม่พบรายการเลขที่เอกสาร</div>`;
+    } else {
+        runningItems.forEach(item => {
+            const icon = getIconForDoc(item);
+            const mode = (item.mode || 'auto').toLowerCase();
+            const isAuto = mode === 'auto';
+            const isCustom = item.Id > 8;
+            const nextPreview = calculateNextPreview(item.docid, item.IdRunning, mode);
+
+            const block = document.createElement("div");
+            block.className = "simple-block";
+            block.id = `card_${item.Id}`;
+            block.dataset.id = item.Id;
+
+            block.innerHTML = `
+                <div>
+                    <div class="block-header">
+                        <div class="block-title-group">
+                            <span class="block-icon">${icon}</span>
+                            <h4 class="block-title">${escapeHtml(item.name || ('เอกสาร ' + (item.docid || item.Id)))}</h4>
+                            <span class="block-tag">#${item.Id}</span>
+                        </div>
+                        <div class="block-actions">
+                            <div class="mode-toggle-group" id="modeControl_${item.Id}">
+                                <button type="button" 
+                                        class="mode-btn ${isAuto ? 'active auto' : ''}" 
+                                        id="btnModeAuto_${item.Id}" 
+                                        onclick="setRowMode(${item.Id}, 'auto')" 
+                                        ${!isEditMode ? 'disabled' : ''}>
+                                    AUTO
+                                </button>
+                                <button type="button" 
+                                        class="mode-btn ${!isAuto ? 'active manual' : ''}" 
+                                        id="btnModeManual_${item.Id}" 
+                                        onclick="setRowMode(${item.Id}, 'manual')" 
+                                        ${!isEditMode ? 'disabled' : ''}>
+                                    MANUAL
+                                </button>
+                                <input type="hidden" name="mode_${item.Id}" id="inputMode_${item.Id}" value="${escapeHtml(mode)}">
+                            </div>
+                            ${isCustom ? `
+                                <button type="button" class="btn-del-mini" onclick="deleteItem(${item.Id}, '${escapeHtml(item.name || '')}')" style="display:${isEditMode ? 'inline-block' : 'none'};">
+                                    ลบ
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="block-fields">
+                        <div class="field-item">
+                            <label for="docPrefix_${item.Id}">คำนำหน้า (Prefix)</label>
+                            <input type="text" 
+                                   id="docPrefix_${item.Id}" 
+                                   class="block-input mono-code ${isEditMode ? 'editable-active' : ''}" 
+                                   value="${escapeHtml(item.docid || '')}" 
+                                   placeholder="" 
+                                   maxlength="10" 
+                                   oninput="updateSinglePreview(${item.Id})"
+                                   ${!isEditMode ? 'disabled' : ''}>
+                        </div>
+                        <div class="field-item">
+                            <label for="docRunNumber_${item.Id}">เลขที่ล่าสุด</label>
+                            <input type="text" 
+                                   id="docRunNumber_${item.Id}" 
+                                   class="block-input mono-code ${isEditMode ? 'editable-active' : ''}" 
+                                   value="${escapeHtml(item.IdRunning || '')}" 
+                                   placeholder="" 
+                                   oninput="updateSinglePreview(${item.Id})"
+                                   ${!isEditMode ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="block-footer">
+                    <span>ตัวอย่างถัดไป:</span>
+                    <span class="preview-val ${!isAuto ? 'manual' : ''}" id="previewNext_${item.Id}">
+                        ${escapeHtml(nextPreview)}
+                    </span>
+                </div>
+            `;
+            runningContainer.appendChild(block);
+        });
+    }
+
+    // 2. เรนเดอร์ Tab 2: ตั้งค่ายอดเงิน (แยกเป็นบล็อค)
+    if (moneyItems.length === 0) {
+        moneyContainer.innerHTML = `<div class="loading-indicator">ไม่พบรายการยอดเงิน</div>`;
+    } else {
+        moneyItems.forEach(item => {
+            const icon = getIconForMoney(item);
+            const isCustom = item.Id > 8;
+            const subtitle = getMoneySubtitle(item.Id);
+            const rawVal = item.IdRunning !== null && item.IdRunning !== undefined ? String(item.IdRunning).trim() : "";
+            const hasVal = rawVal !== "";
+            const amtVal = hasVal ? (parseFloat(rawVal) || 0) : null;
+
+            const block = document.createElement("div");
+            block.className = "simple-block money-block";
+            block.id = `moneyRow_${item.Id}`;
+            block.dataset.id = item.Id;
+
+            block.innerHTML = `
+                <div>
+                    <div class="block-header">
+                        <div class="block-title-group">
+                            <span class="block-icon">${icon}</span>
+                            <h4 class="block-title">${escapeHtml(item.name || ('รายการ ' + item.Id))}</h4>
+                        </div>
+                        ${isCustom ? `
+                            <button type="button" class="btn-del-mini" onclick="deleteItem(${item.Id}, '${escapeHtml(item.name || '')}')" style="display:${isEditMode ? 'inline-block' : 'none'};">
+                                ลบ
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div class="money-desc-text">${subtitle}</div>
+                </div>
+
+                <div>
+                    <div class="money-view-row" id="feeViewBox_${item.Id}" style="display:${isEditMode ? 'none' : 'flex'};">
+                        <span class="money-big-num" id="feeDisplayVal_${item.Id}">${hasVal ? ('฿ ' + amtVal.toFixed(2)) : '-'}</span>
+                        <span class="money-unit" id="feeUnit_${item.Id}">${hasVal ? 'บาท' : ''}</span>
+                    </div>
+                    <div class="money-edit-wrapper" id="feeEditBox_${item.Id}" style="display:${isEditMode ? 'flex' : 'none'};">
+                        <input type="number" 
+                               id="moneyAmount_${item.Id}" 
+                               class="block-input money-input editable-active" 
+                               value="${escapeHtml(hasVal ? rawVal : '')}" 
+                               placeholder="" 
+                               step="0.01" 
+                               oninput="updateMoneyDisplayLive(${item.Id})"
+                               ${!isEditMode ? 'disabled' : ''}>
+                        <span class="money-unit">บาท</span>
+                    </div>
+                </div>
+            `;
+            moneyContainer.appendChild(block);
+        });
+    }
+
+    updateCounts();
+    updateDeleteButtonsVisibility();
+}
+
+function updateDeleteButtonsVisibility() {
+    document.querySelectorAll('.btn-del-mini').forEach(btn => {
+        btn.style.display = isEditMode ? 'inline-block' : 'none';
+    });
+}
+
 function saveSnapshot() {
-    inputIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) originalValues[id] = el.value;
-    });
-    modeKeys.forEach(k => {
-        const checkedRadio = document.querySelector(`input[name="mode${k}"]:checked`);
-        if (checkedRadio) originalModes[k] = checkedRadio.value;
+    originalSnapshot = runningData.map(it => {
+        const isMoney = it.category === 'money';
+        if (isMoney) {
+            const val = document.getElementById(`moneyAmount_${it.Id}`)?.value;
+            return { ...it, IdRunning: val !== undefined ? val : it.IdRunning };
+        } else {
+            const pfx = document.getElementById(`docPrefix_${it.Id}`)?.value;
+            const run = document.getElementById(`docRunNumber_${it.Id}`)?.value;
+            const mode = document.getElementById(`inputMode_${it.Id}`)?.value;
+            return {
+                ...it,
+                docid: pfx !== undefined ? pfx : it.docid,
+                IdRunning: run !== undefined ? run : it.IdRunning,
+                mode: mode || it.mode || 'auto'
+            };
+        }
     });
 }
 
-// Restore values from originalValues & originalModes
 function restoreSnapshot() {
-    inputIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el && originalValues[id] !== undefined) {
-            el.value = originalValues[id];
-        }
-    });
-    modeKeys.forEach(k => {
-        const savedMode = originalModes[k] || 'auto';
-        const radio = document.querySelector(`input[name="mode${k}"][value="${savedMode}"]`);
-        if (radio) {
-            radio.checked = true;
-            window.handleCardModeChange(k, savedMode);
-        }
-    });
+    if (!originalSnapshot || originalSnapshot.length === 0) return;
+    runningData = JSON.parse(JSON.stringify(originalSnapshot));
+    renderRunningUI(runningData);
 }
 
-// Toggle Edit Mode
-window.toggleEditMode = function() {
+function toggleEditMode() {
+    if (isApiOffline) {
+        alert("⚠️ ไม่สามารถแก้ไขข้อมูลได้เนื่องจากยังไม่ได้เชื่อมต่อ API กรุณาเปิดรัน API ก่อน");
+        return;
+    }
     isEditMode = true;
     saveSnapshot();
 
-    // Enable inputs
-    inputIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.disabled = false;
-            el.classList.add('editable-active');
-        }
+    // เปิดใช้งาน inputs ใน Tab 1
+    document.querySelectorAll("#runningListContainer input").forEach(el => {
+        el.disabled = false;
+        el.classList.add("editable-active");
     });
 
-    // Enable radio buttons
-    document.querySelectorAll('.mode-radios input[type="radio"]').forEach(r => {
-        r.disabled = false;
+    // เปิดใช้งานปุ่ม Mode
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.disabled = false;
     });
 
-    // Update buttons
+    // สลับเป็นช่องกรอกใน Tab 2
+    document.querySelectorAll(".money-view-row").forEach(el => el.style.display = 'none');
+    document.querySelectorAll(".money-edit-wrapper").forEach(el => el.style.display = 'flex');
+    document.querySelectorAll("#moneyListContainer input").forEach(el => {
+        el.disabled = false;
+        el.classList.add("editable-active");
+    });
+
+    updateDeleteButtonsVisibility();
+
     const btnSave = document.getElementById('btnSave');
     const btnCancel = document.getElementById('btnCancel');
     const btnEdit = document.getElementById('btnEdit');
@@ -340,46 +795,50 @@ window.toggleEditMode = function() {
     if (btnCancel) btnCancel.style.display = 'inline-flex';
     if (btnEdit) btnEdit.style.display = 'none';
 
-    // Update status badge
     const badge = document.getElementById('modeBadge');
     const icon = document.getElementById('modeIcon');
     const text = document.getElementById('modeText');
     if (badge) {
-        badge.className = 'mode-badge edit-mode';
+        badge.className = 'status-indicator-badge edit-mode';
         if (icon) icon.textContent = '✏️';
-        if (text) text.textContent = 'อยู่ในโหมดแก้ไข';
+        if (text) text.textContent = 'โหมดแก้ไขข้อมูล';
     }
 
-    // Focus first active input
-    const firstInput = document.getElementById('docPrefixPC');
+    const firstInput = document.querySelector("#runningListContainer input[type='text']");
     if (firstInput) firstInput.focus();
-};
+}
+window.toggleEditMode = toggleEditMode;
 
-// Cancel Edit Mode
-window.cancelEdit = function() {
+function cancelEdit() {
     restoreSnapshot();
     lockViewMode();
-};
+}
+window.cancelEdit = cancelEdit;
 
-// Lock back to Read-Only View Mode
 function lockViewMode() {
     isEditMode = false;
 
-    // Disable inputs
-    inputIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.disabled = true;
-            el.classList.remove('editable-active');
-        }
+    // ปิด inputs ใน Tab 1
+    document.querySelectorAll("#runningListContainer input").forEach(el => {
+        el.disabled = true;
+        el.classList.remove("editable-active");
     });
 
-    // Disable radio buttons
-    document.querySelectorAll('.mode-radios input[type="radio"]').forEach(r => {
-        r.disabled = true;
+    // ปิดปุ่ม Mode
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.disabled = true;
     });
 
-    // Update buttons
+    // สลับกลับมาแสดงผลข้อความใน Tab 2
+    document.querySelectorAll(".money-view-row").forEach(el => el.style.display = 'flex');
+    document.querySelectorAll(".money-edit-wrapper").forEach(el => el.style.display = 'none');
+    document.querySelectorAll("#moneyListContainer input").forEach(el => {
+        el.disabled = true;
+        el.classList.remove("editable-active");
+    });
+
+    updateDeleteButtonsVisibility();
+
     const btnSave = document.getElementById('btnSave');
     const btnCancel = document.getElementById('btnCancel');
     const btnEdit = document.getElementById('btnEdit');
@@ -387,183 +846,327 @@ function lockViewMode() {
     if (btnCancel) btnCancel.style.display = 'none';
     if (btnEdit) btnEdit.style.display = 'inline-flex';
 
-    // Update status badge
     const badge = document.getElementById('modeBadge');
     const icon = document.getElementById('modeIcon');
     const text = document.getElementById('modeText');
     if (badge) {
-        badge.className = 'mode-badge view-mode';
+        badge.className = 'status-indicator-badge view-mode';
         if (icon) icon.textContent = '🔒';
         if (text) text.textContent = 'ดูข้อมูลเท่านั้น';
     }
 }
 
-// Handle Save
-window.handleSave = async function() {
+async function saveRunningConfig(config) {
+    try {
+        localStorage.setItem('running_mode_config', JSON.stringify(config));
+        await fetch("/api/running-config", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(config)
+        });
+    } catch (e) {
+        console.warn("saveRunningConfig error:", e);
+    }
+}
+
+async function handleSave() {
     if (!isEditMode) return;
 
-    // Validation
-    const regAmt = parseFloat(document.getElementById("registerAmount")?.value || 0);
-    const yrAmt = parseFloat(document.getElementById("yearAmount")?.value || 0);
-    const yearlyAmt = parseFloat(document.getElementById("yearlyAmount")?.value || 0);
-
-    if (isNaN(regAmt) || isNaN(yrAmt) || isNaN(yearlyAmt)) {
-        alert("⚠️ กรุณากรอกจำนวนเงินให้ถูกต้อง");
-        return;
+    const btnSave = document.getElementById("btnSave");
+    if (btnSave) {
+        btnSave.disabled = true;
+        btnSave.innerHTML = "⏳ กำลังบันทึก...";
     }
 
-    const pcMode = document.querySelector('input[name="modePC"]:checked')?.value || 'auto';
-    const eyMode = document.querySelector('input[name="modeEY"]:checked')?.value || 'auto';
-    const dwMode = document.querySelector('input[name="modeDW"]:checked')?.value || 'auto';
-    const twMode = document.querySelector('input[name="modeTW"]:checked')?.value || 'auto';
-
-    // Save running modes config to backend and localStorage
-    await saveRunningConfig({
-        pc_mode: pcMode,
-        ey_mode: eyMode,
-        dw_mode: dwMode,
-        tw_mode: twMode
-    });
-
-    const payload = {
-        pc_prefix: document.getElementById("docPrefixPC")?.value || "",
-        pc_running: document.getElementById("docRunNumberPC")?.value || "",
-        ey_prefix: document.getElementById("docPrefixEY")?.value || "",
-        ey_running: document.getElementById("docRunNumberEY")?.value || "",
-        dw_prefix: document.getElementById("docPrefixDW")?.value || "",
-        dw_running: document.getElementById("docRunNumberDW")?.value || "",
-        tw_prefix: document.getElementById("docPrefixTW")?.value || "",
-        tw_running: document.getElementById("docRunNumberTW")?.value || "",
-        register_amount: regAmt,
-        year_amount: yrAmt,
-        yearly_amount: yearlyAmt
-    };
-
     try {
-        try {
-            await fetch(`${API_BASE}/update-running`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-        } catch (apiErr) {
-            console.warn("Backend update API note:", apiErr);
+        const updatedItems = [];
+        const modeConfigPayload = {};
+
+        for (const item of runningData) {
+            const isMoney = item.category === 'money';
+            if (isMoney) {
+                const amtInput = document.getElementById(`moneyAmount_${item.Id}`);
+                const amt = parseFloat(amtInput?.value || 0);
+                if (isNaN(amt) || amt < 0) {
+                    alert(`⚠️ กรุณากรอกจำนวนเงินให้ถูกต้องสำหรับ '${item.name}'`);
+                    if (btnSave) { btnSave.disabled = false; btnSave.innerHTML = "💾 บันทึกข้อมูล"; }
+                    amtInput?.focus();
+                    return;
+                }
+                updatedItems.push({
+                    Id: item.Id,
+                    name: item.name,
+                    docid: null,
+                    IdRunning: String(amtInput.value.trim()),
+                    mode: "manual",
+                    category: "money"
+                });
+            } else {
+                const pfxInput = document.getElementById(`docPrefix_${item.Id}`);
+                const runInput = document.getElementById(`docRunNumber_${item.Id}`);
+                const modeInput = document.getElementById(`inputMode_${item.Id}`);
+
+                const docid = (pfxInput?.value || '').trim();
+                const idRunning = (runInput?.value || '').trim();
+                const mode = modeInput?.value || item.mode || 'auto';
+
+                updatedItems.push({
+                    Id: item.Id,
+                    name: item.name,
+                    docid: docid,
+                    IdRunning: idRunning,
+                    mode: mode,
+                    category: "running"
+                });
+
+                const d = docid.toUpperCase();
+                if (d === 'PC' || item.Id === 1) modeConfigPayload.pc_mode = mode;
+                else if (d === 'EY' || item.Id === 2) modeConfigPayload.ey_mode = mode;
+                else if (d === 'DW' || item.Id === 3) modeConfigPayload.dw_mode = mode;
+                else if (d === 'TR' || d === 'TW' || item.Id === 4) modeConfigPayload.tw_mode = mode;
+                else if (d === 'RW' || item.Id === 5) modeConfigPayload.rw_mode = mode;
+            }
         }
 
+        const constantCusid = sessionStorage.getItem("dk_constant_cusid") || "";
+
+        const res = await fetch("/api/running", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: updatedItems, cusid: constantCusid })
+        });
+        const result = await res.json();
+
+        if (result.status !== "success" && result.error && result.error !== "0") {
+            throw new Error(result.message || "เกิดข้อผิดพลาดจากฐานข้อมูล");
+        }
+
+        try {
+            await fetch(`${API_BASE}/running/save`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ items: updatedItems, cusid: constantCusid })
+            });
+        } catch (apiErr) {
+            console.warn("FastAPI sync note:", apiErr);
+        }
+
+        if (Object.keys(modeConfigPayload).length > 0) {
+            await saveRunningConfig(modeConfigPayload);
+        }
+
+        runningData = updatedItems;
         saveSnapshot();
+        renderRunningUI(runningData);
         lockViewMode();
-        alert("✅ บันทึกข้อมูลและการตั้งค่าเลขที่เอกสารเรียบร้อยแล้ว");
+        alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
 
     } catch (err) {
         console.error("Save Error:", err);
-        alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-    }
-};
-
-// ======================
-// โหลดข้อมูลเริ่มต้นจาก API และ Config
-// ======================
-async function loadAllRunning() {
-    // 0. โหลดการตั้งค่าโหมด Auto/Manual
-    try {
-        const config = await getRunningConfig();
-        if (config) {
-            const pcRadio = document.querySelector(`input[name="modePC"][value="${config.pc_mode || 'auto'}"]`);
-            if (pcRadio) { pcRadio.checked = true; window.handleCardModeChange('PC', config.pc_mode || 'auto'); }
-
-            const eyRadio = document.querySelector(`input[name="modeEY"][value="${config.ey_mode || 'auto'}"]`);
-            if (eyRadio) { eyRadio.checked = true; window.handleCardModeChange('EY', config.ey_mode || 'auto'); }
-
-            const dwRadio = document.querySelector(`input[name="modeDW"][value="${config.dw_mode || 'auto'}"]`);
-            if (dwRadio) { dwRadio.checked = true; window.handleCardModeChange('DW', config.dw_mode || 'auto'); }
-
-            const twRadio = document.querySelector(`input[name="modeTW"][value="${config.tw_mode || 'auto'}"]`);
-            if (twRadio) { twRadio.checked = true; window.handleCardModeChange('TW', config.tw_mode || 'auto'); }
+        alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + err.message);
+    } finally {
+        if (btnSave) {
+            btnSave.disabled = !isEditMode;
+            btnSave.innerHTML = "💾 บันทึกข้อมูล";
         }
-    } catch (cfgErr) {
-        console.warn("Config load note:", cfgErr);
+    }
+}
+window.handleSave = handleSave;
+
+const DEFAULT_FORM_ITEMS = [
+    { Id: 1, id: 1, docid: "", IdRunning: "", name: "บันทึกสมาชิก", mode: "auto", category: "running" },
+    { Id: 2, id: 2, docid: "", IdRunning: "", name: "บันทึกพนักงาน", mode: "auto", category: "running" },
+    { Id: 3, id: 3, docid: "", IdRunning: "", name: "ตั้งเอกสารเสียชีวิต", mode: "auto", category: "running" },
+    { Id: 4, id: 4, docid: "", IdRunning: "", name: "บันทึกข้อมูลรายวัน", mode: "auto", category: "running" },
+    { Id: 5, id: 5, docid: "", IdRunning: "", name: "ใบเสร็จรับเงิน", mode: "auto", category: "running" },
+    { Id: 6, id: 6, docid: null, IdRunning: "", name: "ค่าสมัครสมาชิก", mode: "manual", category: "money" },
+    { Id: 7, id: 7, docid: null, IdRunning: "", name: "เงินสงเคราะห์ล่วงหน้า", mode: "manual", category: "money" },
+    { Id: 8, id: 8, docid: null, IdRunning: "", name: "ค่าบำรุงรายปี", mode: "manual", category: "money" }
+];
+
+function showRunningApiError() {
+    isApiOffline = true;
+
+    // เรนเดอร์แบบฟอร์มมาตรฐานชุดเดียวกับที่ API ดึงข้อมูลได้ แต่ไม่มีตัวเลขข้อมูล (เป็นช่องว่าง)
+    runningData = JSON.parse(JSON.stringify(DEFAULT_FORM_ITEMS));
+    renderRunningUI(runningData);
+    saveSnapshot();
+
+    const badge = document.getElementById("modeBadge");
+    if (badge) {
+        badge.className = "status-indicator-badge view-mode";
+        badge.style.background = "";
+        badge.style.color = "";
+        document.getElementById("modeIcon").textContent = "🔒";
+        document.getElementById("modeText").textContent = "ดูข้อมูลเท่านั้น";
     }
 
-    // 1. โหลด Running สมาชิก (id=1)
-    fetch(`${API_BASE}/get-running?id=1`)
-        .then(res => res.json())
-        .then(data => {
-            const elPrefix = document.getElementById("docPrefixPC");
-            const elRun = document.getElementById("docRunNumberPC");
-            if (elPrefix) elPrefix.value = data.docId || "";
-            if (elRun) elRun.value = data.IdRunning || "";
-            saveSnapshot();
-        })
-        .catch(err => console.error("PC Error:", err));
-
-    // 2. โหลด Running พนักงาน (id=2)
-    fetch(`${API_BASE}/get-running?id=2`)
-        .then(res => res.json())
-        .then(data => {
-            const elPrefix = document.getElementById("docPrefixEY");
-            const elRun = document.getElementById("docRunNumberEY");
-            if (elPrefix) elPrefix.value = data.docId || "";
-            if (elRun) elRun.value = data.IdRunning || "";
-            saveSnapshot();
-        })
-        .catch(err => console.error("EY Error:", err));
-
-    // 3. โหลด Running เสียชีวิต (id=3)
-    fetch(`${API_BASE}/get-running?id=3`)
-        .then(res => res.json())
-        .then(data => {
-            const elPrefix = document.getElementById("docPrefixDW");
-            const elRun = document.getElementById("docRunNumberDW");
-            if (elPrefix) elPrefix.value = data.docId || "";
-            if (elRun) elRun.value = data.IdRunning || "";
-            saveSnapshot();
-        })
-        .catch(err => console.error("DW Error:", err));
-
-    // 4. โหลด Running รายวัน (id=4)
-    fetch(`${API_BASE}/get-running?id=4`)
-        .then(res => res.json())
-        .then(data => {
-            const elPrefix = document.getElementById("docPrefixTW");
-            const elRun = document.getElementById("docRunNumberTW");
-            if (elPrefix) elPrefix.value = data.docId || "";
-            if (elRun) elRun.value = data.IdRunning || "";
-            saveSnapshot();
-        })
-        .catch(err => console.error("TW Error:", err));
-
-    // 5. โหลด ค่าธรรมเนียมสมัครสมาชิก (id=6)
-    fetch(`${API_BASE}/get-running?id=6`)
-        .then(res => res.json())
-        .then(data => {
-            const el = document.getElementById("registerAmount");
-            if (el) el.value = data.IdRunning || "";
-            saveSnapshot();
-        })
-        .catch(err => console.error("Register Amount Error:", err));
-
-    // 6. โหลด เงินสงเคราะห์เสียชีวิต (id=7)
-    fetch(`${API_BASE}/get-running?id=7`)
-        .then(res => res.json())
-        .then(data => {
-            const el = document.getElementById("yearAmount");
-            if (el) el.value = data.IdRunning || "";
-            saveSnapshot();
-        })
-        .catch(err => console.error("Year Amount Error:", err));
-
-    // 7. โหลด ค่าธรรมเนียมรายปี (id=8)
-    fetch(`${API_BASE}/get-running?id=8`)
-        .then(res => res.json())
-        .then(data => {
-            const el = document.getElementById("yearlyAmount");
-            if (el) el.value = data.IdRunning || "";
-            saveSnapshot();
-        })
-        .catch(err => console.error("Yearly Amount Error:", err));
+    const btnEdit = document.getElementById("btnEdit");
+    if (btnEdit) {
+        btnEdit.disabled = true;
+        btnEdit.style.opacity = "0.5";
+        btnEdit.style.cursor = "not-allowed";
+        btnEdit.title = "ไม่สามารถแก้ไขได้เนื่องจากยังไม่ได้เชื่อมต่อ API";
+    }
 }
 
-// Initial Load
+
+function hideRunningApiError() {
+    isApiOffline = false;
+
+    const btnEdit = document.getElementById("btnEdit");
+    if (btnEdit) {
+        btnEdit.disabled = false;
+        btnEdit.style.opacity = "1";
+        btnEdit.style.cursor = "pointer";
+        btnEdit.title = "";
+    }
+
+    const badge = document.getElementById("modeBadge");
+    if (badge) {
+        badge.className = "status-indicator-badge view-mode";
+        badge.style.background = "";
+        badge.style.color = "";
+        document.getElementById("modeIcon").textContent = "🔒";
+        document.getElementById("modeText").textContent = "ดูข้อมูลเท่านั้น";
+    }
+}
+
+async function loadAllRunning() {
+    try {
+        let res = null;
+        try {
+            res = await fetch(`${API_BASE}/running`, { signal: AbortSignal.timeout(1500) });
+        } catch (e2) {
+            console.warn("Fetch API_BASE/running failed:", e2);
+        }
+
+        if (!res || !res.ok) {
+            try {
+                res = await fetch("/api/running", { signal: AbortSignal.timeout(1500) });
+            } catch (e1) {
+                console.warn("Fetch /api/running failed:", e1);
+            }
+        }
+
+        if (res && res.ok) {
+            const json = await res.json();
+            const data = json.data || json.results || [];
+            if (Array.isArray(data) && data.length > 0) {
+                hideRunningApiError();
+                runningData = data.map(normalizeRunningItem).filter(Boolean);
+                renderRunningUI(runningData);
+                saveSnapshot();
+                return;
+            }
+        }
+    } catch (err) {
+        console.warn("loadAllRunning error:", err);
+    }
+
+    // หากติดต่อ API ไม่ได้ -> ปิดการแสดงข้อมูลและแจ้งเตือน
+    showRunningApiError();
+}
+
+function openAddModal() {
+    document.getElementById("addRunningForm").reset();
+    handleNewCategoryChange();
+    document.getElementById("addModalOverlay").style.display = "flex";
+    document.getElementById("newName").focus();
+}
+window.openAddModal = openAddModal;
+
+function closeAddModal() {
+    document.getElementById("addModalOverlay").style.display = "none";
+}
+window.closeAddModal = closeAddModal;
+
+function handleNewCategoryChange() {
+    const cat = document.getElementById("newCategory")?.value;
+    const pfxGroup = document.getElementById("modalPrefixGroup");
+    const modeGroup = document.getElementById("modalModeGroup");
+    const lblRun = document.getElementById("labelNewIdRunning");
+    const inputRun = document.getElementById("newIdRunning");
+
+    if (cat === "money") {
+        if (pfxGroup) pfxGroup.style.display = "none";
+        if (modeGroup) modeGroup.style.display = "none";
+        if (lblRun) lblRun.textContent = "จำนวนเงิน (บาท)";
+        if (inputRun) { inputRun.placeholder = "0.00"; inputRun.type = "number"; inputRun.step = "0.01"; }
+    } else {
+        if (pfxGroup) pfxGroup.style.display = "block";
+        if (modeGroup) modeGroup.style.display = "block";
+        if (lblRun) lblRun.textContent = "เลขที่ Running เริ่มต้น";
+        if (inputRun) { inputRun.placeholder = "000000"; inputRun.type = "text"; }
+    }
+}
+window.handleNewCategoryChange = handleNewCategoryChange;
+
+async function submitNewItem() {
+    const category = document.getElementById("newCategory").value;
+    const name = document.getElementById("newName").value.trim();
+    const docid = document.getElementById("newDocid").value.trim();
+    const idRunning = document.getElementById("newIdRunning").value.trim();
+    const mode = document.getElementById("newMode").value;
+
+    if (!name) {
+        alert("⚠️ กรุณาระบุชื่อรายการ");
+        return;
+    }
+
+    const constantCusid = sessionStorage.getItem("dk_constant_cusid") || "";
+
+    try {
+        const res = await fetch("/api/running/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                category: category,
+                name: name,
+                docid: category === "money" ? null : docid,
+                IdRunning: idRunning,
+                mode: mode,
+                cusid: constantCusid
+            })
+        });
+        const result = await res.json();
+        if (result.status === "success") {
+            alert("✅ เพิ่มรายการเรียบร้อยแล้ว");
+            closeAddModal();
+            await loadAllRunning();
+        } else {
+            alert("❌ " + (result.message || "เกิดข้อผิดพลาด"));
+        }
+    } catch (e) {
+        alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อ: " + e.message);
+    }
+}
+window.submitNewItem = submitNewItem;
+
+async function deleteItem(id, name) {
+    if (!confirm(`คุณต้องการลบรายการ '${name}' หรือไม่?`)) return;
+
+    try {
+        const res = await fetch(`/api/running/${id}`, { method: "DELETE" });
+        const result = await res.json();
+        if (result.status === "success") {
+            alert("✅ ลบรายการเรียบร้อยแล้ว");
+            await loadAllRunning();
+        } else {
+            alert("❌ " + (result.message || "เกิดข้อผิดพลาด"));
+        }
+    } catch (e) {
+        alert("❌ เกิดข้อผิดพลาด: " + e.message);
+    }
+}
+window.deleteItem = deleteItem;
+
+// Initial Setup - เรนเดอร์โครงสร้างแบบฟอร์มขึ้นมาแสดงผลทันทีเสมอ และดึงข้อมูลจริงจาก API
+runningData = JSON.parse(JSON.stringify(DEFAULT_FORM_ITEMS));
+renderRunningUI(runningData);
+saveSnapshot();
+
 loadAllRunning();
+
 </script>
 {% endblock %}

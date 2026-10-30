@@ -3,48 +3,92 @@
 {% block title %}แสดงรายการตั้งสมาชิกเสียชีวิต{% endblock %}
 
 {% block content %}
-
-<h2>Welcome to DK_showTransaction</h2>
 <link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Transaction.css') }}">
 
+
+
+<h2>Welcome to DK_showTransaction</h2>
 <p>Hello Flask layout!</p>
-<h3><a href="/DK_Home">HOME</a> \ แสดงรายการตั้งสมาชิกเสียชีวิต</h3>
+<h3><a href="/DK_Home">HOME</a> / แสดงรายการตั้งสมาชิกเสียชีวิต</h3>
+
 <div class="main">
     <div class="form-group1">
-        <p>แสดงรายการตั้งสมาชิกเสียชีวิต</p>
-        <div style="display: flex; gap: 12px; justify-content: flex-end; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
-            <div class="search-box" style="margin-bottom: 0;">
-                <div class="search-wrapper">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" class="search-input" placeholder="ค้นหาเลขที่เอกสาร, รหัสสมาชิก, ชื่อ, นามสกุล, เลขที่มรณะ...">
-                </div>
-                <button type="button" class="search-button">ค้นหา</button>
+        <p style="font-size: 14.5px; font-weight: 600; color: #273B4A; margin-bottom: 10px;">
+            📋 แสดงรายการตั้งสมาชิกเสียชีวิตและสถานะการรับชำระเงิน
+        </p>
+
+        <!-- Header Action Row: Status Pills on Left, Search & Add Button on Right -->
+        <div class="header-action-row">
+            <!-- Quick Status Filter Pills -->
+            <div class="status-filter-pills">
+                <button type="button" class="pill-btn active" data-filter="all" onclick="setStatusFilter('all', this)">
+                    <span>📄 ทั้งหมด</span>
+                    <span class="pill-count" id="countTotal">0</span>
+                </button>
+                <button type="button" class="pill-btn pill-partial" data-filter="partial" onclick="setStatusFilter('partial', this)">
+                    <span>⏳ รับชำระบ้างแล้ว</span>
+                    <span class="pill-count" id="countPartial" style="color: #b45309; font-weight: 800;">0</span>
+                </button>
+                <button type="button" class="pill-btn pill-unpaid" data-filter="unpaid" onclick="setStatusFilter('unpaid', this)">
+                    <span>📋 ยังไม่ได้รับชำระ</span>
+                    <span class="pill-count" id="countUnpaid">0</span>
+                </button>
+                <button type="button" class="pill-btn pill-paid" data-filter="paid" onclick="setStatusFilter('paid', this)">
+                    <span>✅ รับชำระครบแล้ว</span>
+                    <span class="pill-count" id="countPaid">0</span>
+                </button>
+                <button type="button" class="pill-btn pill-cancelled" data-filter="cancelled" onclick="setStatusFilter('cancelled', this)">
+                    <span>🚫 ยกเลิกรายการ</span>
+                    <span class="pill-count" id="countCancelled">0</span>
+                </button>
             </div>
-            <a href="/DK_Transaction" class="btn-add-customer">
-                <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>+ เพิ่มรายการ</span>
-            </a>
+
+            <!-- Search & Action Toolbar -->
+            <div class="toolbar-right">
+                <div class="search-box" style="margin-bottom: 0;">
+                    <div class="search-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="ค้นหาเลขที่เอกสาร, รหัส, ชื่อ-นามสกุล, เลขที่มรณะ...">
+                    </div>
+                    <button type="button" class="search-button">ค้นหา</button>
+                </div>
+
+                <a href="/DK_Transaction" class="btn-add-customer">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>+ เพิ่มรายการ</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Record Summary -->
+        <div style="font-size: 12.5px; color: #64748b; font-weight: 500; margin-bottom: 8px;">
+            <span id="recordSummary">แสดง 0 รายการ</span>
         </div>
     
         <table id="customerTable">
             <thead>
                 <tr>
-                    <th style="width: 60px; text-align: center;">ลำดับ</th>
-                    <th style="width: 140px;">เลขที่เอกสาร</th>
-                    <th style="width: 130px;">รหัสสมาชิก</th>
-                    <th>ชื่อ-นามสกุล</th>
-                    <th style="width: 140px; text-align: center;">วันที่เสียชีวิต</th>
-                    <th style="width: 130px; text-align: center;">เลขที่มรณะ</th>
-                    <th style="width: 190px; text-align: center;">จัดการ</th>
+                    <th style="width: 45px; text-align: center;">ลำดับ</th>
+                    <th style="width: 110px; text-align: center;">เลขที่เอกสาร</th>
+                    <th style="width: 100px; text-align: center;">รหัสสมาชิก</th>
+                    <th style="text-align: left; min-width: 150px;">ชื่อ-นามสกุล ผู้เสียชีวิต</th>
+                    <th style="width: 110px; text-align: center;">วันที่เสียชีวิต</th>
+                    <th style="width: 85px; text-align: center;">เลขที่มรณะ</th>
+                    <th style="width: 160px; text-align: center;">สถานะการชำระเงิน</th>
+                    <th style="width: 170px; text-align: center;">จัดการ</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <tr><td colspan="8" style="text-align: center; padding: 20px; color: #64748b;">⏳ กำลังโหลดข้อมูลรายการตั้งสมาชิกเสียชีวิต...</td></tr>
+            </tbody>
         </table>
+
         <hr class="my-box">
         <div id="pagination" class="pagination"></div>
     </div>
@@ -57,9 +101,14 @@ const rowsPerPage = 10;
 let currentPage = 1;
 let allData = [];
 let filteredData = [];
+let currentStatusFilter = "all";
+
+function formatMoney(val) {
+    return Number(val || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 function formatThaiDate(dateString) {
-    if (!dateString) return "-";
+    if (!dateString || dateString.startsWith("0000")) return "-";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
     const thaiMonths = [
@@ -73,20 +122,35 @@ function formatThaiDate(dateString) {
 }
 
 // =========================
-// SEARCH
+// SEARCH & FILTER
 // =========================
-function applySearch() {
+function applyFilterAndSearch() {
     const searchInput = document.querySelector(".search-input");
     const rawKeyword = (searchInput ? searchInput.value : "").trim();
     const keyword = rawKeyword.toLowerCase();
 
-    if (!keyword) {
-        filteredData = allData;
-    } else {
-        // แยกคำค้นหาตามช่องว่าง เผื่อผู้ใช้พิมพ์ชื่อ เว้นวรรค นามสกุล
+    // 1. กรองตามสถานะการชำระเงิน
+    let list = allData;
+    if (currentStatusFilter !== "all") {
+        list = list.filter(item => {
+            const isCancelled = (item.status == 2 || item.payment_status === "cancelled");
+            if (currentStatusFilter === "cancelled") return isCancelled;
+            if (isCancelled) return false;
+
+            const isPaid = (item.payment_status === "paid" || (item.total_paid > 0 && item.total_remain <= 0));
+            const isPartial = (item.payment_status === "partial" || (item.total_paid > 0 && item.total_remain > 0));
+
+            if (currentStatusFilter === "paid") return isPaid;
+            if (currentStatusFilter === "partial") return isPartial;
+            if (currentStatusFilter === "unpaid") return !isPaid && !isPartial;
+            return true;
+        });
+    }
+
+    // 2. กรองตามคำค้นหา
+    if (keyword) {
         const terms = keyword.split(/\s+/).filter(Boolean);
 
-        // ตรวจสอบกรณีพิมพ์ค้นหาเป็นตัวเลขรหัส เช่น "1", "dw1", "tr1", "pc1"
         let numberMatchStr = null;
         const compact = keyword.replace(/\s+/g, '');
         const dwMatch = compact.match(/^dw-?(\d+)$/i);
@@ -103,8 +167,8 @@ function applySearch() {
             numberMatchStr = String(parseInt(compact, 10));
         }
 
-        filteredData = allData.filter(item => {
-            const docId = (item.docId || "").toLowerCase();
+        list = list.filter(item => {
+            const docId = (item.docId || item.docid || "").toLowerCase();
             const custId = (item.Idcustomer || "").toLowerCase();
             const prefix = (item.prefix || "").toLowerCase();
             const name = (item.name || "").toLowerCase();
@@ -114,7 +178,6 @@ function applySearch() {
             const numberend = (item.numberend || "").toLowerCase();
             const dateStr = (item.dateend || "").toLowerCase();
 
-            // 1. ตรวจสอบเลข running เช่น DW000001, PC000001 เทียบกับเลข 1
             if (numberMatchStr !== null) {
                 const docNum = docId.replace(/\D/g, '');
                 const custNum = custId.replace(/\D/g, '');
@@ -122,8 +185,7 @@ function applySearch() {
                 if (custNum && String(parseInt(custNum, 10)) === numberMatchStr) return true;
             }
 
-            // 2. ตรวจสอบแบบคำต่อคำ
-            const matchesAllTerms = terms.every(t =>
+            return terms.every(t =>
                 docId.includes(t) ||
                 custId.includes(t) ||
                 prefix.includes(t) ||
@@ -134,25 +196,76 @@ function applySearch() {
                 numberend.includes(t) ||
                 dateStr.includes(t)
             );
-
-            return matchesAllTerms;
         });
     }
 
+    filteredData = list;
     currentPage = 1;
     renderTable();
     createPagination();
+    updateRecordSummary();
+}
+
+window.setStatusFilter = function(filterVal, btnElement) {
+    currentStatusFilter = filterVal;
+
+    document.querySelectorAll(".pill-btn").forEach(btn => btn.classList.remove("active"));
+    if (btnElement) {
+        btnElement.classList.add("active");
+    }
+
+    applyFilterAndSearch();
+};
+
+function updateStatusCounts(data) {
+    const total = data.length;
+    let partial = 0;
+    let paid = 0;
+    let unpaid = 0;
+    let cancelled = 0;
+
+    data.forEach(item => {
+        const isCancelled = (item.status == 2 || item.payment_status === "cancelled");
+        if (isCancelled) {
+            cancelled++;
+        } else if (item.payment_status === "partial" || (item.total_paid > 0 && item.total_remain > 0)) {
+            partial++;
+        } else if (item.payment_status === "paid" || (item.total_paid > 0 && item.total_remain <= 0)) {
+            paid++;
+        } else {
+            unpaid++;
+        }
+    });
+
+    const elTotal = document.getElementById("countTotal");
+    const elPartial = document.getElementById("countPartial");
+    const elUnpaid = document.getElementById("countUnpaid");
+    const elPaid = document.getElementById("countPaid");
+    const elCancelled = document.getElementById("countCancelled");
+
+    if (elTotal) elTotal.textContent = total.toLocaleString();
+    if (elPartial) elPartial.textContent = partial.toLocaleString();
+    if (elUnpaid) elUnpaid.textContent = unpaid.toLocaleString();
+    if (elPaid) elPaid.textContent = paid.toLocaleString();
+    if (elCancelled) elCancelled.textContent = cancelled.toLocaleString();
+}
+
+function updateRecordSummary() {
+    const el = document.getElementById("recordSummary");
+    if (el) {
+        el.textContent = `แสดง ${filteredData.length.toLocaleString()} จากทั้งหมด ${allData.length.toLocaleString()} รายการ`;
+    }
 }
 
 const searchInput = document.querySelector(".search-input");
 const searchBtn = document.querySelector(".search-button");
 
 if (searchInput) {
-    searchInput.addEventListener("input", applySearch);
+    searchInput.addEventListener("input", applyFilterAndSearch);
     searchInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
-            applySearch();
+            applyFilterAndSearch();
         }
     });
 }
@@ -160,32 +273,41 @@ if (searchInput) {
 if (searchBtn) {
     searchBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        applySearch();
+        applyFilterAndSearch();
     });
 }
 
 // =========================
 // LOAD DATA
 // =========================
-fetch(`${API_BASE}/transaction`)
-    .then(res => res.json())
-    .then(data => {
-        if (data.error !== "0") {
-            console.log("Error:", data.message);
-            const tbody = document.querySelector("#customerTable tbody");
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#ef4444;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${data.message || ''}</td></tr>`;
-            return;
+async function loadTransactions() {
+    try {
+        let res = await fetch("/api/transaction").catch(() => null);
+        if (!res || !res.ok) {
+            res = await fetch(`${API_BASE}/transaction`).catch(() => null);
         }
+
+        if (!res || !res.ok) {
+            throw new Error(`HTTP Error: ${res ? res.status : 'No connection'}`);
+        }
+
+        const data = await res.json();
+        if (data.error && data.error !== "0") {
+            throw new Error(data.message || "เกิดข้อผิดพลาดในการโหลดข้อมูล");
+        }
+
         allData = Array.isArray(data.results) ? data.results : [];
-        filteredData = allData;
-        renderTable();
-        createPagination();
-    })
-    .catch(err => {
-        console.log("Fetch error:", err);
+        updateStatusCounts(allData);
+        applyFilterAndSearch();
+
+    } catch (err) {
+        console.error("Load transactions error:", err);
         const tbody = document.querySelector("#customerTable tbody");
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#ef4444;">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>`;
-    });
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:25px; color:#ef4444;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</td></tr>`;
+    }
+}
+
+loadTransactions();
 
 // =========================
 // RENDER TABLE
@@ -195,7 +317,7 @@ function renderTable() {
     tbody.innerHTML = "";
 
     if (!filteredData || filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 25px; color: #888;">🔍 ไม่พบข้อมูลรายการที่ค้นหา</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 30px; color: #888;">🔍 ไม่พบข้อมูลรายการที่ตรงกับเงื่อนไข</td></tr>`;
         return;
     }
 
@@ -205,23 +327,79 @@ function renderTable() {
 
     pageData.forEach((emp, index) => {
         const rowNumber = start + index + 1;
-        const rowClass = emp.status == 3 ? 'row-dead' : emp.status == 2 ? 'row-orange' : '';
+        const isCancelled = (emp.status == 2 || emp.payment_status === "cancelled");
+        const isPaid = (emp.payment_status === "paid" || (emp.total_paid > 0 && emp.total_remain <= 0));
+        const isPartial = (emp.payment_status === "partial" || (emp.total_paid > 0 && emp.total_remain > 0));
+
+        let statusBadgeHtml = "";
+        let rowClass = "";
+
+        if (isCancelled) {
+            rowClass = "row-cancelled";
+            statusBadgeHtml = `
+                <span class="badge-status badge-cancelled" title="เอกสารนี้ได้รับการยกเลิกแล้ว">
+                    🚫 ยกเลิกรายการ
+                </span>
+            `;
+        } else if (isPartial) {
+            rowClass = "row-partial";
+            const percent = emp.total_amount > 0 ? Math.min(100, Math.round((emp.total_paid / emp.total_amount) * 100)) : 0;
+            statusBadgeHtml = `
+                <span class="badge-status badge-partial" title="ชำระแล้ว ${formatMoney(emp.total_paid)} จากยอดเรียกเก็บ ${formatMoney(emp.total_amount)} บาท">
+                    ⏳ รับชำระบ้างแล้ว
+                </span>
+                <div class="status-progress-info">
+                    ชำระแล้ว ${emp.count_paid || 0}/${emp.total_members || 0} ราย (${percent}%)
+                </div>
+                <div class="mini-progress-bar">
+                    <div class="mini-progress-fill" style="width: ${percent}%;"></div>
+                </div>
+            `;
+        } else if (isPaid) {
+            rowClass = "row-paid";
+            statusBadgeHtml = `
+                <span class="badge-status badge-paid" title="รับชำระครบทุกรายแล้ว (${formatMoney(emp.total_paid)} บาท)">
+                    ✅ รับชำระครบแล้ว
+                </span>
+                <div class="status-progress-info" style="color: #166534;">
+                    ครบ 100% (${emp.total_members || 0} ราย)
+                </div>
+            `;
+        } else {
+            statusBadgeHtml = `
+                <span class="badge-status badge-unpaid" title="ยังไม่มีการรับชำระเงินสำหรับเอกสารนี้">
+                    📋 ยังไม่ได้รับชำระ
+                </span>
+                <div class="status-progress-info" style="color: #64748b;">
+                    รอชำระ ${emp.total_members || 0} ราย
+                </div>
+            `;
+        }
+
+        const docIdVal = emp.docId || emp.docid || '-';
+        const cancelBtnTitle = isCancelled 
+            ? "เอกสารนี้ได้รับการยกเลิกไปแล้ว" 
+            : (isPartial || isPaid) 
+                ? `เอกสารนี้มียอดรับชำระเงินแล้ว (${formatMoney(emp.total_paid)} บาท)` 
+                : "ยกเลิกเอกสารนี้";
+
         const row = `
             <tr class="${rowClass}">
                 <td style="text-align: center;">${rowNumber}</td>
-                <td><strong style="color: #1e3c72; font-family: monospace;">${emp.docId || '-'}</strong></td>
-                <td><strong style="color: #475569;">${emp.Idcustomer || '-'}</strong></td>
-                <td><strong>${emp.prefix || ''}${emp.name || ''} ${emp.lastname || ''}</strong></td>
+                <td style="text-align: center;"><strong style="color: #273B4A; font-family: monospace;">${docIdVal}</strong></td>
+                <td style="text-align: center;"><strong style="color: #475569;">${emp.Idcustomer || '-'}</strong></td>
+                <td style="text-align: left;"><strong>${emp.prefix || ''}${emp.name || ''} ${emp.lastname || ''}</strong></td>
                 <td style="text-align: center;">${formatThaiDate(emp.dateend)}</td>
                 <td style="text-align: center;">${emp.numberend || '-'}</td>
+                <td style="text-align: center; vertical-align: middle;">${statusBadgeHtml}</td>
                 <td class="action-col" style="text-align: center;">
-                    <button class="btn-viwe" data-id="${emp.docId}" title="ดูข้อมูล">
+                    <button class="btn-viwe" data-id="${docIdVal}" title="ดูข้อมูลรายละเอียด">
                         ดูข้อมูล
                     </button>
-                    <button class="btn-edit" data-id="${emp.docId}" title="แก้ไข">
+                    <button class="btn-edit" data-id="${docIdVal}" title="${isCancelled ? 'เอกสารนี้ยกเลิกแล้ว' : 'แก้ไขเอกสาร'}" ${isCancelled ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : ''}>
                         แก้ไข
                     </button>
-                    <button class="btn-cancel" data-id="${emp.docId}" title="ยกเลิก">
+                    <button class="btn-cancel" data-id="${docIdVal}" title="${cancelBtnTitle}">
                         ยกเลิก
                     </button>
                 </td>
@@ -292,12 +470,13 @@ document.addEventListener("click", function (e) {
     const viweBtn = e.target.closest(".btn-viwe");
     if (viweBtn) {
         const id = viweBtn.dataset.id;
-        window.location.href = `/DK_Viwecustomer?id=${id}`;
+        window.location.href = `/DK_ViweTransaction?docid=${id}`;
         return;
     }
 
     const editBtn = e.target.closest(".btn-edit");
     if (editBtn) {
+        if (editBtn.disabled) return;
         const id = editBtn.dataset.id;
         window.location.href = `/DK_EditTransaction?docid=${id}`;
         return;

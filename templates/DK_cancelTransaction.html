@@ -1,415 +1,867 @@
 {% extends "BaseLayout.html" %}
 
-{% block title %}DK_Running Page{% endblock %}
+{% block title %}ยกเลิกรายการบันทึกรายการตั้งสมาชิกเสียชีวิต{% endblock %}
 
 {% block content %}
-<link rel="stylesheet"href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+<!-- External CSS & Libraries -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='save.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='csstran.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='moneyTable.css') }}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<!-- Flatpickr CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<!-- Flatpickr Theme (เลือกได้) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
-<!-- Flatpickr JS -->
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<!-- Thai language -->
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
-<link rel="stylesheet"href="{{ url_for('static', filename='popup.css') }}">
-<link rel="stylesheet"href="{{ url_for('static', filename='popup1.css') }}">
+<style>
+/* ===================================================
+   Custom Styling for DK_cancelTransaction
+   =================================================== */
+.cancel-page-container {
+    padding: 10px 15px 40px 15px;
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: 'Prompt', 'Sarabun', sans-serif;
+}
 
-<h2>Welcome to  ยกเลิกรายการรายการตั้งสมาชิกเสียชีวิต</h2>
-<h3>
-    <a href="/DK_HOME">HOME</a>
-    ยกเลิกรายการ\ ยกเลิกรายการบันทึกรายการตั้งสมาชิกเสียชีวิต
-</h3>
+.cancel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #e2e8f0;
+}
 
-<div class="maint">
+.cancel-header-title h2 {
+    margin: 0 0 4px 0;
+    font-size: 24px;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-    <form id="registerForm">
+.cancel-breadcrumbs {
+    font-size: 13.5px;
+    color: #64748b;
+}
 
-        <!-- ปุ่ม -->
-        <div class="button-group">
-            <button type="button" class="sbtnCancel" id="btnCancel">
-                📄 ยกเลิก
+.cancel-breadcrumbs a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.cancel-breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+/* KPI Summary Cards */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kpi-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.kpi-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    font-family: 'Prompt', sans-serif;
+}
+
+.kpi-sub {
+    font-size: 11.5px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+/* Notification Banners */
+.alert-banner {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+}
+
+.alert-blocked {
+    background: #fff1f2;
+    border: 1.5px solid #f87171;
+    color: #881337;
+}
+
+.alert-allowed {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    color: #166534;
+}
+
+.alert-cancelled {
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+}
+
+.banner-icon {
+    font-size: 28px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.banner-content-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.banner-content-desc {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Info Section Card */
+.info-section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px 20px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.field-group label {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.field-group input {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #1e293b;
+    cursor: default;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.badge-paid {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.badge-unpaid {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+.badge-cancelled {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+/* Action Buttons */
+.btn-action-cancel {
+    background: #dc2626;
+    color: #ffffff;
+    border: none;
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(220,38,38,0.25);
+    transition: all 0.2s ease;
+}
+
+.btn-action-cancel:hover:not(:disabled) {
+    background: #b91c1c;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.35);
+    transform: translateY(-1px);
+}
+
+.btn-action-cancel:disabled {
+    background: #94a3b8 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    opacity: 0.65;
+    transform: none !important;
+}
+
+.btn-action-back {
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.btn-action-back:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+/* Table Card */
+.table-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.table-container {
+    max-height: 480px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+#moneyTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    background: #fff;
+    margin: 0;
+}
+
+#moneyTable th {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-bottom: 2px solid #cbd5e1;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#moneyTable td {
+    padding: 8px 12px;
+    border: 1px solid #f1f5f9;
+    color: #1e293b;
+}
+
+#moneyTable tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+#moneyTable tbody tr.row-paid {
+    background-color: #f0fdf4;
+}
+
+#moneyTable tbody tr.row-paid:hover {
+    background-color: #dcfce7;
+}
+
+#moneyTable tfoot td {
+    background-color: #f8fafc;
+    font-weight: 700;
+    border-top: 2px solid #cbd5e1;
+    padding: 10px 12px;
+}
+
+/* Fallback Docid Prompt */
+#docidNotFoundBox {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    max-width: 500px;
+    margin: 40px auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+</style>
+
+<div class="cancel-page-container">
+
+    <!-- Fallback Box if no docid provided -->
+    <div id="docidNotFoundBox" style="display: none;">
+        <span style="font-size: 44px;">🔍</span>
+        <h3 style="margin: 12px 0 6px 0; color: #1e293b;">กรุณาระบุเลขที่เอกสาร</h3>
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 18px;">
+            ไม่พบเลขที่เอกสารในลิงก์ กรุณากรอกเลขที่เอกสารที่ต้องการยกเลิก
+        </p>
+        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 14px;">
+            <input type="text" id="manualDocid" placeholder="เช่น DW000001" style="padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 220px;">
+            <button type="button" id="btnManualSearch" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                ค้นหา
             </button>
-
-            
         </div>
-        <hr class="my-box">
-        <!-- ===================== -->
-        <!-- HEADER -->
-        <!-- ===================== -->
-        <div class="form-group1">
-            <p>บันทึกรายการตั้งสมาชิกเสียชีวิต</p>
-            <div class="row-container1">
-                <div class="form-left">
-                    <label>เลขที่เอกสาร</label>
-                    <input type="text" id="docid" name="docid" disabled> 
-                      <label for="date">วันที่บันทึก :</label><br>
-                        <input type="date" id="thai-date" name="thai-date">
-                        <input type="hidden" id="ad-date" name="date"> <!-- ค่านี้จะถูกส่งไป FastAPI -->
-                        <br><br>
-                        <label>ยอดเงินที่ต้องเก็บ</label>
-                          <input
-                           type="number"
-                           id="collect_amount"
-                           name="collect_amount"
-                           placeholder="0.00" 
-                          >
-                </div>
-
-                <div class="form-right">
-                    <label for="Idcustomer"> รหัสสมาชิก:</label><br>
-                        <input type="text" id="Idcustomer" name="Idcustomer"disabled><br>
-                    <label for="prefix">คำนำหน้า :</label><br>
-                        <input type="text" id="prefix"name="prefix"disabled><br>    
-                    <label for="name">ชื่อ :</label><br>
-                        <input type="text" id="name"name="name"disabled><br>
-                    <label for="lastname">นามสกุล :</label><br>
-                        <input type="text" id="lastname"name="lastname"disabled><br>
-                    <label for="Idcard">เลขบัตรประชาชน :</label><br>
-                        <input type="text" id="Idcard"name="Idcard"disabled><br>
-                    <button type="button"class="popup"id="openPopup"> +ค้นหาสมาชิก  </button>
-                  
-            </div>
-
-            <div class="form-right">
-                    <!-- ค่านี้จะถูกส่งไป FastAPI -->
-
-                    <label for="dateend">วันที่เสียชีวิต :</label><br>
-                      <input type="dateend" id="thai-dateend" name="thai-dateend"disabled>
-                      <input type="hidden" id="ad-dateend" name="dateend">
-                    <label for="name">เลขที่มรณะ :</label><br>
-                        <input type="text" id="numberend"name="numberend"><br>
-                    <button type="button"class="" id="calculateTable"> คำนวณยอด</button>
-                 
-   
-            </div>     
-            <!-- POPUP -->
-                    <div id="popupForm" class="popup-bg">
-                        <div class="popup-box">
-                                    <span class="close-btn"
-                                        id="closePopup">
-                                        &times;
-                                    </span>
-                                    <h3>เลือกสมาชิก</h3>
-                                        <input type="text"
-                                            class="search-input"
-                                            placeholder="🔍 ค้นหาสมาชิก...">
-                                        <button type="button"
-                                                class="search-button">
-                                            ค้นหา
-                                        </button>
-
-                                    <table class="popup-table">
-                                        <thead>
-                                            <tr>
-                                                <th>รหัสสมาชิก</th>
-                                                <th>ชื่อ</th>
-                                                <th>สถานะ</th>
-                                                <th>เลขบัตรประชาชน</th>
-                                                <th>เลขที่มรณะ</th>
-                                                <th>เลือก</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="popupTableBody">
-                                        </tbody>
-                                    </table>
-                        </div>
-                    </div>
-          </div>
+        <a href="/DK_showTransaction" style="font-size: 13.5px; color: #475569; text-decoration: underline;">
+            ⬅️ ดูรายการตั้งสมาชิกเสียชีวิตทั้งหมด
+        </a>
     </div>
 
-        <!-- ===================== -->
-        <!-- TABLE เงินที่ต้องเก็บ -->
-        <!-- ===================== -->
-                <div class="form-group1">
-                <p3>ตารางเก็บเงิน</p3>
-                <div class="table-container">
-                    <table id="moneyTable">
-                        <thead>
-                            <tr>
-                                <th width="60">ลำดับ</th>
-                                <th width="120">รหัสสมาชิก</th>
-                                <th width="100">คำนำหน้า</th>
-                                <th>ชื่อ</th>
-                                <th>นามสกุล</th>
-                                <th width="120">เลขที่มรณะ</th>
-                                <th width="120">เงินที่ต้องเก็บ</th>
-                                <th width="120">เงินที่ชำระ</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+    <!-- Main Content Body (Visible when docid is present) -->
+    <div id="mainContent" style="display: none;">
+
+        <!-- Header & Action Buttons -->
+        <div class="cancel-header">
+            <div class="cancel-header-title">
+                <h2>
+                    <span style="color: #dc2626;">📄</span> ยกเลิกรายการบันทึกรายการตั้งสมาชิกเสียชีวิต
+                </h2>
+                <div class="cancel-breadcrumbs">
+                    <a href="/DK_HOME">หน้าหลัก</a> /
+                    <a href="/DK_showTransaction">รายการตั้งสมาชิกเสียชีวิต</a> /
+                    <span>ยกเลิกรายการ</span>
                 </div>
             </div>
-    </form>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="/DK_showTransaction" class="btn-action-back">
+                    ⬅️ ย้อนกลับ
+                </a>
+                <button type="button" class="btn-action-cancel" id="btnCancel">
+                    🗑️ ยกเลิกรายการนี้
+                </button>
+            </div>
+        </div>
 
+        <!-- 1. Alert Banner: Blocked due to existing payments -->
+        <div id="paymentBlockedBanner" class="alert-banner alert-blocked" style="display: none;">
+            <div class="banner-icon">🚫</div>
+            <div>
+                <div class="banner-content-title">
+                    ไม่สามารถยกเลิกรายการนี้ได้ เนื่องจากมียอดรับชำระเงินเข้ามาแล้ว
+                </div>
+                <div class="banner-content-desc">
+                    เอกสารเลขที่ <b id="bannerDocidBlocked">-</b> มียอดเงินที่รับชำระแล้วจำนวน 
+                    <span id="bannerPaidAmount" style="font-weight: 700; color: #be123c; font-size: 16px;">0.00</span> บาท 
+                    (มีสมาชิกชำระเงินแล้ว <span id="bannerPaidCount" style="font-weight: 700;">0</span> ราย)
+                    <br>
+                    <span style="color: #9f1239; font-weight: 600;">
+                        ⚠️ เงื่อนไขความปลอดภัย: จะต้องทำการยกเลิกรายการรับชำระเงิน (Movement) ของเอกสารนี้ทั้งหมดก่อน จึงจะสามารถทำการยกเลิกรายการตั้งสมาชิกเสียชีวิตได้
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Alert Banner: Allowed to cancel (no payments) -->
+        <div id="canCancelBanner" class="alert-banner alert-allowed" style="display: none;">
+            <div class="banner-icon">✅</div>
+            <div>
+                <div class="banner-content-title">
+                    เอกสารนี้ยังไม่มีการรับชำระเงินเข้ามา (สามารถยกเลิกรายการได้)
+                </div>
+                <div class="banner-content-desc">
+                    เอกสารเลขที่ <b id="bannerDocidAllowed">-</b> มียอดรับชำระเงินเข้ามา <b>0.00 บาท</b> ท่านสามารถกดยืนยันการยกเลิกรายการได้
+                    <br>
+                    <span style="color: #15803d; font-size: 13px;">
+                        * เมื่อทำการยกเลิก ระบบจะคืนสถานะของสมาชิกผู้เสียชีวิตกลับเป็น "เสียชีวิต" เพื่อให้สามารถดำเนินการตั้งหนี้ใหม่หรือแก้ไขข้อมูลได้
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Alert Banner: Already cancelled -->
+        <div id="alreadyCancelledBanner" class="alert-banner alert-cancelled" style="display: none;">
+            <div class="banner-icon">ℹ️</div>
+            <div>
+                <div class="banner-content-title">
+                    เอกสารนี้ได้รับการยกเลิกไปแล้ว
+                </div>
+                <div class="banner-content-desc">
+                    เอกสารเลขที่ <b id="bannerDocidCancelled">-</b> อยู่ในสถานะ <b>"ยกเลิกรายการ"</b> เรียบร้อยแล้ว ไม่สามารถดำเนินการซ้ำได้
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Summary Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div>
+                    <div class="kpi-label">เลขที่เอกสาร / สถานะ</div>
+                    <div class="kpi-value" id="kpiDocid" style="font-size: 20px;">-</div>
+                </div>
+                <div class="kpi-sub" id="kpiStatusBadge">-</div>
+            </div>
+
+            <div class="kpi-card">
+                <div>
+                    <div class="kpi-label">สมาชิกผู้เสียชีวิต</div>
+                    <div class="kpi-value" id="kpiDeceasedName" style="font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+                </div>
+                <div class="kpi-sub" id="kpiDeceasedId">รหัส: -</div>
+            </div>
+
+            <div class="kpi-card">
+                <div>
+                    <div class="kpi-label">ยอดเรียกเก็บรวมทั้งหมด</div>
+                    <div class="kpi-value" id="kpiTotalAmount" style="color: #1e3c72;">0.00</div>
+                </div>
+                <div class="kpi-sub" id="kpiMemberCount">จำนวนผู้ถูกเรียกเก็บ: 0 ราย</div>
+            </div>
+
+            <div class="kpi-card" id="kpiPaidCard">
+                <div>
+                    <div class="kpi-label">ยอดรับชำระแล้ว</div>
+                    <div class="kpi-value" id="kpiTotalPaid" style="color: #166534;">0.00</div>
+                </div>
+                <div class="kpi-sub" id="kpiPaidPercent">ชำระแล้ว: 0.0% (0 ราย)</div>
+            </div>
+
+            <div class="kpi-card">
+                <div>
+                    <div class="kpi-label">ยอดคงเหลือค้างชำระ</div>
+                    <div class="kpi-value" id="kpiRemainDebt" style="color: #b91c1c;">0.00</div>
+                </div>
+                <div class="kpi-sub" id="kpiRemainCount">ค้างชำระ: 0 ราย</div>
+            </div>
+        </div>
+
+        <!-- Document Details Form (Readonly) -->
+        <div class="info-section-card">
+            <div class="section-title">
+                <span>📋</span> รายละเอียดข้อมูลการบันทึกรายการตั้งสมาชิกเสียชีวิต
+            </div>
+            <form id="registerForm">
+                <div class="fields-grid">
+                    <div class="field-group">
+                        <label>เลขที่เอกสาร</label>
+                        <input type="text" id="docid" readonly>
+                    </div>
+
+                    <div class="field-group">
+                        <label>วันที่บันทึก</label>
+                        <input type="text" id="thai-date" readonly>
+                    </div>
+
+                    <div class="field-group">
+                        <label>ยอดเงินเรียกเก็บต่อราย (บาท)</label>
+                        <input type="text" id="collect_amount" readonly style="font-weight: 600; text-align: right;">
+                    </div>
+
+                    <div class="field-group">
+                        <label>รหัสสมาชิกผู้เสียชีวิต</label>
+                        <input type="text" id="Idcustomer" readonly style="font-weight: 600;">
+                    </div>
+
+                    <div class="field-group">
+                        <label>คำนำหน้า</label>
+                        <input type="text" id="prefix" readonly>
+                    </div>
+
+                    <div class="field-group">
+                        <label>ชื่อ</label>
+                        <input type="text" id="name" readonly>
+                    </div>
+
+                    <div class="field-group">
+                        <label>นามสกุล</label>
+                        <input type="text" id="lastname" readonly>
+                    </div>
+
+                    <div class="field-group">
+                        <label>เลขประจำตัวประชาชน</label>
+                        <input type="text" id="Idcard" readonly>
+                    </div>
+
+                    <div class="field-group">
+                        <label>วันที่เสียชีวิต</label>
+                        <input type="text" id="thai-dateend" readonly>
+                    </div>
+
+                    <div class="field-group">
+                        <label>เลขที่มรณะ</label>
+                        <input type="text" id="numberend" readonly>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Members Table (moneyTable) -->
+        <div class="table-card">
+            <div class="section-title" style="justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>👥</span> ตารางรายชื่อสมาชิกที่ถูกเรียกเก็บเงิน
+                </div>
+                <div id="tableMemberBadge" style="font-size: 13px; font-weight: normal; color: #64748b;">
+                    ทั้งหมด 0 ราย
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="moneyTable">
+                    <thead>
+                        <tr>
+                            <th width="50" style="text-align: center;">ลำดับ</th>
+                            <th width="110">รหัสสมาชิก</th>
+                            <th width="80">คำนำหน้า</th>
+                            <th>ชื่อ</th>
+                            <th>นามสกุล</th>
+                            <th width="110" style="text-align: center;">เลขที่มรณะ</th>
+                            <th width="110" style="text-align: right;">เงินที่ต้องเก็บ</th>
+                            <th width="110" style="text-align: right;">เงินที่ชำระแล้ว</th>
+                            <th width="100" style="text-align: center;">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="moneyTableBody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" style="text-align: right;">รวมทั้งสิ้น</td>
+                            <td id="tfootTotalAmount" style="text-align: right; color: #1e3c72;">0.00</td>
+                            <td id="tfootTotalPaid" style="text-align: right; color: #166534;">0.00</td>
+                            <td id="tfootSummaryBadge" style="text-align: center;">-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+    </div>
 
 </div>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-<script type="module">
 
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script type="module">
 import { API_BASE } from "/static/js/config.js";
 
-document.getElementById("calculateTable")
-.addEventListener("click", calculateTable);
-const thaiInput = document.getElementById("thai-date");
-const adInput = document.getElementById("ad-date");
- 
-// =========================
-// DATE Open วันที่เสียชีวิต
-// =========================
-const thaiInputEnd =
-    document.getElementById("thai-dateend");
-const adInputEnd =
-    document.getElementById("ad-dateend");
-const fpEnd = flatpickr("#thai-dateend", {
-    locale: "th",
-    dateFormat: "Y-m-d",
-    allowInput: false,
-    defaultDate: "today",
-    onReady: function(
-        selectedDates,
-        dateStr,
-        instance
-    ){
-        changeToBuddhistYear(instance);
-        if (selectedDates.length > 0) {
-            const date = selectedDates[0];
-            thaiInputEnd.value =
-                formatThaiDate(date);
-            updateHiddenDateEnd(date);
-        }
-    },
-    onChange: function(
-        selectedDates,
-        dateStr,
-        instance
-    ){
-        if (!selectedDates.length) return;
-        const date = selectedDates[0];
-        thaiInputEnd.value =
-            formatThaiDate(date);
-        updateHiddenDateEnd(date);
-        changeToBuddhistYear(instance);
-    },
-    onMonthChange: function(
-        selectedDates,
-        dateStr,
-        instance
-    ){
-        changeToBuddhistYear(instance);
-    },
-    onYearChange: function(
-        selectedDates,
-        dateStr,
-        instance
-    ){
-        changeToBuddhistYear(instance);
-    }
-
-});
-
-// =========================
-// UPDATE DATE เริ่มวันที่จากฐานข้อมูล
-// =========================
-
-function updateHiddenDateEnd(date){
-    const yyyy =
-        date.getFullYear();
-    const mm =
-        String(date.getMonth() + 1)
-        .padStart(2, '0');
-    const dd =
-        String(date.getDate())
-        .padStart(2, '0');
-    adInputEnd.value =
-        `${yyyy}-${mm}-${dd}`;
-}
-
-// =========================
-// READONLY
-// =========================
-window.onload = function () {
-    document.getElementById("Idcustomer").readOnly = true;
-};
-
-// =========================
-// FLATPICKR
-// =========================
-const fp = flatpickr("#thai-date", {
-    locale: "th",
-    dateFormat: "Y-m-d",
-    allowInput: false,
-    onReady: function(selectedDates, dateStr, instance) {
-        changeToBuddhistYear(instance);
-        if (selectedDates.length > 0) {
-            const date = selectedDates[0];
-            thaiInput.value = formatThaiDate(date);
-            updateHiddenDate(date);
-        }
-    },
-    onChange: function(selectedDates, dateStr, instance) {
-        if (!selectedDates.length) return;
-        const date = selectedDates[0];
-        thaiInput.value = formatThaiDate(date);
-        updateHiddenDate(date);
-        changeToBuddhistYear(instance);
-    },
-    onMonthChange: function(selectedDates, dateStr, instance) {
-        changeToBuddhistYear(instance);
-    },
-    onYearChange: function(selectedDates, dateStr, instance) {
-        changeToBuddhistYear(instance);
-    }
-});
-
-// =========================
-// เปลี่ยน ค.ศ. → พ.ศ.
-// =========================
-function changeToBuddhistYear(instance) {
-    setTimeout(() => {
-        const yearElement = instance.currentYearElement;
-        if (yearElement) {
-            const christianYear = parseInt(yearElement.value);
-            if (!isNaN(christianYear)) {
-                yearElement.value = christianYear + 543;
-            }
-        }
-    }, 1);
-}
-
-// =========================
-// FORMAT THAI DATE
-// =========================
-function formatThaiDate(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear() + 543;
+// ==========================================
+// Helper Functions
+// ==========================================
+function formatThaiDate(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear() + 543;
     return `${day}/${month}/${year}`;
 }
-// =========================
-// UPDATE HIDDEN DATE
-// =========================
-function updateHiddenDate(date) {
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    adInput.value = `${yyyy}-${mm}-${dd}`;
+
+function formatMoney(num) {
+    const val = parseFloat(num) || 0;
+    return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-// =========================
-// GET ID
-// =========================
+// ==========================================
+// State
+// ==========================================
+let currentDocid = "";
+let currentCustomerId = "";
+let totalPaidSum = 0;
+let isDocCancelled = false;
+
+// ==========================================
+// Check docid Parameter
+// ==========================================
 const params = new URLSearchParams(window.location.search);
-const docid = params.get("docid");
-if (!docid) {
-alert("❌ ไม่พบรหัสเอกสาร");
-throw new Error("No docid");
-}
-console.log("DOCID =>", docid);
+const docidParam = params.get("docid");
 
-// =========================
-// LOAD DATA
-// =========================
-fetch(`${API_BASE}/transaction1/${docid}`)
-.then(res => res.json())
-.then(data => {
-    if (data.error !== "0") {
-        alert("❌ ไม่พบข้อมูลสมาชิก");
+if (!docidParam) {
+    document.getElementById("docidNotFoundBox").style.display = "block";
+    document.getElementById("btnManualSearch").addEventListener("click", () => {
+        const val = document.getElementById("manualDocid").value.trim();
+        if (val) {
+            window.location.href = `/DK_cancelTransaction?docid=${encodeURIComponent(val)}`;
+        } else {
+            alert("กรุณาระบุเลขที่เอกสาร");
+        }
+    });
+    document.getElementById("manualDocid").addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+            document.getElementById("btnManualSearch").click();
+        }
+    });
+} else {
+    currentDocid = docidParam.trim();
+    loadTransactionData(currentDocid);
+}
+
+// ==========================================
+// Load Transaction Data
+// ==========================================
+async function loadTransactionData(docid) {
+    try {
+        const res = await fetch(`${API_BASE}/transaction1/${encodeURIComponent(docid)}`);
+        const data = await res.json();
+
+        if (data.error !== "0" || !data.results) {
+            alert(`❌ ไม่พบข้อมูลเอกสารเลขที่ ${docid}`);
+            document.getElementById("docidNotFoundBox").style.display = "block";
+            return;
+        }
+
+        const emp = data.results;
+        currentCustomerId = emp.Idcustomer || "";
+        isDocCancelled = (emp.status === 2 || String(emp.status) === "2");
+
+        // Show main content
+        document.getElementById("mainContent").style.display = "block";
+
+        // ======================================
+        // Fill Header Fields
+        // ======================================
+        document.getElementById("docid").value = emp.docid || "";
+        document.getElementById("collect_amount").value = formatMoney(emp.amount || 0);
+        document.getElementById("Idcustomer").value = emp.Idcustomer || "";
+        document.getElementById("prefix").value = emp.prefix || "";
+        document.getElementById("name").value = emp.name || "";
+        document.getElementById("lastname").value = emp.lastname || "";
+        document.getElementById("Idcard").value = emp.Idcard || "";
+        document.getElementById("numberend").value = emp.numberend || "-";
+
+        document.getElementById("thai-date").value = formatThaiDate(emp.date);
+        document.getElementById("thai-dateend").value = formatThaiDate(emp.dateend);
+
+        // ======================================
+        // Calculate Totals & Render Table
+        // ======================================
+        let totalAmountSum = 0;
+        totalPaidSum = 0;
+        let paidRowsCount = 0;
+        let totalRowsCount = 0;
+
+        const tbody = document.getElementById("moneyTableBody");
+        tbody.innerHTML = "";
+
+        if (Array.isArray(emp.details)) {
+            totalRowsCount = emp.details.length;
+            emp.details.forEach((row, index) => {
+                const rowAmount = parseFloat(row.amount || 0);
+                const rowPaid = parseFloat(row.payamount || 0);
+                totalAmountSum += rowAmount;
+                totalPaidSum += rowPaid;
+
+                const isRowPaid = rowPaid > 0;
+                if (isRowPaid) paidRowsCount++;
+
+                const trClass = isRowPaid ? "row-paid" : "";
+                const badge = isRowPaid 
+                    ? `<span class="status-badge badge-paid">ชำระแล้ว</span>` 
+                    : `<span class="status-badge badge-unpaid">ยังไม่ชำระ</span>`;
+
+                tbody.insertAdjacentHTML("beforeend", `
+                    <tr class="${trClass}">
+                        <td style="text-align: center;">${index + 1}</td>
+                        <td>${row.Idcustomer || "-"}</td>
+                        <td>${row.prefix || ""}</td>
+                        <td>${row.name || ""}</td>
+                        <td>${row.lastname || ""}</td>
+                        <td style="text-align: center;">${row.numberend || "-"}</td>
+                        <td style="text-align: right; font-weight: 500;">${formatMoney(rowAmount)}</td>
+                        <td style="text-align: right; font-weight: 600; color: ${isRowPaid ? '#166534' : '#64748b'};">
+                            ${formatMoney(rowPaid)}
+                        </td>
+                        <td style="text-align: center;">${badge}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        const remainSum = Math.max(0, totalAmountSum - totalPaidSum);
+
+        // Update Footers
+        document.getElementById("tfootTotalAmount").innerText = formatMoney(totalAmountSum);
+        document.getElementById("tfootTotalPaid").innerText = formatMoney(totalPaidSum);
+        document.getElementById("tableMemberBadge").innerText = `ทั้งหมด ${totalRowsCount.toLocaleString()} ราย (ชำระแล้ว ${paidRowsCount.toLocaleString()} ราย)`;
+
+        // Update KPIs
+        document.getElementById("kpiDocid").innerText = emp.docid || "-";
+        const fullName = `${emp.prefix || ""} ${emp.name || ""} ${emp.lastname || ""}`.trim();
+        document.getElementById("kpiDeceasedName").innerText = fullName || "-";
+        document.getElementById("kpiDeceasedName").title = fullName;
+        document.getElementById("kpiDeceasedId").innerText = `รหัส: ${emp.Idcustomer || "-"} | เลขที่มรณะ: ${emp.numberend || "-"}`;
+
+        document.getElementById("kpiTotalAmount").innerText = formatMoney(totalAmountSum);
+        document.getElementById("kpiMemberCount").innerText = `จำนวนผู้ถูกเรียกเก็บ: ${totalRowsCount.toLocaleString()} ราย`;
+
+        document.getElementById("kpiTotalPaid").innerText = formatMoney(totalPaidSum);
+        const paidPercent = totalAmountSum > 0 ? ((totalPaidSum / totalAmountSum) * 100).toFixed(1) : 0;
+        document.getElementById("kpiPaidPercent").innerText = `ชำระแล้ว: ${paidPercent}% (${paidRowsCount.toLocaleString()} ราย)`;
+
+        document.getElementById("kpiRemainDebt").innerText = formatMoney(remainSum);
+        document.getElementById("kpiRemainCount").innerText = `ค้างชำระ: ${(totalRowsCount - paidRowsCount).toLocaleString()} ราย`;
+
+        // ======================================
+        // Check Status & Payment Conditions
+        // ======================================
+        const btnCancel = document.getElementById("btnCancel");
+
+        if (isDocCancelled) {
+            // Already cancelled
+            document.getElementById("kpiStatusBadge").innerHTML = `<span class="status-badge badge-cancelled">ยกเลิกแล้ว</span>`;
+            document.getElementById("bannerDocidCancelled").innerText = docid;
+            document.getElementById("alreadyCancelledBanner").style.display = "flex";
+
+            btnCancel.disabled = true;
+            btnCancel.title = "เอกสารนี้ได้รับการยกเลิกไปแล้ว";
+            btnCancel.innerHTML = "🚫 ยกเลิกรายการแล้ว";
+
+        } else if (totalPaidSum > 0) {
+            // Blocked because payments exist
+            document.getElementById("kpiStatusBadge").innerHTML = `<span class="status-badge badge-paid">มียอดรับชำระ</span>`;
+            document.getElementById("bannerDocidBlocked").innerText = docid;
+            document.getElementById("bannerPaidAmount").innerText = formatMoney(totalPaidSum);
+            document.getElementById("bannerPaidCount").innerText = paidRowsCount.toLocaleString();
+            document.getElementById("paymentBlockedBanner").style.display = "flex";
+
+            // Style Paid KPI Card with warning border
+            const paidCard = document.getElementById("kpiPaidCard");
+            paidCard.style.borderColor = "#f87171";
+            paidCard.style.backgroundColor = "#fff1f2";
+            document.getElementById("kpiTotalPaid").style.color = "#be123c";
+
+            btnCancel.disabled = true;
+            btnCancel.title = `ไม่สามารถยกเลิกได้ เนื่องจากมียอดรับชำระเงินเข้ามาแล้ว (${formatMoney(totalPaidSum)} บาท)`;
+            btnCancel.innerHTML = "🔒 ไม่สามารถยกเลิกได้ (มียอดรับชำระ)";
+
+        } else {
+            // Allowed to cancel
+            document.getElementById("kpiStatusBadge").innerHTML = `<span class="status-badge badge-unpaid">รอชำระ (สามารถยกเลิกได้)</span>`;
+            document.getElementById("bannerDocidAllowed").innerText = docid;
+            document.getElementById("canCancelBanner").style.display = "flex";
+
+            btnCancel.disabled = false;
+            btnCancel.title = "กดยืนยันเพื่อยกเลิกรายการตั้งสมาชิกเสียชีวิตนี้";
+            btnCancel.innerHTML = "🗑️ ยืนยันยกเลิกรายการนี้";
+        }
+
+    } catch (err) {
+        console.error("Load Transaction Error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการโหลดข้อมูลเอกสาร");
+    }
+}
+
+// ==========================================
+// Handle Cancel Button Click
+// ==========================================
+document.getElementById("btnCancel").addEventListener("click", async () => {
+    if (isDocCancelled) {
+        alert("ℹ️ เอกสารนี้ได้รับการยกเลิกไปแล้ว ไม่สามารถดำเนินการซ้ำได้");
         return;
     }
-    const emp = data.results;
-    // =====================
-    // HEADER
-    // =====================
-    document.getElementById("docid").value = emp.docid || "";
-    document.getElementById("collect_amount").value = emp.amount || 0;
-    document.getElementById("Idcustomer").value = emp.Idcustomer || "";
-    document.getElementById("prefix").value = emp.prefix || "";
-    document.getElementById("name").value = emp.name || "";
-    document.getElementById("lastname").value = emp.lastname || "";
-    document.getElementById("Idcard").value = emp.Idcard || "";
-    document.getElementById("numberend").value = emp.numberend || "";
-    // =====================
-    // DATE
-    // =====================
-    if (emp.date) {
-        const dbDate = new Date(emp.date);
-        fp.setDate(dbDate);
-        thaiInput.value = formatThaiDate(dbDate);
-        updateHiddenDate(dbDate);
+
+    if (totalPaidSum > 0) {
+        alert(`🚫 ไม่สามารถยกเลิกได้ เนื่องจากมียอดรับชำระเงินเข้ามาแล้ว (${formatMoney(totalPaidSum)} บาท)\n\nต้องทำการยกเลิกรายการรับชำระเงิน (Movement) ของเอกสารนี้ให้หมดก่อน จึงจะสามารถยกเลิกรายการตั้งสมาชิกเสียชีวิตได้`);
+        return;
     }
 
-    if (emp.dateend) {
-        const deadDate = new Date(emp.dateend);
-        document.getElementById("thai-dateend").value =
-            formatThaiDate(deadDate);
-        document.getElementById("ad-dateend").value =
-            emp.dateend;
+    const docid = document.getElementById("docid").value.trim();
+    if (!docid) {
+        alert("❌ ไม่พบเลขที่เอกสาร");
+        return;
     }
-    // =====================
-    // TABLE DETAIL
-    // =====================
-    let tbody = document.querySelector("#moneyTable tbody");
-    tbody.innerHTML = "";
-    if (Array.isArray(emp.details)) {
-    emp.details.forEach((row, index) => {
-        tbody.insertAdjacentHTML("beforeend", `
-            <tr>
-                <td class="text-center">${index + 1}</td>
-                <td>${row.Idcustomer || ""}</td>
-                <td>${row.prefix || ""}</td>
-                <td>${row.name || ""}</td>
-                <td>${row.lastname || ""}</td>
-                <td class="text-center">${row.numberend || ""}</td>
-                <td class="text-end">
-                    ${(row.amount || 0).toLocaleString()}
-                </td>
-                <td class="text-end">
-                    ${(row.payamount || 0).toLocaleString()}
-                </td>               
-            </tr>
-            `);
-        });
-    }
-})
-.catch(err => {
-    console.error(err);
-    alert("❌ โหลดข้อมูลไม่สำเร็จ");
-});
 
+    const customerName = `${document.getElementById("prefix").value} ${document.getElementById("name").value} ${document.getElementById("lastname").value}`.trim();
+    const customerId = document.getElementById("Idcustomer").value.trim();
 
- //
- document.getElementById("btnCancel").addEventListener("click", async () => {
-    const docid = document.getElementById("docid").value;
-    if (!confirm("ยืนยันยกเลิกรายการนี้?")) return;
-    const formData = new FormData();
-    formData.append("docid", docid);
-    formData.append("status", "2");
+    const confirmMsg = 
+        `ยืนยันการยกเลิกรายการตั้งสมาชิกเสียชีวิต?\n\n` +
+        `• เลขที่เอกสาร: ${docid}\n` +
+        `• สมาชิกผู้เสียชีวิต: ${customerName} (${customerId})\n\n` +
+        `เมื่อยืนยันยกเลิกรายการ:\n` +
+        `1. สถานะเอกสารตั้งหนี้ ${docid} จะเปลี่ยนเป็น "ยกเลิก" (Status 2)\n` +
+        `2. สถานะสมาชิกผู้เสียชีวิตจะถูกคืนกลับเป็น "เสียชีวิต" (Status 3) เพื่อให้สามารถตั้งหนี้ใหม่หรือแก้ไขข้อมูลได้\n\n` +
+        `ต้องการดำเนินการต่อหรือไม่?`;
+
+    if (!confirm(confirmMsg)) return;
+
     try {
+        const currentUser = (function() {
+            try {
+                const s = sessionStorage.getItem("dk_logged_user");
+                if (s) {
+                    const p = JSON.parse(s);
+                    return p.empid || p.username || "001";
+                }
+            } catch(e) {}
+            return "001";
+        })();
+        const formData = new FormData();
+        formData.append("docid", docid);
+        formData.append("status", "2");
+        formData.append("Idcustomer", customerId);
+        formData.append("cusid", sessionStorage.getItem("dk_constant_cusid") || "");
+
         const res = await fetch(`${API_BASE}/canceltransaction/update`, {
             method: "POST",
             body: formData
         });
         const data = await res.json();
+
         if (data.error === "0") {
-            alert("ยกเลิกสำเร็จ");
-            window.location.href = "/DK_HOME";
+            alert("✅ ยกเลิกรายการตั้งสมาชิกเสียชีวิตสำเร็จเรียบร้อยแล้ว");
+            window.location.href = "/DK_showTransaction";
         } else {
-            alert(data.message);
+            alert("❌ ไม่สามารถยกเลิกรายการได้: " + (data.message || "เกิดข้อผิดพลาด"));
         }
 
     } catch (err) {
-        console.error(err);
-        alert("เชื่อมต่อ API ไม่ได้");
+        console.error("Cancel Transaction Error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     }
 });
 

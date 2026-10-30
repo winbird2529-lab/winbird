@@ -22,33 +22,27 @@
            <h2>ค่าคงที่</h2>
            <ul class="navbar">
             <li><a href="/CM_Home">HOME</a></li>
-            <li><a href="/CM_Running">เลขที่เอกสาร</a></li>
-            <li><a href="/CM_person">ทะเบียนสมาชิก</a></li>
-            <li><a href="/CM_Employee">ทะเบียนพนักงาน</a></li>
+            <li class="menu-item-running"><a href="/CM_Running" data-perm="running">เลขที่เอกสาร</a></li>
+            <li><a href="/CM_person" data-perm="customer">ทะเบียนสมาชิก</a></li>
+            <li><a href="/CM_Employee" data-perm="employee">ทะเบียนพนักงาน</a></li>
            </ul>
-          
           
           <h2>เมนู</h2>
           <ul class="navbar">
-            <li><a href="/CM_Senditem">บันทึกรายการ</a></li>
-            <li><a href="/CM_Transaction">บันทึกรายการเก็บเงิน</a></li>
-            <li><a href="/linecustomer">รอเพิ่ม</a></li>
+            <li><a href="/CM_Senditem" data-perm="transaction">บันทึกรายการ</a></li>
+            <li><a href="/CM_Transaction" data-perm="movement">บันทึกรายการเก็บเงิน</a></li>
           </ul>
-
-         
 
           <h2>รายงาน</h2>
           <ul class="navbar">
             <li><a href="">รายงานทะเบียนลูกค้า</a></li>
             <li><a href="">รายงานทะเบียนพนักงาน</a></li>
-            <li><a href="/DK_Test">ทดสอบ form</a></li>
-            <li><a href="/fromdate">ทดสอบ บันทึกวันที</a></li>
           </ul>
 
-          <h2>APPS</h2>
+          <h2>จัดการระบบ</h2>
           <ul class="navbar">
-            <li><a href="/login">login</a></li>
-            <li><a href="/">ออกจากระบบ</a></li>
+            <li class="menu-item-permission"><a href="/DK_fromUserPermission" data-perm="permission">กำหนดสิทธิ์ผู้ใช้งาน</a></li>
+            <li><a href="/logout" onclick="sessionStorage.removeItem('dk_logged_user');">ออกจากระบบ</a></li>
           </ul>
         </nav>
       </div>
@@ -64,7 +58,29 @@
 
     </div>
 
-
+    <script>
+      (function applyPermissionControl() {
+        try {
+          const saved = sessionStorage.getItem("dk_logged_user");
+          if (!saved) return;
+          const user = JSON.parse(saved);
+          const role = (user.role || "").toLowerCase();
+          if (role === "admin") return;
+          // Hide permission management
+          document.querySelectorAll(".menu-item-permission, [data-perm='permission']").forEach(el => {
+            const li = el.tagName === "LI" ? el : el.closest("li");
+            if (li) li.style.display = "none";
+          });
+          // Hide constant
+          if (role === "user" || role === "staff" || role === "member") {
+            document.querySelectorAll(".menu-item-running, [data-perm='running']").forEach(el => {
+              const li = el.tagName === "LI" ? el : el.closest("li");
+              if (li) li.style.display = "none";
+            });
+          }
+        } catch(e) {}
+      })();
+    </script>
   </body>
 </html>
 

@@ -1,0 +1,513 @@
+{% extends "BaseLayout.html" %}
+
+{% block title %}ชื่อและที่อยู่สำนักงาน{% endblock %}
+
+{% block content %}
+<h2>Welcome to DK_customer</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='constant.css') }}">
+<p>Hello Flask layout!</p>
+
+<h3><a href="/DK_Home">HOME</a> \ ข้อมูลสำนักงานและที่อยู่</h3>
+<div class="constant-container">
+    <form id="constantForm" onsubmit="event.preventDefault(); handleSave();">
+        <div class="action-bar">
+            <div class="action-bar-left">
+                <div class="mode-badge view-mode" id="modeBadge">
+                    <span id="modeIcon">🔒</span>
+                    <span id="modeText">ดูข้อมูลเท่านั้น</span>
+                </div>
+            </div>
+            <div class="action-bar-right">
+                <button type="button" class="btn-cancel" id="btnCancel" onclick="cancelEdit()">
+                    ✕ ยกเลิก
+                </button>
+                <button type="button" class="btn-edit" id="btnEdit" onclick="enableEditMode()">
+                    ✏️ แก้ไขข้อมูล
+                </button>
+                <button type="button" class="btn-save" id="btnSave" onclick="handleSave()" disabled>
+                    📄 บันทึกข้อมูลสำนักงาน
+                </button>
+            </div>
+        </div>
+
+        <!-- Audit Bar -->
+        <div class="audit-bar">
+            <div class="audit-item">
+                <span>👤 <strong>ผู้บันทึกข้อมูล (empid):</strong></span>
+                <span class="audit-val" id="auditUserid" style="color:#0f766e;">-</span>
+            </div>
+            <div class="audit-item">
+                <span>✏️ <strong>ผู้แก้ไขล่าสุด (empid):</strong></span>
+                <span class="audit-val" id="auditUseredit" style="color:#b45309;">-</span>
+            </div>
+            <div class="audit-item">
+                <span>🕒 <strong>อัปเดตล่าสุด:</strong></span>
+                <span class="audit-val" id="auditUpdatedAt" style="color:#64748b;">-</span>
+            </div>
+        </div>
+
+        <!-- Section 1: ข้อมูลสำนักงานและที่อยู่ -->
+        <div class="constant-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span>🏢</span> ข้อมูลทั่วไปและที่อยู่สำนักงาน
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="grid-2">
+                    <div class="form-field">
+                        <label for="office_name">ชื่อสำนักงาน / สมาคม <span class="req">*</span></label>
+                        <input type="text" id="office_name" name="office_name"  required disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="office_name_en">ชื่อสำนักงาน (ภาษาอังกฤษ)</label>
+                        <input type="text" id="office_name_en" name="office_name_en"  disabled>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="form-field">
+                        <label for="cusid">เลขนิติบุคคล / รหัสองค์กร (cusid) <span class="req">*</span></label>
+                        <input type="text" id="cusid" name="cusid" placeholder="" value="" maxlength="50" disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="tax_id">เลขประจำตัวผู้เสียภาษีอากร</label>
+                        <input type="text" id="tax_id" name="tax_id" placeholder="" maxlength="20" disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="manager_name">ชื่อผู้จัดการ / นายกสมาคม / ผู้มีอำนาจลงนาม</label>
+                        <input type="text" id="manager_name" name="manager_name" placeholder="" disabled>
+                    </div>
+                </div>
+
+                <!-- ที่อยู่สำนักงาน -->
+                <div class="grid-4" style="margin-top: 8px;">
+                    <div class="form-field">
+                        <label for="addr_no">บ้านเลขที่</label>
+                        <input type="text" id="addr_no" name="addr_no" placeholder="" disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="moo">หมู่ที่</label>
+                        <input type="text" id="moo" name="moo" placeholder="" disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="soi">ซอย</label>
+                        <input type="text" id="soi" name="soi" placeholder="" disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="road">ถนน</label>
+                        <input type="text" id="road" name="road" placeholder="" disabled>
+                    </div>
+                </div>
+
+                <div class="grid-4">
+                    <div class="form-field">
+                        <label for="locality">ตำบล / แขวง</label>
+                        <input type="text" id="locality" name="locality"  disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="district">อำเภอ / เขต</label>
+                        <input type="text" id="district" name="district"  disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="province">จังหวัด</label>
+                        <input type="text" id="province" name="province"  disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="zipcode">รหัสไปรษณีย์</label>
+                        <input type="text" id="zipcode" name="zipcode"  maxlength="10" disabled>
+                    </div>
+                </div>
+
+                <!-- การติดต่อ -->
+                <div class="grid-4" style="margin-top: 8px;">
+                    <div class="form-field">
+                        <label for="tel">เบอร์โทรศัพท์</label>
+                        <input type="text" id="tel" name="tel"  disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="fax">โทรสาร (แฟกซ์)</label>
+                        <input type="text" id="fax" name="fax"  disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="email">อีเมล</label>
+                        <input type="email" id="email" name="email" placeholder="example@email.com" disabled>
+                    </div>
+                    <div class="form-field">
+                        <label for="website">เว็บไซต์</label>
+                        <input type="text" id="website" name="website"  disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script type="module">
+import { API_BASE } from "/static/js/config.js";
+
+let isEditMode = false;
+let isApiOffline = false;
+let originalData = {};
+
+// 1. ตรวจสอบสิทธิ์การเข้าใช้งาน (ไม่บล็อกหากไม่มี session เพื่อให้สามารถดู/แก้ไขได้)
+(function checkConstantAccess() {
+    try {
+        const saved = sessionStorage.getItem("dk_logged_user");
+        if (!saved) return;
+        const u = JSON.parse(saved);
+        const role = (u.role || "").toLowerCase();
+        if (role === "member") {
+            alert("⚠️ คุณไม่มีสิทธิ์เข้าถึงหน้ากำหนดค่าคงที่ระบบ");
+            window.location.replace("/DK_Home");
+        }
+    } catch(e) {
+        console.warn("Permission check error:", e);
+    }
+})();
+
+// 2. ดึงข้อมูลผู้ใช้งานปัจจุบัน (empid)
+function getCurrentOperator() {
+    try {
+        const s = sessionStorage.getItem("dk_logged_user");
+        if (s) {
+            const p = JSON.parse(s);
+            if (p.empid) return p.empid;
+            if (p.username) return p.username;
+        }
+    } catch(e) {}
+    return "001";
+}
+
+function showConstantApiError() {
+    isApiOffline = true;
+    
+    // เคลียร์ค่าทั้งหมด ป้องกันการมองเห็นข้อมูลเมื่อ API ดับ
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || "";
+    };
+    ["office_name", "office_name_en", "cusid", "tax_id", "manager_name",
+     "addr_no", "moo", "soi", "road", "locality", "district", "province",
+     "zipcode", "tel", "fax", "email", "website"].forEach(id => setVal(id, ""));
+
+    ["auditUserid", "auditUseredit", "auditUpdatedAt"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = "-";
+    });
+
+    const badge = document.getElementById("modeBadge");
+    if (badge) {
+        badge.className = "mode-badge view-mode";
+        badge.style.background = "";
+        badge.style.color = "";
+        document.getElementById("modeIcon").textContent = "🔒";
+        document.getElementById("modeText").textContent = "ดูข้อมูลเท่านั้น";
+    }
+
+    const btnEdit = document.getElementById("btnEdit");
+    if (btnEdit) {
+        btnEdit.disabled = true;
+        btnEdit.style.opacity = "0.5";
+        btnEdit.style.cursor = "not-allowed";
+        btnEdit.title = "ไม่สามารถแก้ไขได้เนื่องจากยังไม่ได้เชื่อมต่อ API";
+    }
+}
+
+function hideConstantApiError() {
+    isApiOffline = false;
+
+    const btnEdit = document.getElementById("btnEdit");
+    if (btnEdit) {
+        btnEdit.disabled = false;
+        btnEdit.style.opacity = "1";
+        btnEdit.style.cursor = "pointer";
+        btnEdit.title = "";
+    }
+
+    const badge = document.getElementById("modeBadge");
+    if (badge) {
+        badge.className = "mode-badge view-mode";
+        badge.style.background = "";
+        badge.style.color = "";
+        document.getElementById("modeIcon").textContent = "🔒";
+        document.getElementById("modeText").textContent = "ดูข้อมูลเท่านั้น";
+    }
+}
+
+// 3. โหลดข้อมูลค่าคงที่สำนักงานจาก API (รองรับทั้ง FastAPI และ Flask Proxy)
+async function loadConstantData() {
+    try {
+        let result = null;
+        try {
+            const res = await fetch(`${API_BASE}/constant`, { signal: AbortSignal.timeout(1500) });
+            if (res.ok) {
+                result = await res.json();
+            }
+        } catch (e) {
+            console.warn("FastAPI fetch /constant failed, trying Flask /api/constant proxy:", e);
+        }
+
+        if (!result || !result.data) {
+            try {
+                const resFlask = await fetch("/api/constant", { signal: AbortSignal.timeout(1500) });
+                if (resFlask.ok) {
+                    result = await resFlask.json();
+                }
+            } catch (eFlask) {
+                console.warn("Flask proxy failed:", eFlask);
+            }
+        }
+        
+        if (result && result.data && Object.keys(result.data).length > 0) {
+            hideConstantApiError();
+            const data = result.data;
+            originalData = Object.assign({}, data);
+            
+            const constantCusid = (data.cusid || data.tax_id || "00001").trim();
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = (val !== undefined && val !== null) ? val : "";
+            };
+
+            setVal("office_name", data.office_name);
+            setVal("office_name_en", data.office_name_en);
+            setVal("cusid", constantCusid || "00001");
+            setVal("tax_id", data.tax_id);
+            setVal("manager_name", data.manager_name);
+            
+            sessionStorage.setItem("dk_constant_cusid", constantCusid || "00001");
+            
+            // ที่อยู่
+            setVal("addr_no", data.addr_no);
+            setVal("moo", data.moo);
+            setVal("soi", data.soi);
+            setVal("road", data.road);
+            setVal("locality", data.locality);
+            setVal("district", data.district);
+            setVal("province", data.province);
+            setVal("zipcode", data.zipcode);
+            
+            // ติดต่อ
+            setVal("tel", data.tel);
+            setVal("fax", data.fax);
+            setVal("email", data.email);
+            setVal("website", data.website);
+            
+            // Audit Bar
+            const setTxt = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val || "-";
+            };
+            setTxt("auditUserid", data.userid);
+            setTxt("auditUseredit", data.useredit);
+            setTxt("auditUpdatedAt", data.updated_at);
+        } else {
+            showConstantApiError();
+        }
+    } catch (err) {
+        console.error("Error loading constant data:", err);
+        showConstantApiError();
+    }
+}
+
+// 4. เปิดโหมดแก้ไข
+window.enableEditMode = function() {
+    if (isApiOffline) {
+        alert("⚠️ ไม่สามารถแก้ไขข้อมูลได้เนื่องจากยังไม่ได้เชื่อมต่อ API กรุณาเปิดรัน API ก่อน");
+        return;
+    }
+    isEditMode = true;
+    
+    // ปลดล็อค inputs, selects, textareas ทั้งหมด
+    const inputs = document.querySelectorAll(
+        "#constantForm input, #constantForm select, #constantForm textarea, " +
+        ".constant-container input, .constant-container select, .constant-container textarea"
+    );
+    inputs.forEach(el => {
+        el.disabled = false;
+        el.removeAttribute("disabled");
+        el.classList.add("editable-active");
+    });
+    
+    // ปรับสถานะปุ่ม
+    const btnSave = document.getElementById("btnSave");
+    const btnCancel = document.getElementById("btnCancel");
+    const btnEdit = document.getElementById("btnEdit");
+    if (btnSave) btnSave.disabled = false;
+    if (btnCancel) btnCancel.style.display = "inline-flex";
+    if (btnEdit) btnEdit.style.display = "none";
+    
+    // ปรับ Mode Badge
+    const badge = document.getElementById("modeBadge");
+    if (badge) {
+        badge.className = "mode-badge edit-mode";
+        document.getElementById("modeIcon").textContent = "✏️";
+        document.getElementById("modeText").textContent = "โหมดแก้ไขข้อมูล";
+    }
+    
+    const firstInput = document.getElementById("office_name");
+    if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
+    }
+};
+
+// 5. ยกเลิกการแก้ไข
+window.cancelEdit = function() {
+    isEditMode = false;
+    
+    // คืนค่าฟอร์มกลับเป็นค่าเดิม
+    loadConstantData();
+    
+    // ล็อค inputs ทั้งหมด
+    const inputs = document.querySelectorAll(
+        "#constantForm input, #constantForm select, #constantForm textarea, " +
+        ".constant-container input, .constant-container select, .constant-container textarea"
+    );
+    inputs.forEach(el => {
+        el.disabled = true;
+        el.setAttribute("disabled", "true");
+        el.classList.remove("editable-active");
+    });
+    
+    // ปรับสถานะปุ่ม
+    const btnSave = document.getElementById("btnSave");
+    const btnCancel = document.getElementById("btnCancel");
+    const btnEdit = document.getElementById("btnEdit");
+    if (btnSave) btnSave.disabled = true;
+    if (btnCancel) btnCancel.style.display = "none";
+    if (btnEdit) btnEdit.style.display = "inline-flex";
+    
+    // ปรับ Mode Badge
+    const badge = document.getElementById("modeBadge");
+    if (badge) {
+        badge.className = "mode-badge view-mode";
+        document.getElementById("modeIcon").textContent = "🔒";
+        document.getElementById("modeText").textContent = "ดูข้อมูลเท่านั้น";
+    }
+};
+
+// 6. บันทึกข้อมูล
+window.handleSave = async function() {
+    if (!isEditMode) return;
+
+    const saveBtn = document.getElementById("btnSave");
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = "⏳ กำลังบันทึก...";
+    }
+
+    try {
+        const office_name = (document.getElementById("office_name")?.value || "").trim();
+        if (!office_name) {
+            alert("⚠️ กรุณาระบุชื่อสำนักงาน / สมาคม");
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = "📄 บันทึกข้อมูลสำนักงาน";
+            }
+            document.getElementById("office_name")?.focus();
+            return;
+        }
+
+        const currentOperator = getCurrentOperator();
+        const origUserid = originalData.userid || currentOperator;
+        const cusidVal = (document.getElementById("cusid")?.value || "").trim() || (document.getElementById("tax_id")?.value || "").trim();
+        const taxIdVal = (document.getElementById("tax_id")?.value || "").trim() || cusidVal;
+
+        const payload = {
+            office_name: office_name,
+            office_name_en: (document.getElementById("office_name_en")?.value || "").trim(),
+            cusid: cusidVal,
+            tax_id: taxIdVal,
+            manager_name: (document.getElementById("manager_name")?.value || "").trim(),
+            addr_no: (document.getElementById("addr_no")?.value || "").trim(),
+            moo: (document.getElementById("moo")?.value || "").trim(),
+            soi: (document.getElementById("soi")?.value || "").trim(),
+            road: (document.getElementById("road")?.value || "").trim(),
+            locality: (document.getElementById("locality")?.value || "").trim(),
+            district: (document.getElementById("district")?.value || "").trim(),
+            province: (document.getElementById("province")?.value || "").trim(),
+            zipcode: (document.getElementById("zipcode")?.value || "").trim(),
+            tel: (document.getElementById("tel")?.value || "").trim(),
+            fax: (document.getElementById("fax")?.value || "").trim(),
+            email: (document.getElementById("email")?.value || "").trim(),
+            website: (document.getElementById("website")?.value || "").trim(),
+            userid: origUserid,
+            useredit: currentOperator
+        };
+
+        let result = null;
+        try {
+            const res = await fetch(`${API_BASE}/constant/save`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                result = await res.json();
+            }
+        } catch (apiErr) {
+            console.warn("FastAPI fetch /constant/save failed, trying Flask /api/constant proxy:", apiErr);
+        }
+
+        if (!result || (result.error !== "0" && !result.results && result.status !== "success")) {
+            const resFlask = await fetch("/api/constant", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            result = await resFlask.json();
+        }
+
+        if (result && (result.error === "0" || result.results === "true" || result.results === true || result.status === "success")) {
+            if (cusidVal) {
+                sessionStorage.setItem("dk_constant_cusid", cusidVal);
+            }
+            alert("✅ บันทึกข้อมูลสำนักงานและที่อยู่เรียบร้อยแล้ว");
+            cancelEdit();
+            loadConstantData();
+        } else {
+            alert("❌ เกิดข้อผิดพลาดในการบันทึก: " + (result?.message || "ไม่สามารถบันทึกได้"));
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = "📄 บันทึกข้อมูลสำนักงาน";
+            }
+        }
+    } catch (err) {
+        console.error("Save error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: " + err.message);
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = "📄 บันทึกข้อมูลสำนักงาน";
+        }
+    }
+};
+
+// โหลดข้อมูลและผูก Event Listeners เมื่อเปิดหน้าเว็บ
+document.addEventListener("DOMContentLoaded", () => {
+    loadConstantData();
+
+    document.getElementById("btnEdit")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        enableEditMode();
+    });
+
+    document.getElementById("btnCancel")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        cancelEdit();
+    });
+
+    document.getElementById("btnSave")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleSave();
+    });
+
+    document.getElementById("constantForm")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        handleSave();
+    });
+});
+</script>
+{% endblock %}

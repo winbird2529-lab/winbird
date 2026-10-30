@@ -50,6 +50,22 @@
       </div>
       <hr class="my-box">
 
+      <!-- กล่องแจ้งเตือนเมื่ออยู่ในสถานะ เสียชีวิต/ตั้งหนี้ -->
+      <div id="lockedWarningBanner" style="display:none; margin-bottom: 18px; padding: 16px 20px; background: #fef2f2; border: 1px solid #f87171; border-radius: 10px; color: #991b1b; box-shadow: 0 4px 12px rgba(239,68,68,0.08);">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom: 6px;">
+              <span style="font-size: 24px;">🔒</span>
+              <strong style="font-size: 16px;">ไม่สามารถแก้ไขข้อมูลได้ (สถานะ: เสียชีวิต/ตั้งหนี้)</strong>
+          </div>
+          <div style="font-size: 14px; color: #7f1d1d; line-height: 1.6;">
+              รายการนี้ได้รับการตั้งหนี้เรียบร้อยแล้ว หากต้องการแก้ไขข้อมูล จะต้องทำการ<strong>ยกเลิกรายการตั้งหนี้</strong>ก่อน
+          </div>
+          <div style="margin-top: 12px;">
+              <a href="/DK_cancelTransaction" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 13.5px; font-weight: 500;">
+                  📄 ไปที่หน้ายกเลิกรายการตั้งหนี้
+              </a>
+          </div>
+      </div>
+
       <div id="memberOwnerBox" style="display:none; margin-bottom: 15px; padding: 12px 16px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 10px; color: #0369a1; font-size: 14.5px;">
           <strong>👤 สมาชิกเจ้าของ:</strong> <span id="ownerText" style="font-weight:600;"></span>
       </div>
@@ -97,9 +113,6 @@
                 </option>
                 <option value="3">
                     เสียชีวิต
-                </option>
-                <option value="4">
-                    เสียชีวิต/ตั้งหนี้
                 </option>
             </select>
 
@@ -297,14 +310,15 @@ if (isBeneficiary) {
     document.getElementById("lblStatus").innerText = "สถานะผู้รับผลประโยชน์ :";
     document.getElementById("lblDateend").innerText = "วันที่เสียชีวิต :";
 
-    // เปลี่ยนตัวเลือกสถานะเป็นของ bk_beneficiary (1=ปกติ, 2=ตาย)
+    // เปลี่ยนตัวเลือกสถานะเป็นของ bk_beneficiary (1=ปกติ, 3=เสียชีวิต) - ไม่แสดงตัวเลือกตั้งหนี้
     const statusSelect = document.getElementById("status");
     statusSelect.innerHTML = `
         <option value="1">ปกติ</option>
-        <option value="3" selected>ตาย</option>
-        <option value="4" selected>เสียชีวิต/ตั้งหนี้</option>
+        <option value="3">เสียชีวิต</option>
     `;
 }
+
+let isLockedStatus = false;
 
 // =========================
 // LOAD DATA
@@ -322,13 +336,17 @@ fetch(loadUrl)
     }
     const item = data.results;
 
+    isLockedStatus = (item.status == 4 || String(item.status) === "4");
+
     if (isBeneficiary) {
         document.getElementById("Idcustomer").value = item.Idbeneficiary || "";
         document.getElementById("prefix").value = item.prefix || "";
         document.getElementById("name").value = item.name || "";
         document.getElementById("lastname").value = item.lastname || "";
         document.getElementById("Idcard").value = item.Idcard || "";
-        document.getElementById("status").value = item.status ? String(item.status) : "2";
+        let benStatus = String(item.status !== undefined && item.status !== null ? item.status : "3");
+        if (benStatus === "2" || benStatus === "4") benStatus = "3";
+        document.getElementById("status").value = benStatus;
 
         const ownerBox = document.getElementById("memberOwnerBox");
         const ownerText = document.getElementById("ownerText");
@@ -342,7 +360,9 @@ fetch(loadUrl)
         document.getElementById("name").value = item.name || "";
         document.getElementById("lastname").value = item.lastname || "";
         document.getElementById("Idcard").value = item.Idcard || "";
-        document.getElementById("status").value = item.status ? String(item.status) : "1";
+        let custStatus = String(item.status !== undefined && item.status !== null ? item.status : "1");
+        if (custStatus === "4") custStatus = "3";
+        document.getElementById("status").value = custStatus;
     }
 
     // =====================
@@ -361,6 +381,53 @@ fetch(loadUrl)
         if (!isNaN(deadDate.getTime())) {
             document.getElementById("thai-dateend").value = formatThaiDate(deadDate);
             document.getElementById("ad-dateend").value = item.dateend;
+        }
+    }
+
+    // หากอยู่ในสถานะ 4 (เสียชีวิต/ตั้งหนี้) ให้ล็อคแบบ Read-Only ทันที
+    if (isLockedStatus) {
+        const warningBanner = document.getElementById("lockedWarningBanner");
+        if (warningBanner) warningBanner.style.display = "block";
+
+        const statusSelect = document.getElementById("status");
+        if (statusSelect) {
+            statusSelect.disabled = true;
+            statusSelect.style.backgroundColor = "#f1f5f9";
+            statusSelect.style.cursor = "not-allowed";
+        }
+
+        const dateEndInput = document.getElementById("thai-dateend");
+        if (dateEndInput) {
+            dateEndInput.disabled = true;
+            dateEndInput.style.backgroundColor = "#f1f5f9";
+            dateEndInput.style.cursor = "not-allowed";
+        }
+        if (typeof fpEnd !== "undefined" && fpEnd) {
+            fpEnd.set("clickOpens", false);
+        }
+
+        const submitBtn = document.querySelector(".submit-btnsave");
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = "0.5";
+            submitBtn.style.cursor = "not-allowed";
+            submitBtn.style.background = "#94a3b8";
+            submitBtn.innerHTML = "🔒 ไม่สามารถบันทึกได้";
+            submitBtn.title = "อยู่ในสถานะ เสียชีวิต/ตั้งหนี้ ไม่สามารถแก้ไขข้อมูลได้ ต้องมีการยกเลิกรายการก่อน";
+        }
+
+        const cancelLink = document.querySelector("#lockedWarningBanner a");
+        const targetCusId = item.Idcustomer || item.Idbeneficiary || "";
+        if (targetCusId) {
+            fetch(`${API_BASE}/transaction_by_customer/${targetCusId}`)
+                .then(res => res.json())
+                .then(tData => {
+                    if (tData.error === "0" && tData.docid && cancelLink) {
+                        cancelLink.href = `/DK_cancelTransaction?docid=${encodeURIComponent(tData.docid)}`;
+                        cancelLink.innerHTML = `📄 ไปที่หน้ายกเลิกรายการตั้งหนี้ (เลขที่ ${tData.docid})`;
+                    }
+                })
+                .catch(() => {});
         }
     }
 })
@@ -382,19 +449,39 @@ document.getElementById("btnCancel").addEventListener("click", () => {
 document.getElementById("customerForm").addEventListener("submit", function(e) {
     e.preventDefault();
 
+    if (isLockedStatus) {
+        alert("⚠️ รายการนี้อยู่ในสถานะ 'เสียชีวิต/ตั้งหนี้' ไม่สามารถแก้ไขข้อมูลได้\nต้องทำการยกเลิกรายการตั้งหนี้ก่อน");
+        return false;
+    }
+
     const updateUrl = isBeneficiary
         ? `${API_BASE}/beneficiaryDeceased/update`
         : `${API_BASE}/customerDeceased/update`;
 
+    const currentUser = (function() {
+        try {
+            const s = sessionStorage.getItem("dk_logged_user");
+            if (s) {
+                const p = JSON.parse(s);
+                return p.empid || p.username || "001";
+            }
+        } catch(e) {}
+        return "001";
+    })();
+
+    const constantCusid = sessionStorage.getItem("dk_constant_cusid") || "";
     const payload = new FormData();
+    payload.append("cusid", constantCusid);
     if (isBeneficiary) {
         payload.append("Idbeneficiary", id);
         payload.append("status", document.getElementById("status").value);
         payload.append("dateend", document.getElementById("ad-dateend").value || "");
+        payload.append("useredit", currentUser);
     } else {
         payload.append("Idcustomer", id);
         payload.append("status", document.getElementById("status").value);
         payload.append("dateend", document.getElementById("ad-dateend").value || "");
+        payload.append("useredit", currentUser);
     }
 
     fetch(updateUrl, {

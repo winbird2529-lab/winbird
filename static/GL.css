@@ -1,0 +1,1066 @@
+.gl-period-container {
+        max-width: 980px;
+        margin: 10px auto 30px auto;
+        font-family: 'Sarabun', 'Prompt', sans-serif;
+    }
+
+    /* Top Toolbar (เหมือนรูปถ่ายหน้าจอ Windows Form แต่ทันสมัยและสะอาดตา) */
+    .gl-toolbar {
+        background: #475569;
+        background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+        border-radius: 8px 8px 0 0;
+        padding: 8px 16px;
+        display: flex;
+        justify-content: flex-end; /* จัดกลุ่มปุ่ม Action ชิดขวาสุด */
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .gl-toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto; /* ผลักปุ่มแก้ไข / ปุ่มบันทึก / ปุ่มออก ไปชิดขวาสุด */
+    }
+
+    /* ปุ่มบันทึก / ปุ่ม Action ของฟอร์มให้อยู่ชิดขวา */
+    .gl-form-actions,
+    .gl-form-actions-right,
+    .gl-btn-group-right {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        margin-left: auto;
+    }
+
+    .btn-gl-tool {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.15s ease;
+        outline: none;
+        user-select: none;
+    }
+
+    .btn-gl-edit {
+        background: #fff7ed;
+        color: #c2410c;
+        border-color: #fdba74;
+    }
+    .btn-gl-edit:hover {
+        background: #ffedd5;
+        border-color: #ea580c;
+        color: #9a3412;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(234, 88, 12, 0.25);
+    }
+    .btn-gl-edit:active {
+        transform: translateY(0);
+    }
+
+    .btn-gl-save {
+        background: #ffffff;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+    .btn-gl-save:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+    .btn-gl-save:active {
+        transform: translateY(0);
+    }
+
+    .btn-gl-tool:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .gl-input-code:disabled,
+    .gl-input-number:disabled,
+    .period-flatpickr-input:disabled {
+        background: #f1f5f9 !important;
+        color: #64748b !important;
+        border-color: #cbd5e1 !important;
+        cursor: not-allowed !important;
+    }
+
+    .btn-browse-dots:disabled {
+        background: #e2e8f0 !important;
+        color: #94a3b8 !important;
+        border-color: #cbd5e1 !important;
+        cursor: not-allowed !important;
+        opacity: 0.65;
+    }
+
+    .period-checkbox-label.is-disabled {
+        cursor: not-allowed;
+        color: #64748b;
+    }
+
+    .period-checkbox-label input[type="checkbox"]:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
+    .btn-gl-exit {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fecaca;
+        border-color: rgba(239, 68, 68, 0.35);
+    }
+    .btn-gl-exit:hover {
+        background: #dc2626;
+        color: #ffffff;
+        border-color: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    .gl-toolbar-info {
+        font-size: 12px;
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Main Box Frame */
+    .gl-main-card {
+        background: #fdfdf9;
+        background: linear-gradient(180deg, #fafaf6 0%, #f7f7f0 100%);
+        border: 1px solid #cbd5e1;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        padding: 20px 24px 24px 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Fieldset Card: ระยะเวลาสิ้นสุดของปี */
+    .gl-fieldset {
+        border: 1px solid #b0c4de;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 6px;
+        padding: 16px 20px 18px 20px;
+        position: relative;
+        margin-top: 10px;
+    }
+
+    .gl-fieldset-legend {
+        position: absolute;
+        top: -12px;
+        left: 18px;
+        background: #ffffff;
+        padding: 2px 10px;
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0369a1;
+        border: 1px solid #b0c4de;
+        border-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    /* Top Controls Row: จำนวนงวดต่อปี (ซ้าย) + ปีปัจจุบัน (ขวา) */
+    .gl-controls-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 24px;
+        margin-top: 8px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed #cbd5e1;
+        align-items: center;
+    }
+
+    .gl-control-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .gl-input-number {
+        padding: 5px 8px;
+        border: 1px solid #94a3b8;
+        border-radius: 4px;
+        font-size: 13px;
+        font-family: inherit;
+        text-align: center;
+        background: #ffffff;
+        outline: none;
+        transition: border 0.15s ease;
+    }
+    .gl-input-number:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    .status-badge-saved {
+        font-size: 11.5px;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        background: #dcfce7;
+        color: #15803d;
+        border: 1px solid #86efac;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .status-badge-new {
+        font-size: 11.5px;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Period Grid (2 คอลัมน์ งวดคี่ซ้าย - งวดคู่ขวา กว้างเท่ากันเป๊ะ) */
+    .gl-periods-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 24px;
+    }
+    @media (max-width: 840px) {
+        .gl-periods-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+    }
+
+    /* Item Card สำหรับฟอร์มวันที่แต่ละงวด */
+    .period-item-card {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 8px 12px;
+        box-sizing: border-box;
+        transition: all 0.15s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .period-item-card:hover {
+        border-color: #0284c7;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08);
+    }
+    .period-header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .period-label-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0369a1;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .period-thai-date-input,
+    .period-flatpickr-input {
+        width: 100%;
+        height: 38px;
+        padding: 6px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 5px;
+        font-size: 13.5px;
+        color: #1e293b;
+        background: #ffffff;
+        box-sizing: border-box;
+        outline: none;
+        font-family: inherit;
+        transition: border 0.15s ease, box-shadow 0.15s ease;
+    }
+    .period-thai-date-input:focus,
+    .period-flatpickr-input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    /* กล่องใส่วันที่พร้อมปฏิทิน */
+    .period-date-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+    .period-date-input {
+        flex: 1;
+        height: 38px;
+        padding: 6px 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 13.5px;
+        color: #1e293b;
+        background: #ffffff;
+        box-sizing: border-box;
+        outline: none;
+        font-family: inherit;
+        cursor: pointer;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .period-date-input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+    .period-date-input::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        font-size: 17px;
+        padding: 3px;
+        margin-left: auto;
+    }
+    .period-date-input::-webkit-calendar-picker-indicator:hover {
+        background: #e2e8f0;
+        border-radius: 4px;
+    }
+    .period-thai-year-badge {
+        font-size: 12px;
+        font-weight: 600;
+        color: #0369a1;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        padding: 5px 8px;
+        border-radius: 5px;
+        white-space: nowrap;
+        user-select: none;
+        min-width: 78px;
+        text-align: center;
+    }
+
+    /* จัดเรียงงวดให้เท่ากันเป๊ะทุกช่องด้วย CSS Grid คอลัมน์ละขนาดตายตัว */
+    .period-row-item {
+        display: grid;
+        grid-template-columns: 62px 46px 1fr 65px 78px;
+        align-items: center;
+        gap: 6px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        padding: 5px 8px;
+        border-radius: 4px;
+        box-sizing: border-box;
+        transition: all 0.15s ease;
+    }
+    .period-row-item:hover {
+        border-color: #94a3b8;
+        background: #f8fafc;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .period-lbl {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .period-day-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 4px 2px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 13px;
+        text-align: center;
+        background: #ffffff;
+        font-family: inherit;
+        outline: none;
+    }
+    .period-day-input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    .period-month-select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 4px 6px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 13px;
+        background: #ffffff;
+        font-family: inherit;
+        outline: none;
+        cursor: pointer;
+    }
+    .period-month-select:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    .period-year-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 4px 2px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 13px;
+        text-align: center;
+        background: #ffffff;
+        font-family: inherit;
+        outline: none;
+    }
+    .period-year-input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    .period-checkbox-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12.5px;
+        color: #334155;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        margin-left: 2px;
+    }
+    .period-checkbox-label input[type="checkbox"] {
+        accent-color: #0284c7;
+        cursor: pointer;
+        width: 14px;
+        height: 14px;
+        margin: 0;
+    }
+
+    /* Note Legend at bottom */
+    .gl-notes-footer {
+        margin-top: 18px;
+        padding-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 12px;
+        color: #475569;
+        flex-wrap: wrap;
+    }
+    .note-tag {
+        font-weight: 700;
+        color: #dc2626;
+    }
+    .note-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Constant Section: ค่าคงที่สำหรับประมวลผล (กลุ่มบัญชี, เลขที่บัญชีกำไรขาดทุน/ประจำงวด, เลขที่บัญชีกำไรสะสม อยู่บรรทัดเดียวกันเสมอ) */
+    .gl-constants-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        padding: 4px 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .gl-const-col {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    .gl-const-lbl {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .gl-code-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+    }
+    .gl-input-code {
+        padding: 5px 8px;
+        border: 1px solid #94a3b8;
+        border-radius: 4px;
+        font-size: 13px;
+        font-family: inherit;
+        text-align: center;
+        background: #ffffff;
+        font-weight: 600;
+        color: #0f172a;
+        outline: none;
+        transition: border 0.15s ease;
+    }
+    .gl-input-code:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+    .btn-browse-dots {
+        width: 28px;
+        height: 28px;
+        background: #f1f5f9;
+        border: 1px solid #94a3b8;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+        padding: 0;
+        line-height: 1;
+    }
+    .btn-browse-dots:hover {
+        background: #e2e8f0;
+        border-color: #64748b;
+        color: #0f172a;
+    }
+    .gl-account-name-badge {
+        font-size: 12px;
+        color: #0369a1;
+        background: #e0f2fe;
+        border: 1px solid #bae6fd;
+        padding: 4px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+        max-width: 175px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        vertical-align: middle;
+        flex-shrink: 0;
+    }
+
+    /* Modal for Chart of Accounts (เลือกผังบัญชี) */
+    .chart-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(2px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    .chart-modal-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+    .chart-modal-box {
+        background: #ffffff;
+        border-radius: 8px;
+        width: 620px;
+        max-width: 95vw;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalScaleIn {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .chart-modal-header {
+        background: #1e293b;
+        color: #ffffff;
+        padding: 12px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .btn-modal-close {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: color 0.15s ease;
+    }
+    .btn-modal-close:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .chart-modal-body {
+        padding: 16px 20px;
+        flex: 1;
+        overflow-y: auto;
+    }
+    .chart-search-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    .chart-search-input {
+        flex: 1;
+        padding: 7px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 13px;
+        outline: none;
+        font-family: inherit;
+    }
+    .chart-search-input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+    .chart-filter-select {
+        padding: 7px 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 13px;
+        outline: none;
+        background: #ffffff;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .chart-table-wrap {
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        max-height: 320px;
+        overflow-y: auto;
+    }
+    .chart-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        text-align: left;
+    }
+    .chart-table th {
+        background: #f8fafc;
+        padding: 8px 12px;
+        font-weight: 600;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    .chart-table td {
+        padding: 7px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #1e293b;
+    }
+    .chart-table tr:hover {
+        background: #f0f9ff;
+        cursor: pointer;
+    }
+    .btn-select-acc {
+        background: #0284c7;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        padding: 3px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .btn-select-acc:hover {
+        background: #0369a1;
+    }
+    .chart-modal-footer {
+        padding: 10px 18px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* Toast notification */
+    .gl-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #1e293b;
+        color: #ffffff;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.25s ease;
+        pointer-events: none;
+    }
+    .gl-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+    .gl-toast.success { background: #059669; }
+    .gl-toast.error { background: #dc2626; }
+
+    /* ==========================================
+       GL_AccountChart (ผังบัญชี) Styles
+       ========================================== */
+    .gl-chart-container {
+        max-width: 1120px;
+        margin: 10px auto 30px auto;
+        font-family: 'Sarabun', 'Prompt', sans-serif;
+    }
+
+    .gl-chart-toolbar {
+        background: linear-gradient(135deg, #4f7ccf 0%, #3b63b5 100%);
+        border-radius: 8px 8px 0 0;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-chart-tool {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.95);
+        color: #1e293b;
+        transition: all 0.15s ease;
+        user-select: none;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .btn-chart-tool:hover:not(:disabled) {
+        background: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+    .btn-chart-tool:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    .btn-chart-refresh { color: #15803d; border-color: #86efac; background: #f0fdf4; }
+    .btn-chart-add { color: #0369a1; border-color: #7dd3fc; background: #f0f9ff; }
+    .btn-chart-edit { color: #c2410c; border-color: #fdba74; background: #fff7ed; }
+    .btn-chart-delete { color: #b91c1c; border-color: #fca5a5; background: #fef2f2; }
+    .btn-chart-save { color: #1e40af; border-color: #93c5fd; background: #eff6ff; }
+    .btn-chart-exit { color: #dc2626; border-color: #fca5a5; background: #fff1f2; margin-left: auto; }
+
+    /* Tabs bar */
+    .gl-chart-tabs {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        padding: 12px 18px 0 18px;
+        background: #f5f5dc;
+        background: linear-gradient(180deg, #f8f8ec 0%, #f4f4e4 100%);
+        border-left: 1px solid #cbd5e1;
+        border-right: 1px solid #cbd5e1;
+    }
+
+    .gl-chart-tab-btn {
+        padding: 7px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        background: #e2e8f0;
+        border: 1px solid #cbd5e1;
+        border-bottom: none;
+        border-radius: 6px 6px 0 0;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        font-family: inherit;
+        position: relative;
+        top: 1px;
+    }
+    .gl-chart-tab-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .gl-chart-tab-btn.active {
+        background: #fafaf0;
+        color: #0f172a;
+        font-weight: 700;
+        border-color: #94a3b8;
+        border-bottom: 2px solid #fafaf0;
+        z-index: 2;
+    }
+
+    /* Main body card */
+    .gl-chart-body-card {
+        background: #fafaf0;
+        border: 1px solid #cbd5e1;
+        border-radius: 0 0 8px 8px;
+        padding: 18px 20px 22px 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .gl-chart-tab-panel {
+        display: none;
+    }
+    .gl-chart-tab-panel.active {
+        display: block;
+    }
+
+    /* 2-Column Split inside Tab 1 */
+    .gl-chart-split {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 18px;
+        align-items: stretch;
+    }
+    @media (max-width: 920px) {
+        .gl-chart-split {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .gl-chart-fieldset {
+        border: 1px solid #cbd5e1;
+        background: rgba(255, 255, 255, 0.65);
+        border-radius: 6px;
+        padding: 18px 16px 16px 16px;
+        position: relative;
+    }
+
+    .gl-chart-legend {
+        position: absolute;
+        top: -11px;
+        left: 14px;
+        background: #fafaf0;
+        padding: 1px 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1d4ed8;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .gl-chart-form-row {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .gl-chart-form-row.align-top {
+        align-items: start;
+    }
+    .gl-chart-form-row label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        text-align: right;
+        padding-right: 4px;
+    }
+
+    .gl-chart-input,
+    .gl-chart-select,
+    .gl-chart-textarea {
+        width: 100%;
+        padding: 5px 8px;
+        border: 1px solid #94a3b8;
+        border-radius: 4px;
+        font-size: 13px;
+        font-family: inherit;
+        color: #0f172a;
+        background: #ffffff;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .gl-chart-input:focus,
+    .gl-chart-select:focus,
+    .gl-chart-textarea:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+    .gl-chart-input:disabled,
+    .gl-chart-select:disabled,
+    .gl-chart-textarea:disabled,
+    .gl-chart-input[readonly] {
+        background: #e9ecef !important;
+        color: #475569 !important;
+        border-color: #cbd5e1 !important;
+        cursor: not-allowed !important;
+    }
+
+    .gl-chart-textarea {
+        resize: vertical;
+        min-height: 58px;
+    }
+
+    /* Sub-fieldset ยอดยกมาต้นปี */
+    .gl-chart-sub-fieldset {
+        border: 1px solid #cbd5e1;
+        border-radius: 5px;
+        padding: 14px 12px 10px 12px;
+        margin-top: 14px;
+        margin-bottom: 14px;
+        position: relative;
+        background: rgba(255, 255, 255, 0.5);
+    }
+    .gl-chart-sub-legend {
+        position: absolute;
+        top: -10px;
+        left: 12px;
+        background: #fafaf0;
+        padding: 0 6px;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .gl-chart-radio-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 28px;
+        margin-bottom: 10px;
+    }
+    .gl-chart-radio-lbl {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    .gl-chart-radio-lbl input[type="radio"] {
+        accent-color: #0284c7;
+        width: 15px;
+        height: 15px;
+        margin: 0;
+        cursor: pointer;
+    }
+    .gl-chart-radio-lbl input[type="radio"]:disabled {
+        cursor: not-allowed;
+    }
+
+    .gl-chart-warnings {
+        margin-top: 12px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .gl-chart-warnings div {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #dc2626;
+    }
+
+    /* Right Side Table & Search */
+    .gl-chart-right-col {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .gl-chart-grid-wrap {
+        border: 1px solid #94a3b8;
+        background: #ffffff;
+        height: 410px;
+        overflow-y: auto;
+        border-radius: 4px;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .gl-chart-grid-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .gl-chart-grid-table thead th {
+        background: #f3e88e;
+        background: linear-gradient(180deg, #fef08a 0%, #fde047 100%);
+        color: #1e293b;
+        font-weight: 700;
+        padding: 6px 10px;
+        border-bottom: 1px solid #94a3b8;
+        border-right: 1px solid #cbd5e1;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .gl-chart-grid-table thead th:last-child {
+        border-right: none;
+    }
+    .gl-chart-grid-table tbody td {
+        padding: 5px 10px;
+        border-bottom: 1px solid #cbd5e1;
+        border-right: 1px solid #cbd5e1;
+        color: #0f172a;
+        white-space: nowrap;
+    }
+    .gl-chart-grid-table tbody td:last-child {
+        border-right: none;
+    }
+    .gl-chart-grid-table tbody tr {
+        cursor: pointer;
+        transition: background 0.1s ease;
+    }
+    .gl-chart-grid-table tbody tr:hover {
+        background: #fef9c3;
+    }
+    .gl-chart-grid-table tbody tr.selected {
+        background: #fed7aa !important;
+        font-weight: 600;
+    }
+
+    /* Search box at bottom right */
+    .gl-chart-search-box {
+        border: 1px solid #cbd5e1;
+        background: rgba(255, 255, 255, 0.65);
+        border-radius: 6px;
+        padding: 16px 18px 14px 18px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+    .gl-chart-search-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .gl-chart-search-item label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+    }

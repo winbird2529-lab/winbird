@@ -27,7 +27,7 @@
     <!-- Top Header Bar -->
     <div class="tran-header-bar-modern">
         <div class="tran-header-title-group">
-            <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #1e3c72; display: flex; align-items: center; gap: 8px;">
+            <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #273B4A; display: flex; align-items: center; gap: 8px;">
                 <span>💵</span> บันทึกรายการเก็บเงิน (ฌาปนกิจ)
             </h1>
             <p style="margin: 4px 0 0 0; font-size: 13.5px; color: #64748b;">
@@ -37,7 +37,7 @@
         <div class="tran-doc-meta-badge">
             <div class="tran-doc-meta-item">
                 <span style="color: #64748b;">เลขที่เอกสาร:</span>
-                <input type="text" id="docidmove" readonly style="border: none; background: transparent; font-weight: 700; font-family: monospace; color: #1e3c72; font-size: 15px; width: 95px; outline: none;">
+                <input type="text" id="docidmove" readonly style="border: none; background: transparent; font-weight: 700; font-family: monospace; color: #273B4A; font-size: 15px; width: 95px; outline: none;">
             </div>
             <div style="width: 1px; height: 18px; background: #cbd5e1;"></div>
             <div class="tran-doc-meta-item">
@@ -94,7 +94,7 @@
                         <div class="member-profile-grid">
                             <div class="member-profile-item">
                                 <span class="label">รหัสสมาชิก</span>
-                                <span class="value" id="displayCustId" style="color: #1e3c72; font-family: monospace;">-</span>
+                                <span class="value" id="displayCustId" style="color: #273B4A; font-family: monospace;">-</span>
                             </div>
                             <div class="member-profile-item">
                                 <span class="label">ชื่อ - นามสกุล</span>
@@ -122,9 +122,9 @@
                 <div class="tran-table-card">
                     <div class="tran-table-toolbar">
                         <div class="tran-table-title">
-                            <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #1e3c72; display: flex; align-items: center; gap: 10px;">
+                            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #273B4A; display: flex; align-items: center; gap: 8px;">
                                 <span>📊</span> รายการมรณะที่ค้างชำระ 
-                                <span class="badge-pill" style="font-size: 14.5px; padding: 3px 12px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 700;">
+                                <span class="badge-pill" style="font-size: 12px; padding: 2px 8px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 700;">
                                     <span id="tableRowsCount">0</span> รายการ
                                 </span>
                             </h3>
@@ -160,10 +160,10 @@
                             </thead>
                             <tbody>
                                 <tr id="emptyRowPlaceholder">
-                                    <td colspan="9" style="text-align: center; padding: 55px 20px; color: #94a3b8;">
-                                        <div style="font-size: 48px; margin-bottom: 12px;">👤</div>
-                                        <div style="font-size: 17px; font-weight: 600; color: #475569; margin-bottom: 6px;">ยังไม่ได้เลือกสมาชิกผู้ชำระเงิน</div>
-                                        <div style="font-size: 14px; color: #94a3b8;">กรุณากดปุ่ม "+ ค้นหาสมาชิก" ด้านบนเพื่อเลือกสมาชิกและดึงรายการหนี้ค้างชำระ</div>
+                                    <td colspan="9" style="text-align: center; padding: 35px 20px; color: #94a3b8;">
+                                        <div style="font-size: 36px; margin-bottom: 8px;">👤</div>
+                                        <div style="font-size: 15px; font-weight: 600; color: #475569; margin-bottom: 4px;">ยังไม่ได้เลือกสมาชิกผู้ชำระเงิน</div>
+                                        <div style="font-size: 13px; color: #94a3b8;">กรุณากดปุ่ม "+ ค้นหาสมาชิก" ด้านบนเพื่อเลือกสมาชิกและดึงรายการหนี้ค้างชำระ</div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -291,8 +291,15 @@
                 </p>
 
                 <!-- SEARCH BAR -->
-                <div class="search-wrapper" style="width: 100%; margin-bottom: 12px;">
-                    <input type="text" id="popupSearchInput" class="search-input" placeholder="🔍 ค้นหารหัสสมาชิก, ชื่อ-นามสกุล, หรือเลขบัตรประชาชน...">
+                <div class="popup-search-box">
+                    <div class="popup-search-wrapper">
+                        <svg class="popup-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="popupSearchInput" class="popup-search-input" placeholder="ค้นหารหัสสมาชิก, ชื่อ-นามสกุล, หรือเลขประจำตัวประชาชน..." autocomplete="off">
+                        <button type="button" class="popup-search-clear" id="popupSearchClear" style="display: none;" title="ล้างข้อความ">✕</button>
+                    </div>
                 </div>
 
                 <!-- TABLE CONTAINER -->
@@ -428,13 +435,46 @@ let isManualDocMode = false;
 
 async function loadRunning() {
     try {
-        const response = await fetch(`${API_BASE}/get-running?id=4`);
-        const data = await response.json();
-        const nextRun = String(parseInt(data.IdRunning || "0") + 1).padStart(6, "0");
-        return `${data.docId || 'TR'}${nextRun}`;
+        let res = null;
+        try {
+            res = await fetch(`${API_BASE}/get-running?id=4`, { signal: AbortSignal.timeout(2000) });
+        } catch(e) {
+            console.warn("API_BASE get-running failed, falling back to local Flask:", e);
+        }
+        if (!res || !res.ok) {
+            try {
+                res = await fetch("/get-running?id=4");
+            } catch(e2) {
+                console.warn("Flask get-running failed, trying /api/running:", e2);
+            }
+        }
+        if (!res || !res.ok) {
+            try {
+                const resAll = await fetch("/api/running");
+                if (resAll && resAll.ok) {
+                    const j = await resAll.json();
+                    const list = j.data || j.results || [];
+                    const it = list.find(x => String(x.Id || x.id) === "4");
+                    if (it) {
+                        const doc = it.docid || it.docId || "TR";
+                        const run = String(it.IdRunning || it.id_running || "0");
+                        const nextRun = String(parseInt(run) + 1).padStart(6, "0");
+                        return `${doc}${nextRun}`;
+                    }
+                }
+            } catch(e3) {}
+        }
+        if (res && res.ok) {
+            const data = await res.json();
+            const doc = data.docId || data.docid || "TR";
+            const run = String(data.IdRunning || data.id_running || "0");
+            const nextRun = String(parseInt(run) + 1).padStart(6, "0");
+            return `${doc}${nextRun}`;
+        }
+        return "TR000001";
     } catch (err) {
         console.error("Running Error:", err);
-        return "";
+        return "TR000001";
     }
 }
 
@@ -599,7 +639,7 @@ function renderDebtTable() {
                 <td class="col-seq" style="text-align: center;">${rowNumber}</td>
                 <td class="col-docid">${row.docid}</td>
                 <td class="col-deceased">
-                    <div style="font-weight: 600; color: #0f172a; font-size: 16px;">${row.deceased_name || "-"}</div>
+                    <div style="font-weight: 600; color: #0f172a; font-size: 13.5px;">${row.deceased_name || "-"}</div>
                 </td>
                 <td class="col-date" style="text-align: center;">${dateStr}</td>
                 <td class="col-numend" style="text-align: center;">${row.numberend || "-"}</td>
@@ -789,6 +829,12 @@ let popupCurrentPage = 1;
 
 function openPopup() {
     popupMemberModal.style.display = "flex";
+    if (popupSearchInput) {
+        popupSearchInput.value = "";
+        const clearBtn = document.getElementById("popupSearchClear");
+        if (clearBtn) clearBtn.style.display = "none";
+        setTimeout(() => popupSearchInput.focus(), 120);
+    }
     loadPopupMembers();
 }
 
@@ -839,8 +885,26 @@ function applyPopupMemberFilter() {
 }
 
 const popupSearchInput = document.getElementById("popupSearchInput");
+const popupSearchClear = document.getElementById("popupSearchClear");
+
 if (popupSearchInput) {
-    popupSearchInput.addEventListener("input", applyPopupMemberFilter);
+    popupSearchInput.addEventListener("input", () => {
+        if (popupSearchClear) {
+            popupSearchClear.style.display = popupSearchInput.value ? "inline-flex" : "none";
+        }
+        applyPopupMemberFilter();
+    });
+}
+
+if (popupSearchClear) {
+    popupSearchClear.addEventListener("click", () => {
+        if (popupSearchInput) {
+            popupSearchInput.value = "";
+            popupSearchClear.style.display = "none";
+            popupSearchInput.focus();
+            applyPopupMemberFilter();
+        }
+    });
 }
 
 function renderPopupMemberTable() {
@@ -1121,6 +1185,18 @@ if (submitBtn) {
         submitBtn.innerHTML = `<span>⏳ กำลังบันทึก...</span>`;
         submitBtn.disabled = true;
 
+        const currentOperator = (function() {
+            try {
+                const s = sessionStorage.getItem("dk_logged_user");
+                if (s) {
+                    const p = JSON.parse(s);
+                    return p.empid || p.username || "admin";
+                }
+            } catch(e) {}
+            return "admin";
+        })();
+        const constantCusid = sessionStorage.getItem("dk_constant_cusid") || "";
+
         const detailsPayload = selectedDebts.map(d => ({
             docid: d.docid,
             deceased_id: d.deceased_id || "",
@@ -1131,7 +1207,8 @@ if (submitBtn) {
             paid_prev: Number(d.paid_prev) || 0,
             payamount: Number(d.pay_amount) || 0,
             remain: Math.max(0, (Number(d.remain) || 0) - (Number(d.pay_amount) || 0)),
-            status: 1
+            status: 1,
+            cusid: constantCusid
         }));
 
         const payload = {
@@ -1149,9 +1226,10 @@ if (submitBtn) {
             bank_name: document.getElementById("bank_name").value || "",
             ref_no: document.getElementById("ref_no").value || "",
             remark: document.getElementById("remark").value || "",
-            staff_name: document.getElementById("staff_name").value || "เจ้าหน้าที่",
+            staff_name: document.getElementById("staff_name").value || currentOperator,
             status: 1,
-            details: detailsPayload
+            details: detailsPayload,
+            cusid: constantCusid
         };
 
         console.log("Submitting movement payload:", payload);
